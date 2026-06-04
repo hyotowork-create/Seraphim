@@ -18,6 +18,9 @@
 
 * { box-sizing: border-box; }
 
+/* hidden 속성은 항상 숨김 (display 지정이 있는 요소에서도 우선) */
+[hidden] { display: none !important; }
+
 html { -webkit-text-size-adjust: 100%; }
 
 body {
