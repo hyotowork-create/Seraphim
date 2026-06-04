@@ -1,0 +1,52 @@
+# 주보 사이트를 GitHub Pages 에 자동으로 빌드·배포합니다.
+# main 브랜치에 새 글(주보)이 올라오면 자동 실행됩니다.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # 수동 실행 버튼
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 동시에 여러 배포가 겹치지 않도록 함
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # GitHub Pages 프로젝트 페이지는 /저장소이름/ 하위 경로에 배포됩니다.
+      # 이 값을 자동으로 넣어 링크·이미지 경로가 깨지지 않게 합니다.
+      - name: Build
+        run: npm run build
+        env:
+          PATH_PREFIX: /${{ github.event.repository.name }}/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

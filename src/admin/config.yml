@@ -1,0 +1,102 @@
+# ──────────────────────────────────────────────────────────────
+# Sveltia CMS 설정 — 목회자가 보는 입력 폼을 정의합니다.
+# (Decap CMS 와 설정 호환: 그대로 Decap 으로도 동작합니다)
+#
+# ⚠️ 사용 전 아래 2곳을 본인 저장소에 맞게 수정하세요:
+#   1) backend.repo : "깃허브아이디/저장소이름"
+#   2) (Phase 2) backend.base_url : Sveltia CMS Auth 워커 주소
+# ──────────────────────────────────────────────────────────────
+
+backend:
+  name: github
+  repo: hyotowork-create/seraphim   # ← 본인 저장소로 수정
+  branch: main
+  # Phase 2: GitHub 로그인 중계용 Sveltia CMS Auth(Cloudflare Workers) 주소
+  # base_url: https://your-auth.example.workers.dev
+
+# 로컬에서 폼을 시험해 볼 때 사용 (npx @sveltia/cms-proxy-server 와 함께)
+# local_backend: true
+
+# 업로드한 사진이 저장되는 위치
+media_folder: "src/assets/uploads"
+public_folder: "/assets/uploads"
+
+# 화면 언어
+locale: ko
+i18n: false
+
+# 발행 전 미리보기 → 발행 (2단계)
+publish_mode: editorial_workflow
+
+collections:
+  - name: bulletins
+    label: 주보
+    label_singular: 주보 1부
+    description: "날짜만 고르면 주소(URL)와 파일명이 자동으로 만들어집니다."
+    folder: "src/bulletins"
+    create: true
+    delete: true
+    extension: md
+    format: yaml-frontmatter
+    slug: "{{year}}-{{month}}-{{day}}"
+    summary: "{{fields.date}} · {{fields.sermon.title}}"
+    sortable_fields: ["date", "sermon.preacher"]
+    fields:
+      # ── 필수 항목 (맨 위에) ──
+      - { name: date, label: "예배일", widget: datetime, date_format: "YYYY-MM-DD", time_format: false, format: "YYYY-MM-DD", required: true, hint: "이 날짜로 페이지 주소가 만들어집니다." }
+
+      - name: sermon
+        label: "설교"
+        widget: object
+        fields:
+          - { name: title, label: "설교 제목", widget: string, required: true }
+          - { name: scripture, label: "본문 말씀", widget: string, required: true, hint: "예: 요한복음 3:16" }
+          - { name: preacher, label: "설교자", widget: string, required: true }
+          - { name: summary, label: "설교 요약 또는 전문", widget: text, required: false }
+          - { name: videoUrl, label: "설교 영상 링크 (선택)", widget: string, required: false, hint: "유튜브 등 주소" }
+
+      # ── 선택 항목 (없으면 비워두세요. 페이지에 표시되지 않습니다) ──
+      - name: announcements
+        label: "이번 주 공지"
+        label_singular: "공지"
+        widget: list
+        required: false
+        collapsed: false
+        summary: "{{fields.title}}"
+        fields:
+          - { name: title, label: "공지 제목", widget: string }
+          - { name: body, label: "내용", widget: text, required: false }
+
+      - name: schedule
+        label: "주간 일정"
+        label_singular: "일정"
+        widget: list
+        required: false
+        collapsed: true
+        summary: "{{fields.day}} · {{fields.content}}"
+        fields:
+          - { name: day, label: "요일/날짜", widget: string, hint: "예: 수요일" }
+          - { name: content, label: "내용", widget: string }
+
+      - { name: season, label: "절기 (선택)", widget: string, required: false, hint: "예: 대림절, 맥추절 — 없으면 비워두세요" }
+      - { name: serviceType, label: "예배 종류 (선택)", widget: string, required: false, hint: "예: 주일예배, 수요예배" }
+      - { name: worshipOrder, label: "예배 순서 (선택)", widget: text, required: false }
+      - { name: greeting, label: "교역자 인사말 (선택)", widget: text, required: false }
+      - { name: bulletinImage, label: "주보 원본 사진 (선택)", widget: image, required: false, hint: "폰 사진첩에서 바로 첨부할 수 있습니다." }
+
+      - name: offering
+        label: "헌금 안내 (선택)"
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { name: accountInfo, label: "헌금 계좌", widget: string, required: false }
+          - name: visibility
+            label: "공개 범위"
+            widget: select
+            default: "members"
+            hint: "계좌 등 민감정보는 기본을 '교인만'으로 두는 것을 권장합니다."
+            options:
+              - { label: "전체 공개", value: "public" }
+              - { label: "교인만 (비밀번호 입력 후 표시)", value: "members" }
+              - { label: "표시 안 함", value: "hidden" }

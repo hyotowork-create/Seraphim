@@ -1,0 +1,112 @@
+{# 주보 본문을 그리는 매크로. 홈(index)과 날짜별 상세 페이지가 함께 사용합니다. #}
+{# b: 주보 데이터 객체 (date, season, sermon, announcements ... ) #}
+{# church: 교회 고정정보(헌금 가림막 비밀번호 등) #}
+
+{% macro renderBulletin(b, church) %}
+<article class="bulletin">
+  <header class="bulletin-head">
+    {% if b.season %}<p class="season">{{ b.season }}</p>{% endif %}
+    <h1 class="bulletin-date">{{ b.date | dateKorean }}</h1>
+    {% if b.serviceType %}<p class="service-type">{{ b.serviceType }}</p>{% endif %}
+  </header>
+
+  {# ── 설교 ── #}
+  <section class="card sermon" aria-labelledby="sermon-h">
+    <h2 id="sermon-h">말씀</h2>
+    <p class="sermon-title">{{ b.sermon.title }}</p>
+    <dl class="meta">
+      <div><dt>본문</dt><dd>{{ b.sermon.scripture }}</dd></div>
+      <div><dt>설교자</dt><dd>{{ b.sermon.preacher }}</dd></div>
+    </dl>
+    {% if b.sermon.summary %}
+      <div class="prose">{{ b.sermon.summary | safe }}</div>
+    {% endif %}
+    {% if b.sermon.videoUrl %}
+      <p><a class="btn btn-line" href="{{ b.sermon.videoUrl }}" target="_blank" rel="noopener">▶ 설교 영상 보기</a></p>
+    {% endif %}
+  </section>
+
+  {# ── 인사말(선택) ── #}
+  {% if b.greeting %}
+    <section class="card" aria-labelledby="greeting-h">
+      <h2 id="greeting-h">인사말</h2>
+      <div class="prose">{{ b.greeting | safe }}</div>
+    </section>
+  {% endif %}
+
+  {# ── 예배 순서(선택) ── #}
+  {% if b.worshipOrder %}
+    <section class="card" aria-labelledby="order-h">
+      <h2 id="order-h">예배 순서</h2>
+      <div class="prose">{{ b.worshipOrder | safe }}</div>
+    </section>
+  {% endif %}
+
+  {# ── 이번 주 공지 ── #}
+  {% if b.announcements and b.announcements.length %}
+    <section class="card" aria-labelledby="ann-h">
+      <h2 id="ann-h">이번 주 공지</h2>
+      <ul class="announcements">
+        {% for a in b.announcements %}
+          <li>
+            <h3>{{ a.title }}</h3>
+            {% if a.body %}<div class="prose">{{ a.body | safe }}</div>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {# ── 주간 일정 ── #}
+  {% if b.schedule and b.schedule.length %}
+    <section class="card" aria-labelledby="sch-h">
+      <h2 id="sch-h">주간 일정</h2>
+      <ul class="schedule">
+        {% for s in b.schedule %}
+          <li><span class="day">{{ s.day }}</span> <span class="what">{{ s.content }}</span></li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {# ── 헌금 계좌 (공개범위 제어) ── #}
+  {% if b.offering and b.offering.accountInfo and b.offering.visibility != "hidden" %}
+    <section class="card offering" aria-labelledby="off-h">
+      <h2 id="off-h">헌금 안내</h2>
+      {% if b.offering.visibility == "members" %}
+        {# 교인용: 간단 비밀번호 입력 후 계좌가 보입니다. (가벼운 가림막일 뿐 강력한 보안은 아님) #}
+        <div class="protected" data-protected data-protected-hash="{{ church.memberPassword | sha256 }}">
+          <p class="protected-hint">교인 확인용 비밀번호를 입력하면 계좌가 보입니다.</p>
+          <div class="protected-form">
+            <input type="password" inputmode="numeric" placeholder="비밀번호" data-protected-input aria-label="교인 비밀번호" />
+            <button type="button" class="btn btn-line" data-protected-submit>확인</button>
+          </div>
+          <p class="protected-error" data-protected-error hidden>비밀번호가 맞지 않습니다.</p>
+          <div class="protected-content" data-protected-content hidden>
+            <p class="account">{{ b.offering.accountInfo }}</p>
+          </div>
+        </div>
+      {% else %}
+        <p class="account">{{ b.offering.accountInfo }}</p>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  {# ── 주보 원본 이미지(선택) ── #}
+  {% if b.bulletinImage %}
+    <section class="card" aria-labelledby="img-h">
+      <h2 id="img-h">주보 원본</h2>
+      <img class="bulletin-image" src="{{ b.bulletinImage | url }}" alt="{{ b.date | dateKorean }} 주보 이미지" loading="lazy" />
+    </section>
+  {% endif %}
+
+  {# ── 공유 / 인쇄 버튼 ── #}
+  <div class="actions no-print">
+    <button type="button" class="btn btn-primary" data-share
+            data-share-title="{{ b.pageTitle }}"
+            data-share-text="{{ b.pageDescription }}"
+            data-share-url="{{ b.shareUrl }}">📤 카톡·링크 공유</button>
+    <button type="button" class="btn btn-line" onclick="window.print()">🖨️ 인쇄</button>
+  </div>
+</article>
+{% endmacro %}

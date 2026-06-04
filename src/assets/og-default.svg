@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f4f1ea"/>
+  <rect x="0" y="0" width="1200" height="14" fill="#7a5230"/>
+  <g fill="#7a5230">
+    <rect x="585" y="150" width="30" height="180" rx="6"/>
+    <rect x="540" y="200" width="120" height="30" rx="6"/>
+  </g>
+  <text x="600" y="430" text-anchor="middle" font-family="Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="74" font-weight="800" fill="#1a1a1a">은혜로교회 주보</text>
+  <text x="600" y="510" text-anchor="middle" font-family="Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" fill="#4a4a4a">이번 주 예배와 소식을 전합니다</text>
+</svg>

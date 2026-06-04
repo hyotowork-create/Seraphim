@@ -1,0 +1,20 @@
+---
+layout: layout.njk
+eleventyExcludeFromCollections: true
+---
+{# 홈 = 가장 최근 주보를 자동으로 보여줍니다. #}
+{% from "partials/bulletin-body.njk" import renderBulletin %}
+
+{% set latest = collections.bulletins[0] %}
+
+{% if latest %}
+  {% set b = latest.data %}
+  <p class="home-eyebrow no-print">이번 주 주보</p>
+  {{ renderBulletin(b, church) }}
+  <p class="back-link no-print"><a href="{{ '/archive/' | url }}">← 지난 주보 보기</a></p>
+{% else %}
+  <section class="card">
+    <h1>아직 등록된 주보가 없습니다</h1>
+    <p>첫 주보를 등록하면 이곳에 자동으로 표시됩니다.</p>
+  </section>
+{% endif %}

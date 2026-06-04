@@ -1,0 +1,40 @@
+---
+layout: layout.njk
+permalink: /archive/
+pageTitle: 지난 주보
+eleventyExcludeFromCollections: true
+---
+{# 지난 주보·설교 목록 + 간단 검색(제목/설교자/구절) #}
+
+<section class="archive">
+  <h1>지난 주보</h1>
+
+  <div class="search no-print">
+    <label for="q" class="sr-only">검색</label>
+    <input id="q" type="search" data-search-input
+           placeholder="설교 제목·설교자·성경 구절 검색" autocomplete="off" />
+  </div>
+
+  {% if collections.bulletins.length %}
+    <ul class="archive-list" data-search-list>
+      {% for item in collections.bulletins %}
+        {% set b = item.data %}
+        <li class="archive-item"
+            data-title="{{ b.sermon.title }}"
+            data-preacher="{{ b.sermon.preacher }}"
+            data-scripture="{{ b.sermon.scripture }}">
+          <a href="{{ item.url | url }}">
+            <span class="archive-date">{{ b.date | dateKorean }}</span>
+            <span class="archive-title">{{ b.sermon.title }}</span>
+            <span class="archive-meta">{{ b.sermon.scripture }} · {{ b.sermon.preacher }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+    <p class="search-empty" data-search-empty hidden>검색 결과가 없습니다.</p>
+  {% else %}
+    <p>아직 등록된 주보가 없습니다.</p>
+  {% endif %}
+</section>
+
+<script src="{{ '/assets/archive.js' | url }}" defer></script>

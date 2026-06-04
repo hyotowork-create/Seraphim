@@ -1,0 +1,15 @@
+{
+  "name": "church-bulletin-site",
+  "version": "1.0.0",
+  "description": "소형 교회용 주보 홈페이지 자동 생성 정적 사이트 (Eleventy)",
+  "license": "MIT",
+  "scripts": {
+    "start": "eleventy --serve",
+    "dev": "eleventy --serve",
+    "build": "eleventy",
+    "clean": "rm -rf _site"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {# 페이지 제목: 각 페이지에서 pageTitle 을 넘기지 않으면 교회명을 씁니다. #}
+    <title>{% if pageTitle %}{{ pageTitle }}{% else %}{{ church.name }}{% endif %}</title>
+    <meta name="description" content="{{ pageDescription or church.footerNote }}" />
+
+    {# ── 카카오톡/SNS 공유용 OG 태그 ── #}
+    {# 공유 링크를 붙이면 제목·설명·썸네일이 미리보기로 뜹니다. #}
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ page.url | absUrl(church.url) }}" />
+    <meta property="og:site_name" content="{{ church.name }}" />
+    <meta property="og:title" content="{% if pageTitle %}{{ pageTitle }}{% else %}{{ church.name }}{% endif %}" />
+    <meta property="og:description" content="{{ pageDescription or church.footerNote }}" />
+    {% set _ogImage = ogImage or (church.defaultImage | absUrl(church.url)) %}
+    <meta property="og:image" content="{{ _ogImage }}" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{% if pageTitle %}{{ pageTitle }}{% else %}{{ church.name }}{% endif %}" />
+    <meta name="twitter:description" content="{{ pageDescription or church.footerNote }}" />
+    <meta name="twitter:image" content="{{ _ogImage }}" />
+
+    <link rel="stylesheet" href="{{ '/assets/style.css' | url }}" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="site-title" href="{{ '/' | url }}">{{ church.name }}</a>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="{{ '/' | url }}">이번 주</a>
+        <a href="{{ '/archive/' | url }}">지난 주보</a>
+      </nav>
+    </header>
+
+    <main id="main" class="content">
+      {{ content | safe }}
+    </main>
+
+    <footer class="site-footer">
+      <p class="church-name">{{ church.name }}</p>
+      {% if church.address %}<p>{{ church.address }}</p>{% endif %}
+      {% if church.phone %}<p>{{ church.phone }}</p>{% endif %}
+      {% if church.footerNote %}<p class="note">{{ church.footerNote }}</p>{% endif %}
+    </footer>
+  </body>
+</html>

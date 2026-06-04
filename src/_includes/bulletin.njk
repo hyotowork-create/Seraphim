@@ -1,0 +1,27 @@
+---
+layout: layout.njk
+---
+{# 주보 한 부의 상세 페이지. 공통 본문 매크로를 그대로 사용합니다. #}
+{% from "partials/bulletin-body.njk" import renderBulletin %}
+
+{% set b = {
+  date: date,
+  season: season,
+  serviceType: serviceType,
+  sermon: sermon,
+  greeting: greeting,
+  worshipOrder: worshipOrder,
+  announcements: announcements,
+  schedule: schedule,
+  offering: offering,
+  bulletinImage: bulletinImage,
+  pageTitle: pageTitle,
+  pageDescription: pageDescription,
+  shareUrl: shareUrl
+} %}
+
+{{ renderBulletin(b, church) }}
+
+<p class="back-link no-print"><a href="{{ '/archive/' | url }}">← 지난 주보 보기</a></p>
+
+<script src="{{ '/assets/bulletin.js' | url }}" defer></script>

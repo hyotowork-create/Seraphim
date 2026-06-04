@@ -1,0 +1,241 @@
+/* ──────────────────────────────────────────────────────────────
+   소형 교회 주보 사이트 스타일
+   원칙: 모바일 우선 · 단일 컬럼 · 큰 글씨(18px+) · 고대비 · 큰 버튼
+   ────────────────────────────────────────────────────────────── */
+
+:root {
+  --ink: #1a1a1a;          /* 진한 본문 글씨 */
+  --ink-soft: #4a4a4a;     /* 보조 글씨 */
+  --bg: #ffffff;           /* 밝은 배경 */
+  --bg-soft: #f4f1ea;      /* 카드 배경(은은한 베이지) */
+  --line: #d8d2c4;
+  --accent: #7a5230;       /* 차분한 갈색 포인트 */
+  --accent-ink: #ffffff;
+  --link: #1d4ed8;
+  --max: 720px;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui,
+    sans-serif;
+  font-size: 19px;
+  line-height: 1.75;
+  color: var(--ink);
+  background: var(--bg);
+  word-break: keep-all;       /* 한글 단어 단위 줄바꿈 */
+  overflow-wrap: anywhere;
+}
+
+/* ── 머리글 ── */
+.site-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  padding: 18px 16px;
+  border-bottom: 2px solid var(--line);
+  background: var(--bg-soft);
+  text-align: center;
+}
+.site-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ink);
+  text-decoration: none;
+}
+.site-nav { display: flex; gap: 10px; }
+.site-nav a {
+  display: inline-block;
+  min-height: 44px;
+  line-height: 44px;
+  padding: 0 18px;
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* ── 본문 영역(단일 컬럼) ── */
+.content {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 20px 16px 64px;
+}
+
+.home-eyebrow {
+  margin: 4px 0 0;
+  color: var(--accent);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* ── 주보 머리 ── */
+.bulletin-head { text-align: center; margin: 8px 0 20px; }
+.season {
+  display: inline-block;
+  margin: 0 0 6px;
+  padding: 2px 12px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.bulletin-date { font-size: 28px; margin: 4px 0; }
+.service-type { margin: 0; color: var(--ink-soft); font-weight: 700; }
+
+/* ── 카드 ── */
+.card {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 18px;
+  margin: 16px 0;
+}
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 6px;
+  color: var(--accent);
+}
+
+.sermon-title { font-size: 23px; font-weight: 800; margin: 4px 0 12px; }
+
+dl.meta { margin: 0; }
+dl.meta > div { display: flex; gap: 10px; margin: 4px 0; }
+dl.meta dt {
+  flex: 0 0 64px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+dl.meta dd { margin: 0; }
+
+.prose { margin-top: 10px; white-space: pre-wrap; }
+.prose p { margin: 0 0 0.8em; }
+
+.announcements { list-style: none; padding: 0; margin: 0; }
+.announcements > li { padding: 10px 0; border-bottom: 1px dashed var(--line); }
+.announcements > li:last-child { border-bottom: 0; }
+.announcements h3 { margin: 0 0 4px; font-size: 19px; }
+
+.schedule { list-style: none; padding: 0; margin: 0; }
+.schedule > li { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+.schedule > li:last-child { border-bottom: 0; }
+.schedule .day { flex: 0 0 88px; font-weight: 700; color: var(--accent); }
+
+.account { font-size: 20px; font-weight: 700; }
+
+.bulletin-image { width: 100%; height: auto; border-radius: 10px; display: block; }
+
+/* ── 교인용 가림막 ── */
+.protected-form { display: flex; gap: 8px; margin: 8px 0; }
+.protected-input,
+.protected input[type="password"] {
+  flex: 1;
+  min-height: 48px;
+  font-size: 18px;
+  padding: 0 12px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+}
+.protected-hint { margin: 0 0 6px; color: var(--ink-soft); }
+.protected-error { color: #b00020; font-weight: 700; }
+
+/* ── 버튼 ── */
+.btn {
+  display: inline-block;
+  min-height: 52px;
+  line-height: 50px;
+  padding: 0 22px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  border: 2px solid var(--accent);
+}
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-line { background: #fff; color: var(--accent); }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 24px 0 8px;
+}
+.actions .btn { flex: 1 1 160px; }
+
+.back-link { margin-top: 8px; }
+.back-link a, a { color: var(--link); }
+
+/* ── 아카이브 ── */
+.archive h1 { font-size: 26px; }
+.search { margin: 12px 0 18px; }
+.search input {
+  width: 100%;
+  min-height: 52px;
+  font-size: 18px;
+  padding: 0 14px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+}
+.archive-list { list-style: none; padding: 0; margin: 0; }
+.archive-item { border-bottom: 1px solid var(--line); }
+.archive-item a {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 6px;
+  text-decoration: none;
+  color: var(--ink);
+}
+.archive-date { color: var(--accent); font-weight: 700; }
+.archive-title { font-size: 20px; font-weight: 800; }
+.archive-meta { color: var(--ink-soft); }
+.search-empty { padding: 16px 6px; color: var(--ink-soft); }
+
+/* ── 꼬리글 ── */
+.site-footer {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  border-top: 2px solid var(--line);
+  color: var(--ink-soft);
+  text-align: center;
+  font-size: 16px;
+}
+.site-footer .church-name { font-weight: 800; color: var(--ink); }
+.site-footer p { margin: 4px 0; }
+
+/* 접근성: 화면에는 숨기고 스크린리더에만 */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ── 인쇄용 (종이 주보) ── */
+@media print {
+  .no-print { display: none !important; }
+  body { font-size: 12pt; line-height: 1.5; color: #000; background: #fff; }
+  .site-header, .site-footer { background: #fff; border: 0; }
+  .site-nav { display: none; }
+  .content { max-width: none; padding: 0; }
+  .card {
+    background: #fff;
+    border: 1px solid #999;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin: 8px 0;
+  }
+  a { color: #000; text-decoration: none; }
+}

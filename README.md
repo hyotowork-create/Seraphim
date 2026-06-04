@@ -1,1 +1,163 @@
-# Seraphim
+# 교회 주보 홈페이지 (소형 교회용)
+
+목회자가 그 주 내용을 폼에 채우면 **그 주 교회 홈페이지가 자동으로 만들어지고**,
+링크를 카톡으로 공유할 수 있는 **무료** 정적 웹사이트입니다.
+
+- 📱 **폰에서 보기 좋게** — 단일 컬럼, 큰 글씨(19px+), 고대비, 큰 버튼 (고령 교인 배려)
+- 💬 **카톡 공유 최적화** — 링크를 붙이면 제목·설명·썸네일이 뜹니다 (OG 태그)
+- 🖨️ **인쇄 지원** — 종이 주보도 깔끔하게 출력
+- 💰 **운영비 0원** — GitHub Pages 무료 호스팅, 서버·DB 관리 없음
+
+> 이 저장소는 **Phase 1 (MVP)** 입니다. 주보를 `.md` 파일로 추가하면 홈·상세·아카이브에
+> 자동 반영됩니다. (Phase 2 에서 Sveltia CMS 로그인으로 폰에서 폼 작성까지 연결)
+
+---
+
+## 1. 폴더 구조
+
+```
+├─ .github/workflows/deploy.yml   # GitHub Pages 자동 배포
+├─ src/
+│  ├─ _data/church.json           # 교회 고정정보(이름·주소·예배시간·계좌·비밀번호)
+│  ├─ _includes/
+│  │  ├─ layout.njk               # 공통 레이아웃 + OG 태그
+│  │  ├─ bulletin.njk             # 주보 상세 페이지 레이아웃
+│  │  └─ partials/bulletin-body.njk  # 주보 본문(홈·상세 공용)
+│  ├─ bulletins/                  # 주보 1부 = 파일 1개 (YYYY-MM-DD.md)
+│  ├─ index.njk                   # 홈(최신 주보 자동 노출)
+│  ├─ archive.njk                 # 지난 주보 목록 + 검색
+│  ├─ assets/                     # CSS·JS·기본 이미지
+│  └─ admin/                      # Sveltia CMS 입력 화면(config.yml = 폼 정의)
+├─ .eleventy.js                   # Eleventy 설정
+└─ package.json
+```
+
+---
+
+## 2. 로컬에서 미리보기 (선택 — 개발자용)
+
+> 목회자는 이 단계를 몰라도 됩니다. 사이트를 고치려는 분만 참고하세요.
+
+```bash
+# 1) Node.js 18 이상 설치 후
+npm install      # 처음 한 번만
+
+# 2) 미리보기 서버 실행 → 브라우저에서 http://localhost:8080
+npm start
+
+# 3) 정적 파일로 빌드만 하려면
+npm run build    # 결과물은 _site/ 폴더
+```
+
+수정 후 저장하면 브라우저가 자동으로 새로고침됩니다.
+
+---
+
+## 3. 새 주보 올리기 (지금 당장 쓰는 방법)
+
+`src/bulletins/` 폴더에 **날짜 이름의 파일**을 하나 추가하면 됩니다.
+예) `src/bulletins/2026-06-14.md`
+
+```yaml
+---
+date: 2026-06-14            # 필수 — 이 날짜로 주소가 만들어집니다
+season: 맥추절              # 선택 (절기)
+serviceType: 주일예배       # 선택
+sermon:
+  title: 설교 제목          # 필수
+  scripture: 요한복음 3:16  # 필수 (본문)
+  preacher: 홍길동 목사     # 필수
+  summary: |               # 선택 (설교 요약/전문)
+    여러 줄로 길게 쓸 수 있습니다.
+  videoUrl: https://youtu.be/...   # 선택 (영상)
+worshipOrder: |            # 선택 (예배 순서)
+  묵도 · 찬송 · 기도 · 설교 · 축도
+announcements:            # 선택 (공지 여러 개)
+  - title: 공지 제목
+    body: 공지 내용
+schedule:                # 선택 (주간 일정)
+  - day: 수요일
+    content: 저녁 7시 30분 수요예배
+greeting: |              # 선택 (인사말)
+  이번 주도 평안하시길 바랍니다.
+offering:                # 선택 (헌금 계좌)
+  accountInfo: "○○은행 000-00-000000 (예금주: 교회명)"
+  visibility: members    # public(전체공개) / members(비밀번호) / hidden(숨김)
+---
+```
+
+> ⚠️ 계좌처럼 콜론(`:`)이나 괄호가 들어간 값은 **큰따옴표로 감싸세요.**
+> main 브랜치에 올리면(push) 1~2분 뒤 사이트에 자동 반영됩니다.
+
+### 매주 같은 값은 한 번만 — `src/_data/church.json`
+
+교회명·주소·예배시간·기본 계좌·교인 비밀번호 등 **매주 바뀌지 않는 정보**는
+`src/_data/church.json` 에 한 번 적어두면 모든 페이지에서 재사용됩니다.
+
+```jsonc
+{
+  "name": "교회 이름",
+  "url": "https://깃허브아이디.github.io",   // ← 사이트 주소(도메인만, 경로 X)
+  "address": "교회 주소",
+  "memberPassword": "1234"                   // 교인용 헌금정보 가림막 비밀번호
+}
+```
+
+---
+
+## 4. GitHub Pages 켜기 (처음 한 번)
+
+1. 이 저장소를 GitHub 에 올립니다.
+2. 저장소 **Settings → Pages** 로 이동합니다.
+3. **Build and deployment → Source** 를 **GitHub Actions** 로 선택합니다.
+4. `main` 브랜치에 변경사항을 push 하면 자동으로 빌드·배포됩니다.
+   (진행 상황은 저장소 **Actions** 탭에서 볼 수 있습니다.)
+5. 배포가 끝나면 `https://깃허브아이디.github.io/저장소이름/` 으로 공개됩니다.
+
+> 📌 **카톡 썸네일을 위해** `src/_data/church.json` 의 `url` 을 본인 도메인
+> (`https://깃허브아이디.github.io`)으로 꼭 바꿔주세요. 하위 경로(`/저장소이름/`)는
+> 배포 시 자동으로 붙습니다.
+>
+> 기본 공유 썸네일은 `src/assets/og-default.svg` 입니다. 카카오톡은 SVG 썸네일을
+> 잘 못 띄울 수 있으니, 가능하면 **1200×630 PNG/JPG** 로 교체하고 `church.json` 의
+> `defaultImage` 경로를 바꾸길 권장합니다. (개별 주보에 사진을 넣으면 그 사진이 썸네일이 됩니다.)
+
+---
+
+## 5. 페이지 안내
+
+| 주소 | 내용 |
+|------|------|
+| `/` | 가장 최근 주보 자동 노출 |
+| `/bulletin/YYYY-MM-DD/` | 날짜별 상세 (카톡 공유용 고유 URL, OG 태그 포함) |
+| `/archive/` | 지난 주보 목록 + 제목·설교자·구절 검색 |
+| `/admin/` | 주보 입력 화면 (Sveltia CMS — 로그인 연결은 Phase 2) |
+
+---
+
+## 6. 민감정보 공개범위
+
+헌금 계좌 등 민감정보는 `offering.visibility` 로 조절합니다.
+
+- `public` — 전체 공개
+- `members` — **간단 비밀번호**(`church.json` 의 `memberPassword`) 입력 후 표시
+  - ⚠️ 강력한 보안이 아니라 **가벼운 가림막**입니다. 매우 민감한 정보는 올리지 마세요.
+- `hidden` — 표시하지 않음
+
+기본값은 보수적으로 `members` 를 권장합니다.
+
+---
+
+## 7. 다음 단계 (Phase 2)
+
+> "Sveltia CMS Auth 를 Cloudflare Workers 에 배포하고, `/admin` 에서 GitHub 로그인 후
+> 폼으로 발행되게 해줘" 를 요청하면, 목회자가 **폰에서 폼만 채워 발행**할 수 있게 됩니다.
+
+`src/admin/config.yml` 에 입력 폼(컬렉션)이 이미 데이터 모델대로 정의되어 있어,
+인증(OAuth)만 연결하면 바로 사용할 수 있습니다.
+
+---
+
+## 기술 스택
+
+Eleventy(11ty) · Nunjucks · GitHub Pages · Sveltia CMS(예정) — 모두 무료.

@@ -1,0 +1,17 @@
+{
+  "name": "은혜로교회",
+  "shortName": "은혜로교회",
+  "url": "https://example.github.io",
+  "address": "서울특별시 ○○구 ○○로 00, 2층",
+  "phone": "02-000-0000",
+  "pastor": "홍길동 목사",
+  "defaultImage": "/assets/og-default.svg",
+  "serviceTimes": [
+    { "name": "주일예배", "time": "주일 오전 11:00" },
+    { "name": "수요예배", "time": "수요일 저녁 7:30" },
+    { "name": "새벽기도회", "time": "화~토 오전 5:30" }
+  ],
+  "offeringAccount": "○○은행 000-00-000000 (예금주: 은혜로교회)",
+  "memberPassword": "1234",
+  "footerNote": "이 페이지는 교인들과의 나눔을 위한 주보입니다."
+}
