@@ -2,20 +2,25 @@
 # Sveltia CMS 설정 — 목회자가 보는 입력 폼을 정의합니다.
 # (Decap CMS 와 설정 호환: 그대로 Decap 으로도 동작합니다)
 #
-# ⚠️ 사용 전 아래 2곳을 본인 저장소에 맞게 수정하세요:
-#   1) backend.repo : "깃허브아이디/저장소이름"
-#   2) (Phase 2) backend.base_url : Sveltia CMS Auth 워커 주소
+# ⚠️ 사용 전 아래 3곳을 본인 환경에 맞게 수정하세요:
+#   1) backend.repo     : "깃허브아이디/저장소이름"
+#   2) backend.base_url : 배포한 Sveltia CMS Auth 워커 주소
+#   3) site_url         : 공개된 사이트 주소(GitHub Pages)
 # ──────────────────────────────────────────────────────────────
 
 backend:
   name: github
   repo: hyotowork-create/seraphim   # ← 본인 저장소로 수정
   branch: main
-  # Phase 2: GitHub 로그인 중계용 Sveltia CMS Auth(Cloudflare Workers) 주소
-  # base_url: https://your-auth.example.workers.dev
+  # GitHub 로그인 중계용 Sveltia CMS Auth(Cloudflare Workers) 주소.
+  # auth-worker/ 를 배포한 뒤 받은 주소로 바꾸세요. (끝에 /auth, /callback 붙이지 않음)
+  base_url: https://sveltia-cms-auth.example.workers.dev   # ← 배포한 워커 주소로 수정
 
 # 로컬에서 폼을 시험해 볼 때 사용 (npx @sveltia/cms-proxy-server 와 함께)
 # local_backend: true
+
+# 관리자 화면에서 "사이트 보기" 링크로 쓰입니다.
+site_url: https://example.github.io/seraphim   # ← 공개 사이트 주소로 수정
 
 # 업로드한 사진이 저장되는 위치
 media_folder: "src/assets/uploads"
@@ -25,8 +30,12 @@ public_folder: "/assets/uploads"
 locale: ko
 i18n: false
 
-# 발행 전 미리보기 → 발행 (2단계)
-publish_mode: editorial_workflow
+# 참고: Sveltia CMS 는 폼 옆에 실시간 미리보기를 보여주고, 발행 시 한 번 더
+# 확인하므로 "미리보기 → 발행" 흐름이 자연스럽습니다. 발행을 누르면 main 에
+# 바로 반영되어(=커밋) 사이트가 1~2분 안에 자동 갱신됩니다.
+# (검토용 초안/승인 단계를 원하면 아래 한 줄의 주석을 해제하세요. 단, 이 경우
+#  '발행'은 GitHub PR 병합 단계까지 거쳐야 사이트에 반영됩니다.)
+# publish_mode: editorial_workflow
 
 collections:
   - name: bulletins

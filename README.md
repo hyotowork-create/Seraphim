@@ -8,8 +8,9 @@
 - 🖨️ **인쇄 지원** — 종이 주보도 깔끔하게 출력
 - 💰 **운영비 0원** — GitHub Pages 무료 호스팅, 서버·DB 관리 없음
 
-> 이 저장소는 **Phase 1 (MVP)** 입니다. 주보를 `.md` 파일로 추가하면 홈·상세·아카이브에
-> 자동 반영됩니다. (Phase 2 에서 Sveltia CMS 로그인으로 폰에서 폼 작성까지 연결)
+> **두 가지 방법으로 주보를 올릴 수 있습니다.**
+> - 개발자/익숙한 분: `src/bulletins/` 에 `.md` 파일 추가 (→ 3장)
+> - 목회자(코드 없이): `/admin` 에서 GitHub 로그인 후 폼 작성·발행 (→ 7장, Cloudflare 워커 1회 배포 필요)
 
 ---
 
@@ -28,6 +29,7 @@
 │  ├─ archive.njk                 # 지난 주보 목록 + 검색
 │  ├─ assets/                     # CSS·JS·기본 이미지
 │  └─ admin/                      # Sveltia CMS 입력 화면(config.yml = 폼 정의)
+├─ auth-worker/                   # /admin GitHub 로그인 중계 워커(Cloudflare, 1회 배포)
 ├─ .eleventy.js                   # Eleventy 설정
 └─ package.json
 ```
@@ -148,13 +150,31 @@ offering:                # 선택 (헌금 계좌)
 
 ---
 
-## 7. 다음 단계 (Phase 2)
+## 7. 폰에서 폼으로 발행하기 (Phase 2 — Sveltia CMS 로그인)
 
-> "Sveltia CMS Auth 를 Cloudflare Workers 에 배포하고, `/admin` 에서 GitHub 로그인 후
-> 폼으로 발행되게 해줘" 를 요청하면, 목회자가 **폰에서 폼만 채워 발행**할 수 있게 됩니다.
+목회자가 코드를 몰라도 **폰에서 `/admin` → GitHub 로그인 1회 → 폼 작성 → 발행**으로
+사이트를 갱신할 수 있게 하는 단계입니다.
 
-`src/admin/config.yml` 에 입력 폼(컬렉션)이 이미 데이터 모델대로 정의되어 있어,
-인증(OAuth)만 연결하면 바로 사용할 수 있습니다.
+준비물은 이미 저장소에 들어 있습니다:
+- `src/admin/config.yml` — 데이터 모델대로 된 입력 폼(쉬운 한국어 라벨, 필수 우선, 선택 접기)
+- `auth-worker/` — GitHub 로그인 중계용 Cloudflare 워커(무료)
+
+연결 순서 (처음 한 번, 약 10분):
+
+1. **인증 워커 배포** — [`auth-worker/README.md`](auth-worker/README.md) 의
+   1~3단계를 따라 GitHub OAuth App 을 만들고 Cloudflare 에 워커를 배포합니다.
+2. **CMS 연결** — `src/admin/config.yml` 의 아래 3곳을 본인 값으로 수정 후 push:
+   - `backend.repo` : `깃허브아이디/저장소이름`
+   - `backend.base_url` : 배포한 워커 주소 (예: `https://sveltia-cms-auth.your-name.workers.dev`)
+   - `site_url` : 공개 사이트 주소
+3. **사용** — 폰 브라우저에서 `https://<사이트>/admin/` 접속 → **GitHub 로그인** →
+   주보 폼 작성 → **발행**. 발행을 누르면 main 에 반영되어 1~2분 뒤 사이트가 자동 갱신됩니다.
+
+> 💡 **미리보기 → 발행**: Sveltia CMS 는 폼 옆에 실시간 미리보기를 보여줍니다.
+> 발행 화면에서 **개인정보(계좌·연락처)가 공개로 들어가지 않았는지** 다시 확인하세요.
+>
+> 📷 **사진 첨부**: "주보 원본 사진" 항목은 폰 사진첩에서 바로 올릴 수 있습니다.
+> 사진을 넣으면 그 사진이 카톡 공유 썸네일로도 쓰입니다.
 
 ---
 

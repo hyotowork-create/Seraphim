@@ -1,0 +1,10 @@
+# Cloudflare Workers 배포 설정.
+# 배포: 이 폴더(auth-worker/)에서  npx wrangler deploy
+name = "sveltia-cms-auth"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# 시크릿(아래 3개)은 wrangler.toml 에 적지 말고 명령으로 등록하세요(노출 방지):
+#   npx wrangler secret put GITHUB_CLIENT_ID
+#   npx wrangler secret put GITHUB_CLIENT_SECRET
+#   npx wrangler secret put ALLOWED_DOMAINS      # 선택 (예: yourname.github.io)
