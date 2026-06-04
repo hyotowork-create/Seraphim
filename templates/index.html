@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seraphim · 교회 방송실 자동화</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <span class="logo">✦</span>
+    <div>
+      <h1>Seraphim</h1>
+      <p>교회 방송실 업무 자동화 · 찬양 PPT · 설교 · 주보</p>
+    </div>
+  </div>
+  <span class="ver">v{{ version }}</span>
+</header>
+
+<main class="layout">
+  <!-- ===== 입력 영역 ===== -->
+  <section class="panel form-panel">
+    <div class="card">
+      <h2>예배 정보</h2>
+      <div class="grid-2">
+        <label>교회명<input id="church" placeholder="예) 세라핌교회"></label>
+        <label>예배일자<input id="date" type="date" value="{{ today }}"></label>
+        <label>예배명<input id="service_name" placeholder="예) 주일 낮 예배"></label>
+        <label>디자인 테마
+          <select id="theme">
+            {% for t in themes %}
+            <option value="{{ t.key }}">{{ t.name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>찬양 악보(가사)</h2>
+        <button class="btn-add" onclick="addSong()">+ 찬양 추가</button>
+      </div>
+      <p class="hint">가사는 절(슬라이드) 사이를 <b>빈 줄</b>로 구분하면 더 깔끔하게 나뉩니다.</p>
+      <div id="songs"></div>
+    </div>
+
+    <div class="card">
+      <h2>설교</h2>
+      <div class="grid-2">
+        <label>설교 제목<input id="sermon_title" placeholder="예) 그리스도의 사랑"></label>
+        <label>설교자<input id="sermon_preacher" placeholder="예) 홍길동 목사"></label>
+      </div>
+      <label>설교 본문(성경 구절)<input id="sermon_passage" placeholder="예) 요한복음 3:16"></label>
+      <label>설교 요약 / 본문 내용
+        <textarea id="sermon_body" rows="5" placeholder="주보에 들어갈 설교 요약이나 본문을 입력하세요."></textarea>
+      </label>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>광고 / 안내</h2>
+        <button class="btn-add" onclick="addAd()">+ 광고 추가</button>
+      </div>
+      <p class="hint">각 광고는 PPT 광고 슬라이드와 주보 광고란에 함께 반영됩니다.</p>
+      <div id="ads"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="downloadPPT()">🎬 찬양·설교·광고 PPT 다운로드</button>
+      <button class="btn-primary" onclick="downloadBulletin()">📄 주보(HTML) 다운로드</button>
+      <button class="btn-ghost" onclick="refreshPreview()">↻ 주보 미리보기</button>
+    </div>
+    <div id="status" class="status"></div>
+  </section>
+
+  <!-- ===== 미리보기 영역 ===== -->
+  <section class="panel preview-panel">
+    <h2>주보 미리보기</h2>
+    <iframe id="preview" title="주보 미리보기"></iframe>
+  </section>
+</main>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

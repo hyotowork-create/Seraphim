@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# PyInstaller 빌드 산출물
+build/
+dist/
+*.spec
+
+# 생성된 결과물
+output/*.pptx
+output/*.html
+!output/.gitkeep
+
+# OS / 에디터
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
