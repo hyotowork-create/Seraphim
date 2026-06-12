@@ -21,8 +21,8 @@ export function createInteractions({ camera, player, valley, ui, audio, postFx, 
   carried.position.set(0.25, -0.35, 0.15); // low right hand
   camera.add(carried);
   const carriedFlame = new THREE.Mesh(
-    new THREE.SphereGeometry(0.022, 6, 6),
-    new THREE.MeshBasicMaterial({ color: 0xffb24d })
+    new THREE.SphereGeometry(0.011, 6, 6),
+    new THREE.MeshBasicMaterial({ color: 0xcc8a3a })
   );
   carriedFlame.position.copy(carried.position);
   carriedFlame.visible = false;
@@ -118,7 +118,7 @@ export function createInteractions({ camera, player, valley, ui, audio, postFx, 
       const power = boosted ? 16 : 9;
       const fl = 0.85 + Math.sin(t * 11.3) * 0.05 + Math.sin(t * 27.7) * 0.04 + Math.sin(t * 5.1) * 0.06;
       carried.distance = THREE.MathUtils.lerp(carried.distance, radius, dt * 2);
-      carried.intensity = power * fl;
+      carried.intensity = power * fl * (1 - state.dawnT * 0.75);
       if (boosted && state.prayerBoostUntil - t < 0.1) ui.setHud('The light fades back');
     }
 
@@ -127,11 +127,12 @@ export function createInteractions({ camera, player, valley, ui, audio, postFx, 
       state.dawnT = Math.min(1, state.dawnT + dt / 8);
       const k = state.dawnT;
       const e = k * k * (3 - 2 * k);
-      valley.skyUniforms.uDawn.value = e * 0.75;
-      valley.dawn.sun.intensity = e * 1.15;
-      valley.dawn.ambient.intensity = e * 0.22;
-      fog.density = THREE.MathUtils.lerp(fog.baseDensity, 0.011, e);
-      fog.color.lerpColors(fog.baseColor, new THREE.Color(0x46506b), e);
+      valley.skyUniforms.uDawn.value = e * 0.6;
+      valley.dawn.sun.intensity = e * 2.2;
+      valley.dawn.ambient.intensity = e * 0.3;
+      valley.dawn.glow.material.opacity = e * 0.45;
+      fog.density = THREE.MathUtils.lerp(fog.baseDensity, 0.009, e);
+      fog.color.lerpColors(fog.baseColor, new THREE.Color(0x2e3850), e);
       fog.dawnLock = e; // tell main loop to stop breathing the fog
       if (state.dawnT >= 1) {
         ui.showEndCard();

@@ -73,3 +73,21 @@ Fixes queued for iter5:
 - Sky shader: explicit low gold sun disc at dawn instead of a white horizon wash (uDawn 0.75→0.6).
 - Dedicated rock maps (separate texture instance, low repeat) to kill the fishskin tiling.
 - Darken cliff vertex color above ad>8 to hide UV stretch; raise terrain z-repeat.
+
+## Iterations 5–9 — texture identity, dawn rescue, sky tracking
+
+Key changes: dedicated boulder texture set (fishskin tiling gone); cliff vertex-color
+silhouetting; gold sun disc in sky shader; dawn fog #2e3850 (was washing white); carried
+flame shrunk (was a bloom blob dead-center); sky dome now follows the camera (sun disc
+parallax fix); fire light casts 512px cube shadows; fps probe walks facing -z (was backward).
+
+| Axis (iter9) | Score | Notes |
+|---|---|---|
+| Darkness legibility | 7 | Path pool reads; entrance silhouettes good; path fades a touch early beyond lantern |
+| Fire/smoke believability | 7 | Seam buried in trench, embers cross path; near-lantern hotspot below camera |
+| Fog depth | 7 | Free view layers beautifully; exit horizon still a pale band (dawnGlow sprite saturating) |
+| Material response | 7 | Boulders read as wet hewn stone; mud crazing strong; cliff strata acceptable as hatching |
+| Dread factor | 7 | Free + ditch views genuinely oppressive |
+
+Perf note: fire cube shadow re-renders the scene 6 ways every frame (2.18M tris/frame
+measured). Queued: shadow autoUpdate off, refresh every 5th frame.

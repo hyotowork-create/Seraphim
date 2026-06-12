@@ -1,6 +1,6 @@
 // The valley itself: terrain, cliff walls, quagmire surface, sky, props.
 import * as THREE from 'three';
-import { makeRockMaps, makeMudMaps, fbmFactory, mulberry32 } from './textures.js';
+import { makeRockMaps, makeMudMaps, makeSoftSprite, fbmFactory, mulberry32 } from './textures.js';
 
 export const VALLEY = {
   zStart: 6,        // entrance (player spawns here)
@@ -97,9 +97,15 @@ function buildTerrain(rockMaps, mudMaps) {
       col.setRGB(0.30 + n * 0.10, 0.25 + n * 0.08, 0.20 + n * 0.06);
     } else {
       // Ditch side: cold dead grey swallowed by black — bottomless.
-      const depth = Math.min(1, Math.max(0, -groundHeight(x, z) / 9));
-      const l = (0.34 + n * 0.12) * Math.pow(1 - depth, 2.2);
+      const depth = Math.min(1, Math.max(0, -groundHeight(x, z) / 6));
+      const l = (0.30 + n * 0.10) * Math.pow(1 - depth, 2.6);
       col.setRGB(l * 0.95, l, l * 1.1);
+    }
+    // High cliffs sink into silhouette (hides UV stretch, deepens the engraving look).
+    const ad = Math.abs(d);
+    if (ad > 8) {
+      const sink = Math.min(1, (ad - 8) / 7);
+      col.multiplyScalar(1 - sink * 0.55);
     }
     // Charring near the fissure overrides everything.
     if (fz > 0.12 && d > -1) {
@@ -121,9 +127,9 @@ function buildTerrain(rockMaps, mudMaps) {
     metalness: 0.0,
     envMapIntensity: 0.18,
   });
-  rockMaps.albedo.repeat.set(26, 44);
-  rockMaps.roughness.repeat.set(26, 44);
-  rockMaps.normal.repeat.set(26, 44);
+  rockMaps.albedo.repeat.set(26, 64);
+  rockMaps.roughness.repeat.set(26, 64);
+  rockMaps.normal.repeat.set(26, 64);
 
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
@@ -131,6 +137,7 @@ function buildTerrain(rockMaps, mudMaps) {
 }
 
 // Kit-bashed rocks lining the cliffs and the path edges.
+// Takes its own texture set (low repeat) so boulders don't tile like fishskin.
 function buildRocks(rockMaps) {
   const rng = mulberry32(5150);
   const proto = new THREE.IcosahedronGeometry(1, 3);
@@ -192,7 +199,8 @@ export function buildValley(scene, renderer) {
   const terrain = buildTerrain(rockMaps, mudMaps);
   scene.add(terrain);
 
-  const rocks = buildRocks(rockMaps);
+  const boulderMaps = makeRockMaps(909); // separate instance: repeat stays (1,1)
+  const rocks = buildRocks(boulderMaps);
   scene.add(rocks);
 
   // ---- Quagmire skin ----
@@ -263,7 +271,7 @@ export function buildValley(scene, renderer) {
     uTop: { value: new THREE.Color(0x030611) },
     uBottom: { value: new THREE.Color(0x000001) },
     uDawn: { value: 0 },
-    uDawnDir: { value: new THREE.Vector3(0, 0.12, -1).normalize() },
+    uDawnDir: { value: new THREE.Vector3(0.05, 0.05, -1).normalize() },
   };
   const sky = new THREE.Mesh(
     new THREE.SphereGeometry(380, 24, 16),
@@ -290,7 +298,10 @@ export function buildValley(scene, renderer) {
           vec3 gold = vec3(1.0, 0.62, 0.28);
           vec3 coldBlue = vec3(0.45, 0.60, 0.95);
           vec3 dawnCol = mix(coldBlue, gold, horizon) * pow(toward, 2.0);
-          col += dawnCol * uDawn * (0.16 + horizon * 0.55);
+          col += dawnCol * uDawn * (0.14 + horizon * 0.3);
+          // The sun itself: a low gold disc with a tight halo, not a white wash.
+          float sunDot = clamp(dot(d, normalize(uDawnDir)), 0.0, 1.0);
+          col += gold * uDawn * (pow(sunDot, 350.0) * 3.0 + pow(sunDot, 40.0) * 0.6);
           gl_FragColor = vec4(col, 1.0);
         }`,
     })
@@ -312,6 +323,15 @@ export function buildValley(scene, renderer) {
   scene.add(dawnSun, dawnSun.target);
   const dawnAmbient = new THREE.HemisphereLight(0x9db8e8, 0x4a3a28, 0);
   scene.add(dawnAmbient);
+  // A broad gold halo low past the gate — the sun bleeding through the mist.
+  const dawnGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: makeSoftSprite(128, [255, 200, 120], [255, 120, 40], 2.0),
+    transparent: true, opacity: 0, depthWrite: false,
+    blending: THREE.AdditiveBlending, fog: false,
+  }));
+  dawnGlow.scale.set(42, 24, 1);
+  dawnGlow.position.set(pathCenterX(VALLEY.zEnd) + 4, 5, VALLEY.zEnd - 35);
+  scene.add(dawnGlow);
 
   // ---- Props ----
   const props = {};
@@ -421,7 +441,7 @@ export function buildValley(scene, renderer) {
     props,
     sky,
     skyUniforms,
-    dawn: { sun: dawnSun, ambient: dawnAmbient },
+    dawn: { sun: dawnSun, ambient: dawnAmbient, glow: dawnGlow },
     baseLights: { hemi, rim },
     updateQuagmire,
   };

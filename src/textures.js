@@ -92,7 +92,7 @@ export function makeRockMaps(seed = 101) {
       for (let x = 0; x < s; x++) {
         const u = x / s * 8, v = y / s * 8;
         // Strata: stretched noise bands, like an engraving's hatch lines.
-        const strata = fbm(u * 0.6, v * 3.2, 4);
+        const strata = fbm(u * 1.1, v * 2.2, 4);
         const grain = fbm(u * 2.0, v * 2.0, 5);
         const cracks = Math.pow(Math.abs(fbm(u * 1.3, v * 1.3, 4) - 0.5) * 2, 0.55);
         let l = 0.10 + strata * 0.13 + grain * 0.07;

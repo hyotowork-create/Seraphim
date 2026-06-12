@@ -42,8 +42,12 @@ export function buildHazards(scene) {
   fissureGroup.add(fissure);
 
   // Throbbing fire light over the seam.
-  const fireLight = new THREE.PointLight(0xff5a14, 26, 15, 2.0);
+  const fireLight = new THREE.PointLight(0xff5a14, 20, 13, 2.0);
   fireLight.position.set(pathCenterX(fz) + 1.6, groundHeight(pathCenterX(fz) + 1.6, fz) + 1.2, fz);
+  fireLight.castShadow = true;
+  fireLight.shadow.mapSize.set(512, 512);
+  fireLight.shadow.bias = -0.01;
+  fireLight.shadow.camera.far = 14;
   scene.add(fireLight);
   // Secondary deeper glow.
   const coalLight = new THREE.PointLight(0xff7a1e, 10, 8, 2.0);
@@ -147,9 +151,9 @@ export function buildHazards(scene) {
       flickerNext = 0.6 + flickerSeed() * 0.8;
     }
     const fl = flickerCur + (flickerNext - flickerCur) * Math.max(0, 1 - flickerT / 0.09);
-    fireLight.intensity = 26 * fl;
+    fireLight.intensity = 20 * fl;
     coalLight.intensity = 10 * (0.7 + 0.3 * fl);
-    fissureMat.color.setScalar(1.4 + fl * 1.3); // pump emissive through tonemap
+    fissureMat.color.setScalar(1.1 + fl * 0.9); // pump emissive through tonemap
 
     // Embers.
     const ep = emberGeo.attributes.position.array;

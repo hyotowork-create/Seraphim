@@ -120,6 +120,9 @@ function tick() {
   interact.update(dt, t, fogCtl);
   audio.update(dt);
 
+  // Sky dome rides with the player so its gradient/sun stay put on screen.
+  valley.sky.position.copy(pos);
+
   // Breathing fog: slow asymmetric swell, unless dawn has taken over.
   if (fogCtl.dawnLock < 0.02) {
     const breathe = Math.sin(t * 0.21) * 0.5 + Math.sin(t * 0.071 + 2) * 0.5;
@@ -154,7 +157,7 @@ function setView(name) {
     case 'entrance': place(4.5, -0.3, -0.10, -0.04); break;
     case 'ditch': place(-30, 0, 0.62, -0.45); break;
     case 'hellmouth': place(-52.5, -0.3, -0.32, -0.14); break;
-    case 'exit': place(VALLEY.zEnd + 14, 0, 0.05, 0.04); break;
+    case 'exit': place(VALLEY.zEnd + 14, -0.4, 0.12, 0.05); break;
     case 'free': place(-78, -0.2, Math.PI + 0.5, -0.12); break; // back toward the glow, mire in frame
   }
 }
@@ -200,7 +203,7 @@ window.__VALLEY__ = {
         const z = z0 + (z1 - z0) * k;
         const x = pathCenterX(z);
         player.yaw.position.set(x, groundHeight(x, z) + 1.7, z);
-        player.yaw.rotation.y = Math.PI;
+        player.yaw.rotation.y = 0;
         frames++;
         requestAnimationFrame(step);
       };
