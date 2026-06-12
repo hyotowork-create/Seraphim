@@ -1,7 +1,7 @@
 // Hazards: the mouth of Hell, its fire/smoke/embers, drifting ash,
 // and falling off the path into the ditch or the quagmire.
 import * as THREE from 'three';
-import { VALLEY, pathCenterX, groundHeight } from './valley.js';
+import { VALLEY, pathCenterX, groundHeight, fissureWobble } from './valley.js';
 import { makeLavaMaps, makeSoftSprite, makeSmokeSprite, mulberry32 } from './textures.js';
 
 export function buildHazards(scene) {
@@ -17,17 +17,19 @@ export function buildHazards(scene) {
   const fissureGeo = new THREE.PlaneGeometry(2.0, 13, 4, SEG);
   fissureGeo.rotateX(-Math.PI / 2);
   {
+    // Bake WORLD coordinates straight into the geometry — the seam must lie
+    // exactly in the shelf trench that groundHeight() carves beside the path.
     const p = fissureGeo.attributes.position;
     for (let i = 0; i < p.count; i++) {
       const lx = p.getX(i), lz = p.getZ(i);
       const wz = fz + lz;
-      const wob = Math.sin(wz * 1.7) * 0.35 + Math.sin(wz * 3.3 + 2) * 0.18;
       const edge = Math.abs(lx) / 1.0; // 0 center, 1 edge
-      p.setX(i, lx + wob);
-      // Center of the seam sinks deepest; edges meet the charred trench walls.
-      const cx = pathCenterX(wz) + 1.6;
-      const ground = groundHeight(cx + lx + wob, wz);
-      p.setY(i, ground + 0.12 - (1 - edge) * 0.55);
+      const wx = pathCenterX(wz) + 1.6 + fissureWobble(wz) + lx * 0.75;
+      const ground = groundHeight(wx, wz);
+      p.setX(i, wx);
+      p.setZ(i, wz);
+      // Center of the seam sinks deepest; edges tuck under the trench lips.
+      p.setY(i, ground + 0.06 - (1 - edge) * 0.9);
     }
     fissureGeo.computeVertexNormals();
   }
@@ -37,26 +39,18 @@ export function buildHazards(scene) {
     toneMapped: true,
   });
   const fissure = new THREE.Mesh(fissureGeo, fissureMat);
-  fissure.position.set(0, 0, 0);
   fissureGroup.add(fissure);
-  // Place by world coords baked into geometry x/y; only x needs path offset.
-  fissure.position.x = 0;
-  fissureGroup.position.set(pathCenterX(fz) + 1.6, 0, fz);
-  // Geometry already sampled world height with cx offset, so cancel group x for y baking:
-  fissureGroup.position.x = pathCenterX(fz) + 1.6;
 
   // Throbbing fire light over the seam.
-  const fireLight = new THREE.PointLight(0xff5a14, 60, 22, 1.9);
+  const fireLight = new THREE.PointLight(0xff5a14, 26, 15, 2.0);
   fireLight.position.set(pathCenterX(fz) + 1.6, groundHeight(pathCenterX(fz) + 1.6, fz) + 1.2, fz);
   scene.add(fireLight);
   // Secondary deeper glow.
-  const coalLight = new THREE.PointLight(0xff7a1e, 18, 9, 2.0);
+  const coalLight = new THREE.PointLight(0xff7a1e, 10, 8, 2.0);
   coalLight.position.set(fireLight.position.x, fireLight.position.y - 0.6, fz + 3.5);
   scene.add(coalLight);
 
   scene.add(fissureGroup);
-  // Reposition fissure mesh: geometry was built in world space already.
-  fissureGroup.position.set(0, 0, 0);
 
   // ---- Embers: sparks climbing out of the seam ----
   const N_EMBER = 240;
@@ -65,7 +59,7 @@ export function buildHazards(scene) {
   const emberSpawn = () => {
     const t = rng();
     return {
-      x: pathCenterX(fz + (t - 0.5) * 12) + 1.6 + (rng() - 0.5) * 1.2 + Math.sin((fz + (t - 0.5) * 12) * 1.7) * 0.35,
+      x: pathCenterX(fz + (t - 0.5) * 12) + 1.6 + fissureWobble(fz + (t - 0.5) * 12) + (rng() - 0.5) * 0.9,
       z: fz + (t - 0.5) * 12,
       vy: 0.8 + rng() * 1.6,
       vx: -(0.3 + rng() * 0.9), // wind pushes them across the path
@@ -111,7 +105,7 @@ export function buildHazards(scene) {
       spin: (rng() - 0.5) * 0.25,
       rise: 0.10 + rng() * 0.22,
       drift: 0.55 + rng() * 0.75,
-      baseScale: 1.6 + rng() * 2.2,
+      baseScale: 2.2 + rng() * 2.8,
     };
     smokeData.push(d);
     smokeGroup.add(spr);
@@ -153,8 +147,8 @@ export function buildHazards(scene) {
       flickerNext = 0.6 + flickerSeed() * 0.8;
     }
     const fl = flickerCur + (flickerNext - flickerCur) * Math.max(0, 1 - flickerT / 0.09);
-    fireLight.intensity = 60 * fl;
-    coalLight.intensity = 18 * (0.7 + 0.3 * fl);
+    fireLight.intensity = 26 * fl;
+    coalLight.intensity = 10 * (0.7 + 0.3 * fl);
     fissureMat.color.setScalar(1.4 + fl * 1.3); // pump emissive through tonemap
 
     // Embers.
@@ -193,9 +187,9 @@ export function buildHazards(scene) {
       d.sprite.scale.set(sc, sc * 0.7, 1);
       d.sprite.material.rotation += d.spin * dt;
       // Fade in fast, out slow; slightly lit from below by the fire when fresh.
-      d.sprite.material.opacity = Math.min(k * 6, 1 - k) * 0.42;
+      d.sprite.material.opacity = Math.min(k * 6, 1 - k) * 0.62;
       const warm = Math.max(0, 1 - d.life * 0.7);
-      d.sprite.material.color.setRGB(0.29 + warm * 0.5, 0.25 + warm * 0.18, 0.22 + warm * 0.04);
+      d.sprite.material.color.setRGB(0.34 + warm * 0.55, 0.30 + warm * 0.20, 0.27 + warm * 0.05);
     }
 
     // Ash falls around the player, wrapping in a 30m cube.

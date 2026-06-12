@@ -12,6 +12,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.info.autoReset = false; // stats survive the composer's multi-pass render
 document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -106,6 +107,7 @@ let elapsed = 0;
 const fpsBuf = [];
 
 function tick() {
+  renderer.info.reset();
   const dt = Math.min(clock.getDelta(), 0.05);
   elapsed += dt;
   const t = elapsed;
@@ -149,11 +151,11 @@ function setView(name) {
     player.pitch.rotation.x = pitchAngle;
   };
   switch (name) {
-    case 'entrance': place(4.5, 0, Math.PI + 0.12, -0.05); break;
-    case 'ditch': place(-30, -0.6, Math.PI - 0.85, -0.42); break;
-    case 'hellmouth': place(-53.5, -0.2, Math.PI + 0.38, -0.18); break;
-    case 'exit': place(VALLEY.zEnd + 11, 0, Math.PI - 0.05, 0.04); break;
-    case 'free': place(-82, -0.3, 0.35, 0.02); break; // looking back at the glow
+    case 'entrance': place(4.5, -0.3, -0.10, -0.04); break;
+    case 'ditch': place(-30, 0, 0.62, -0.45); break;
+    case 'hellmouth': place(-52.5, -0.3, -0.32, -0.14); break;
+    case 'exit': place(VALLEY.zEnd + 14, 0, 0.05, 0.04); break;
+    case 'free': place(-78, -0.2, Math.PI + 0.5, -0.12); break; // back toward the glow, mire in frame
   }
 }
 

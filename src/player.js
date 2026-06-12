@@ -15,7 +15,7 @@ export function createPlayer(camera, domElement) {
 
   const startZ = VALLEY.zStart - 2;
   yaw.position.set(pathCenterX(startZ), groundHeight(pathCenterX(startZ), startZ) + EYE_HEIGHT, startZ);
-  yaw.rotation.y = Math.PI; // face down the valley (-z)
+  yaw.rotation.y = 0; // face down the valley (-z)
 
   const state = {
     keys: {},

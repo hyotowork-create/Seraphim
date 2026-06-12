@@ -23,12 +23,13 @@ page.on('pageerror', (e) => console.error('[pageerror]', e.message));
 await page.goto(url, { waitUntil: 'load' });
 await page.waitForFunction(() => window.__VALLEY__?.ready, { timeout: 60000 });
 await page.evaluate(() => window.__VALLEY__.enter());
-await page.evaluate(() => window.__VALLEY__.takeLantern());
 await page.waitForTimeout(400);
 
-const views = ['entrance', 'ditch', 'hellmouth', 'exit', 'free'];
+// entrance first (lantern still burning on its post), dawn-contaminating exit LAST
+const views = ['entrance', 'ditch', 'hellmouth', 'free', 'exit'];
 for (const v of views) {
   await page.evaluate((name) => {
+    if (name === 'ditch') window.__VALLEY__.takeLantern(); // carried light from here on
     window.__VALLEY__.setView(name);
     if (name === 'exit') window.__VALLEY__.dawn(true);
     window.__VALLEY__.advance(3); // settle particles

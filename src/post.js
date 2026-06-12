@@ -26,7 +26,9 @@ const FinalShader = {
     varying vec2 vUv;
 
     float hash(vec2 p) {
-      return fract(sin(dot(p, vec2(127.1, 311.7)) + uTime * 43.7) * 43758.5453);
+      // gl_FragCoord-based with a per-frame jitter offset; avoids UV moiré.
+      vec2 q = p + fract(uTime * vec2(17.31, 9.137)) * 113.0;
+      return fract(sin(dot(q, vec2(12.9898, 78.233))) * 43758.5453);
     }
 
     void main() {
@@ -42,7 +44,7 @@ const FinalShader = {
       col.b = texture2D(tDiffuse, uv - fromCenter * ca).b;
 
       // Film grain, luminance-weighted so shadows crawl.
-      float g = (hash(uv * vec2(1920.0, 1080.0)) - 0.5);
+      float g = (hash(gl_FragCoord.xy) - 0.5);
       float lum = dot(col, vec3(0.299, 0.587, 0.114));
       col += g * uGrain * (1.0 - lum * 0.7);
 

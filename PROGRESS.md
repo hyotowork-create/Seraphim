@@ -27,3 +27,49 @@ Fixes queued:
 - [harness] Shoot `exit` LAST (dawn state contaminated `free`); shoot `entrance` before
   taking the lantern so the post lantern is still burning in frame.
 - [harness] renderer.info.autoReset=false so draw-call stats survive the composer's passes.
+
+## Iteration 2 — orientation + fissure placement fixes, global darkening
+
+| Axis | Score | Notes |
+|---|---|---|
+| Darkness legibility | 5 | Baseline finally dark; path reads under lantern |
+| Fire/smoke believability | 4 | Seam visible but floats ON the surface (trench misaligned d=2.65 vs mesh d=1.6); fire light floods half the valley |
+| Fog depth | 5 | Fog and sky now blend; depth layering appears |
+| Material response | 5 | Mud crazing strong; rocks read as smooth blobs, cliffs as flat slabs |
+| Dread factor | 5 | Mood arriving; hellmouth too cheerful-bright |
+
+Fixes: shared `fissureWobble(z)` so trench + glow mesh + embers align; crag noise on ditch
+walls and cliff flanks; fire light 60→26; smoke bigger/denser; dawn sun 2.6→0.85; grain hash
+moiré fixed (gl_FragCoord + frame jitter); rocks flat-shaded (mistake — see iter3).
+
+## Iteration 3 — crags, alignment, smoke
+
+| Axis | Score | Notes |
+|---|---|---|
+| Darkness legibility | 6 | Ditch view reads as a real drop; entrance solid |
+| Fire/smoke believability | 6 | Smoke crossing the path believable; near-fissure blowout from carried lantern + bloom |
+| Fog depth | 6 | Free view layers nicely |
+| Material response | 5 | flatShading made rocks honeycomb domes; cliff UV stretch streaks |
+| Dread factor | 6 | Ditch + free views carry dread |
+
+Fixes: rocks back to smooth shading with ridged-noise crumple (icosa detail 3); carried
+lantern 18→9 (decay 2); dawn sky horizon halved; ditch vertex colors fall to black faster
+(bottomless); free view reframed to include the quagmire looking back at the glow.
+
+## Iteration 4 — current
+
+| Axis | Score | Notes |
+|---|---|---|
+| Darkness legibility | 6 | Entrance still slightly flat; path pool good |
+| Fire/smoke believability | 6 | Near-fissure white clipping via bloom; cliff behind hellmouth oversaturated red |
+| Fog depth | 6 | Exit dawn still whites out the horizon |
+| Material response | 5 | Rock instances show scale/fishskin texture tiling; cliff strata stretch |
+| Dread factor | 6 | Free view (looking back at the glow) is the strongest frame yet |
+
+SwiftShader fps 0.6 @1280x720 (CPU; tracking only). 123 draw calls / 570k tris.
+
+Fixes queued for iter5:
+- Bloom threshold 0.82→0.88, strength 0.55→0.5; fissure emissive pump 2.7x→2.0x; fire 26→20.
+- Sky shader: explicit low gold sun disc at dawn instead of a white horizon wash (uDawn 0.75→0.6).
+- Dedicated rock maps (separate texture instance, low repeat) to kill the fishskin tiling.
+- Darken cliff vertex color above ad>8 to hide UV stretch; raise terrain z-repeat.

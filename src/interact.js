@@ -17,7 +17,7 @@ export function createInteractions({ camera, player, valley, ui, audio, postFx, 
   };
 
   // Player-carried lantern light (born when taken).
-  const carried = new THREE.PointLight(0xff9a3d, 0, 4.5, 1.7);
+  const carried = new THREE.PointLight(0xff9a3d, 0, 4.5, 2.0);
   carried.position.set(0.25, -0.35, 0.15); // low right hand
   camera.add(carried);
   const carriedFlame = new THREE.Mesh(
@@ -58,7 +58,7 @@ export function createInteractions({ camera, player, valley, ui, audio, postFx, 
     src.light.intensity = 0;
     src.flame.visible = false;
     src.cage.visible = false;
-    carried.intensity = 18;
+    carried.intensity = 9;
     carriedFlame.visible = true;
     ui.setHud('The lantern is lit · keep to the path');
     audio?.onLantern?.();
@@ -115,7 +115,7 @@ export function createInteractions({ camera, player, valley, ui, audio, postFx, 
     if (state.hasLantern) {
       const boosted = t < state.prayerBoostUntil;
       const radius = boosted ? 9 : 4.5;
-      const power = boosted ? 30 : 18;
+      const power = boosted ? 16 : 9;
       const fl = 0.85 + Math.sin(t * 11.3) * 0.05 + Math.sin(t * 27.7) * 0.04 + Math.sin(t * 5.1) * 0.06;
       carried.distance = THREE.MathUtils.lerp(carried.distance, radius, dt * 2);
       carried.intensity = power * fl;
@@ -127,10 +127,10 @@ export function createInteractions({ camera, player, valley, ui, audio, postFx, 
       state.dawnT = Math.min(1, state.dawnT + dt / 8);
       const k = state.dawnT;
       const e = k * k * (3 - 2 * k);
-      valley.skyUniforms.uDawn.value = e * 1.25;
-      valley.dawn.sun.intensity = e * 2.6;
-      valley.dawn.ambient.intensity = e * 0.5;
-      fog.density = THREE.MathUtils.lerp(fog.baseDensity, 0.0075, e);
+      valley.skyUniforms.uDawn.value = e * 0.75;
+      valley.dawn.sun.intensity = e * 1.15;
+      valley.dawn.ambient.intensity = e * 0.22;
+      fog.density = THREE.MathUtils.lerp(fog.baseDensity, 0.011, e);
       fog.color.lerpColors(fog.baseColor, new THREE.Color(0x46506b), e);
       fog.dawnLock = e; // tell main loop to stop breathing the fog
       if (state.dawnT >= 1) {
