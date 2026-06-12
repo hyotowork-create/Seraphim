@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Valley of the Shadow of Death</title>
+  <style>
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #000; height: 100%; }
+    canvas { display: block; }
+    #ui { position: fixed; inset: 0; pointer-events: none; font-family: Georgia, 'Times New Roman', serif; }
+
+    #crosshair {
+      position: absolute; left: 50%; top: 50%; width: 3px; height: 3px;
+      margin: -1.5px 0 0 -1.5px; border-radius: 50%;
+      background: rgba(214, 208, 196, 0.55);
+    }
+    #prompt {
+      position: absolute; left: 50%; top: 58%; transform: translateX(-50%);
+      color: #d6d0c4; font-size: 17px; letter-spacing: 0.08em;
+      text-shadow: 0 1px 3px #000, 0 0 12px rgba(0,0,0,0.9);
+      opacity: 0; transition: opacity 0.18s ease;
+    }
+    #hud {
+      position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+      color: rgba(170, 164, 152, 0.75); font-size: 13px; letter-spacing: 0.22em;
+      text-transform: uppercase; text-shadow: 0 1px 2px #000;
+      white-space: nowrap;
+    }
+    #fade {
+      position: absolute; inset: 0; background: #000; opacity: 1;
+      transition: opacity 0.45s ease;
+    }
+    #fade.slow { transition: opacity 2.2s ease; }
+    #message {
+      position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%);
+      color: #cfc8b8; font-size: 26px; letter-spacing: 0.12em; text-align: center;
+      font-style: italic; text-shadow: 0 0 18px rgba(0,0,0,0.8);
+      opacity: 0; transition: opacity 1.4s ease; max-width: 80vw;
+    }
+    #endcard {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      color: #e8dfc8; font-size: 38px; letter-spacing: 0.18em; font-style: italic;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%);
+      opacity: 0; transition: opacity 3s ease; text-shadow: 0 2px 24px rgba(0,0,0,0.9);
+    }
+    #title {
+      position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%);
+      text-align: center; color: #b8b0a0; transition: opacity 0.8s ease;
+    }
+    #title h1 { font-size: 30px; font-weight: normal; letter-spacing: 0.22em; margin: 0 0 14px; font-style: italic; }
+    #title p { font-size: 14px; letter-spacing: 0.18em; color: #7a7468; margin: 4px 0; }
+    .hidden { opacity: 0 !important; }
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <div id="crosshair" class="hidden"></div>
+    <div id="prompt"></div>
+    <div id="hud"></div>
+    <div id="message"></div>
+    <div id="endcard">So He went on.</div>
+    <div id="fade"></div>
+    <div id="title">
+      <h1>The Valley of the Shadow of Death</h1>
+      <p>CLICK TO ENTER</p>
+      <p>WASD — WALK &nbsp;·&nbsp; MOUSE — LOOK &nbsp;·&nbsp; E — INTERACT</p>
+    </div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
