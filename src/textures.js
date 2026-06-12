@@ -91,18 +91,19 @@ export function makeRockMaps(seed = 101) {
     for (let y = 0; y < s; y++) {
       for (let x = 0; x < s; x++) {
         const u = x / s * 8, v = y / s * 8;
-        // Strata: stretched noise bands, like an engraving's hatch lines.
+        // Strata: stretched bands on a mid-grey field (Doré: light stone, dark cracks).
         const strata = fbm(u * 1.1, v * 2.2, 4);
         const grain = fbm(u * 2.0, v * 2.0, 5);
         const cracks = Math.pow(Math.abs(fbm(u * 1.3, v * 1.3, 4) - 0.5) * 2, 0.55);
-        let l = 0.10 + strata * 0.13 + grain * 0.07;
-        l *= 0.45 + cracks * 0.65; // crack shadows
+        // Base in sRGB ~0.45–0.72; cracks pull it to ~0.22–0.38
+        let l = 0.38 + strata * 0.22 + grain * 0.12;
+        l *= 0.55 + cracks * 0.52; // range: crack min ~0.21, bright max ~0.73
         height[y * s + x] = strata * 0.5 + grain * 0.5;
         const i = (y * s + x) * 4;
         // Charcoal with the faintest cold-blue cast.
-        img.data[i] = l * 235;
-        img.data[i + 1] = l * 240;
-        img.data[i + 2] = l * 255;
+        img.data[i] = l * 210;
+        img.data[i + 1] = l * 218;
+        img.data[i + 2] = l * 235;
         img.data[i + 3] = 255;
       }
     }

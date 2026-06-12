@@ -71,12 +71,12 @@ export function createPost(renderer, scene, camera) {
   const n8ao = new N8AOPass(scene, camera, size.x, size.y);
   n8ao.configuration.aoRadius = 2.2;
   n8ao.configuration.distanceFalloff = 3.0;
-  n8ao.configuration.intensity = 4.0;
+  n8ao.configuration.intensity = 2.0;
   n8ao.configuration.halfRes = true;
   n8ao.setQualityMode('Medium');
   composer.addPass(n8ao);
 
-  const bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), 0.5, 0.5, 0.88);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), 0.45, 0.4, 0.88);
   composer.addPass(bloom);
 
   composer.addPass(new OutputPass());

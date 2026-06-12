@@ -18,8 +18,8 @@ document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x010102);
 
-const BASE_FOG_DENSITY = 0.042;
-const BASE_FOG_COLOR = new THREE.Color(0x06070c);
+const BASE_FOG_DENSITY = 0.055;
+const BASE_FOG_COLOR = new THREE.Color(0x04050a);
 scene.fog = new THREE.FogExp2(BASE_FOG_COLOR.getHex(), BASE_FOG_DENSITY);
 const fogCtl = {
   get density() { return scene.fog.density; },
@@ -154,11 +154,11 @@ function setView(name) {
     player.pitch.rotation.x = pitchAngle;
   };
   switch (name) {
-    case 'entrance': place(4.5, -0.3, -0.10, -0.04); break;
-    case 'ditch': place(-30, 0, 0.62, -0.45); break;
-    case 'hellmouth': place(-52.5, -0.3, -0.32, -0.14); break;
+    case 'entrance': place(2.5, -0.5,  0.28, -0.08); break; // looking down valley, lantern post on right
+    case 'ditch': place(-30, -0.55, 0.72, -0.52); break; // looking into the void
+    case 'hellmouth': place(-57, -1.1, -0.55, -0.04); break; // standing left/ditch side, looking across at seam
     case 'exit': place(VALLEY.zEnd + 14, -0.4, 0.12, 0.05); break;
-    case 'free': place(-78, -0.2, Math.PI + 0.5, -0.12); break; // back toward the glow, mire in frame
+    case 'free': place(-78, 1.8, Math.PI + 0.38, -0.32); break; // ON the mire, looking back at glow
   }
 }
 

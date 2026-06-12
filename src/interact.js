@@ -58,7 +58,7 @@ export function createInteractions({ camera, player, valley, ui, audio, postFx, 
     src.light.intensity = 0;
     src.flame.visible = false;
     src.cage.visible = false;
-    carried.intensity = 9;
+    carried.intensity = 7;
     carriedFlame.visible = true;
     ui.setHud('The lantern is lit · keep to the path');
     audio?.onLantern?.();
@@ -115,7 +115,7 @@ export function createInteractions({ camera, player, valley, ui, audio, postFx, 
     if (state.hasLantern) {
       const boosted = t < state.prayerBoostUntil;
       const radius = boosted ? 9 : 4.5;
-      const power = boosted ? 16 : 9;
+      const power = boosted ? 13 : 7;
       const fl = 0.85 + Math.sin(t * 11.3) * 0.05 + Math.sin(t * 27.7) * 0.04 + Math.sin(t * 5.1) * 0.06;
       carried.distance = THREE.MathUtils.lerp(carried.distance, radius, dt * 2);
       carried.intensity = power * fl * (1 - state.dawnT * 0.75);
@@ -130,7 +130,7 @@ export function createInteractions({ camera, player, valley, ui, audio, postFx, 
       valley.skyUniforms.uDawn.value = e * 0.6;
       valley.dawn.sun.intensity = e * 2.2;
       valley.dawn.ambient.intensity = e * 0.3;
-      valley.dawn.glow.material.opacity = e * 0.45;
+      valley.dawn.glow.material.opacity = e * 0.3;
       fog.density = THREE.MathUtils.lerp(fog.baseDensity, 0.009, e);
       fog.color.lerpColors(fog.baseColor, new THREE.Color(0x2e3850), e);
       fog.dawnLock = e; // tell main loop to stop breathing the fog

@@ -90,22 +90,24 @@ function buildTerrain(rockMaps, mudMaps) {
     const n = terrainNoise(x * 0.5, z * 0.5, 3);
 
     if (Math.abs(d) <= VALLEY.pathHalfWidth + 0.35) {
-      // Worn ash-pale path so it reads even in near-dark.
-      col.setRGB(0.62 + n * 0.18, 0.60 + n * 0.17, 0.55 + n * 0.15);
+      // Path: bright warm ash — light catches the stone, lantern makes it glow.
+      const pw = 0.78 + n * 0.14;
+      col.setRGB(pw, pw * 0.97, pw * 0.88);
     } else if (d > VALLEY.pathHalfWidth) {
-      // Mud flats on the quagmire side.
-      col.setRGB(0.30 + n * 0.10, 0.25 + n * 0.08, 0.20 + n * 0.06);
+      // Quagmire bank: sickly dark olive-grey, subtly distinct from path warmth.
+      const mw = 0.32 + n * 0.09;
+      col.setRGB(mw * 0.88, mw * 0.84, mw * 0.72);
     } else {
-      // Ditch side: cold dead grey swallowed by black — bottomless.
-      const depth = Math.min(1, Math.max(0, -groundHeight(x, z) / 6));
-      const l = (0.30 + n * 0.10) * Math.pow(1 - depth, 2.6);
-      col.setRGB(l * 0.95, l, l * 1.1);
+      // Ditch side: plunges to black — vertex color is the depth gradient.
+      const depth = Math.min(1, Math.max(0, -groundHeight(x, z) / 4));
+      const dw = (0.46 + n * 0.09) * Math.pow(1 - depth, 3.2);
+      col.setRGB(dw * 0.82, dw * 0.88, dw);
     }
-    // High cliffs sink into silhouette (hides UV stretch, deepens the engraving look).
+    // High cliff flanks sink to silhouette: engraving hatching aesthetic.
     const ad = Math.abs(d);
-    if (ad > 8) {
-      const sink = Math.min(1, (ad - 8) / 7);
-      col.multiplyScalar(1 - sink * 0.55);
+    if (ad > 7) {
+      const sink = Math.min(1, (ad - 7) / 8);
+      col.multiplyScalar(1 - sink * 0.72);
     }
     // Charring near the fissure overrides everything.
     if (fz > 0.12 && d > -1) {
@@ -132,7 +134,6 @@ function buildTerrain(rockMaps, mudMaps) {
   rockMaps.normal.repeat.set(26, 64);
 
   const mesh = new THREE.Mesh(geo, mat);
-  mesh.receiveShadow = true;
   return mesh;
 }
 
@@ -208,9 +209,10 @@ export function buildValley(scene, renderer) {
   qGeo.rotateX(-Math.PI / 2);
   qGeo.translate(21, VALLEY.quagmireLevel, (VALLEY.zStart + VALLEY.zEnd) / 2);
   const qMat = new THREE.MeshStandardMaterial({
-    color: 0x17120b, roughness: 0.2, metalness: 0,
-    normalMap: mudMaps.normal, normalScale: new THREE.Vector2(0.55, 0.55),
-    envMapIntensity: 1.0,
+    color: 0x1d1a08, roughness: 0.14, metalness: 0,
+    normalMap: mudMaps.normal, normalScale: new THREE.Vector2(1.1, 1.1),
+    emissive: new THREE.Color(0x0f0c00), emissiveIntensity: 0.7,
+    envMapIntensity: 1.2,
   });
   let qShader = null;
   qMat.onBeforeCompile = (s) => {
@@ -250,6 +252,8 @@ export function buildValley(scene, renderer) {
   const _m = new THREE.Matrix4();
   function updateQuagmire(t) {
     if (qShader) qShader.uniforms.uTime.value = t;
+    // Marsh gas breathes slowly — like something alive beneath the surface.
+    gasLight.intensity = 1.2 * (0.65 + Math.sin(t * 0.34) * 0.22 + Math.sin(t * 0.17 + 1.4) * 0.13);
     for (let i = 0; i < NB; i++) {
       const b = bState[i];
       const c = (t * b.speed + b.phase) % 4; // 4s cycle: swell, pop, gone
@@ -309,12 +313,17 @@ export function buildValley(scene, renderer) {
   scene.add(sky);
 
   // ---- Lights: scarcity is the point ----
-  const hemi = new THREE.HemisphereLight(0x202c44, 0x000000, 0.09);
+  const hemi = new THREE.HemisphereLight(0x1a2438, 0x000000, 0.12);
   scene.add(hemi);
   // Faint cold rim from the unseen sky, raking down the cliffs.
-  const rim = new THREE.DirectionalLight(0x33415e, 0.14);
+  const rim = new THREE.DirectionalLight(0x2a3450, 0.09);
   rim.position.set(18, 60, 30);
   scene.add(rim);
+
+  // Marsh gas: faint sickly light breathes at quagmire level, mid-valley.
+  const gasLight = new THREE.PointLight(0x2c3c14, 1.2, 18, 2.0);
+  gasLight.position.set(pathCenterX(VALLEY.fissureZ - 20) + 7, VALLEY.quagmireLevel + 0.8, VALLEY.fissureZ - 20);
+  scene.add(gasLight);
 
   // Dawn rig: dead until the exit interaction.
   const dawnSun = new THREE.DirectionalLight(0xffc97a, 0);
@@ -351,7 +360,7 @@ export function buildValley(scene, renderer) {
   cage.position.set(-0.44, 1.5, 0);
   const flame = new THREE.Mesh(
     new THREE.SphereGeometry(0.055, 8, 8),
-    new THREE.MeshBasicMaterial({ color: new THREE.Color(2.4, 1.35, 0.5) }) // >1 so bloom catches it
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(1.55, 0.88, 0.34) }) // >1 so bloom catches it
   );
   flame.position.copy(cage.position);
   const lanternLight = new THREE.PointLight(0xff9a3d, 14, 9, 1.8);

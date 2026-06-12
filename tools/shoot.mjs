@@ -26,15 +26,15 @@ await page.evaluate(() => window.__VALLEY__.enter());
 await page.waitForTimeout(400);
 
 // entrance first (lantern still burning on its post), dawn-contaminating exit LAST
-const views = ['entrance', 'ditch', 'hellmouth', 'free', 'exit'];
+const views = ['entrance', 'hellmouth', 'ditch', 'free', 'exit'];
 for (const v of views) {
   await page.evaluate((name) => {
-    if (name === 'ditch') window.__VALLEY__.takeLantern(); // carried light from here on
+    if (name === 'ditch') window.__VALLEY__.takeLantern(); // carried from ditch onward
     window.__VALLEY__.setView(name);
     if (name === 'exit') window.__VALLEY__.dawn(true);
     window.__VALLEY__.advance(3); // settle particles
   }, v);
-  await page.waitForTimeout(700); // let a few real frames render
+  await page.waitForTimeout(900); // let particles settle in real frames
   await page.screenshot({ path: `${outDir}/${v}.png`, timeout: 120000 });
   console.log(`shot: ${v}`);
 }
