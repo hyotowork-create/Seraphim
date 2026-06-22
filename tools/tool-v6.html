@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>교회학교 설교·자료 제작 통합도구 v6</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root{
+    --ink:#16181D;
+    --ink-2:#1d2027;
+    --panel:#202430;
+    --panel-2:#262b38;
+    --line:#343a49;
+    --paper:#F4F1EA;
+    --muted:#9aa0ad;
+    --brass:#AE863A;
+    --brass-hi:#d4ab57;
+    --navy:#1C2B49;
+    --navy-hi:#33518a;
+    --ok:#4ea672;
+    --err:#d2584e;
+    --warn:#c9a227;
+    --radius:14px;
+    --mono:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(900px 500px at 88% -10%, rgba(174,134,58,.10), transparent 60%),
+      radial-gradient(700px 500px at -5% 8%, rgba(28,43,73,.35), transparent 55%),
+      var(--ink);
+    color:var(--paper);
+    font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:38px 24px 80px;}
+
+  header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:30px;}
+  .brand{display:flex;flex-direction:column;gap:6px;}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--brass);}
+  h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.01em;}
+  h1 .accent{color:var(--brass-hi);}
+  .sub{color:var(--muted);font-size:14px;max-width:560px;}
+  .badge{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 12px;white-space:nowrap;}
+
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;}
+  @media(max-width:880px){.grid{grid-template-columns:1fr;}}
+
+  .panel{background:linear-gradient(180deg,var(--panel),var(--ink-2));border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+  .panel + .panel{margin-top:20px;}
+  .panel h2{margin:0 0 4px;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);font-weight:700;}
+  .panel .hint{color:var(--muted);font-size:12px;margin:0 0 16px;}
+
+  label.field{display:block;margin-bottom:16px;}
+  label.field > span{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;font-weight:600;}
+  input[type=text],input[type=password],select,textarea{
+    width:100%;background:var(--ink);color:var(--paper);border:1px solid var(--line);
+    border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--brass);box-shadow:0 0 0 3px rgba(174,134,58,.16);}
+  textarea{resize:vertical;line-height:1.55;font-family:var(--mono);font-size:13px;}
+  textarea#prompts{min-height:280px;}
+  select{appearance:none;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--brass) 50%),linear-gradient(135deg,var(--brass) 50%,transparent 50%);background-position:calc(100% - 18px) 19px,calc(100% - 13px) 19px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;}
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .check{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--paper);cursor:pointer;user-select:none;}
+  .check input{width:16px;height:16px;accent-color:var(--brass);}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:11px;padding:13px 18px;font-size:14.5px;font-weight:700;font-family:inherit;cursor:pointer;transition:transform .08s,filter .15s,opacity .15s;width:100%;}
+  .btn:active{transform:translateY(1px);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-primary{background:linear-gradient(180deg,var(--brass-hi),var(--brass));color:#1a160b;box-shadow:0 6px 18px rgba(174,134,58,.25);}
+  .btn-primary:hover:not(:disabled){filter:brightness(1.06);}
+  .btn-ghost{background:transparent;color:var(--paper);border:1px solid var(--line);}
+  .btn-ghost:hover:not(:disabled){border-color:var(--brass);color:var(--brass-hi);}
+  .btn-stop{background:var(--err);color:#fff;}
+  .btnrow{display:flex;gap:10px;margin-top:6px;}
+  .btnrow .btn{width:auto;flex:1;}
+
+  .meter{display:flex;align-items:center;gap:10px;margin:14px 0 4px;font-size:13px;color:var(--muted);}
+  .count-pill{font-family:var(--mono);background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:3px 9px;color:var(--brass-hi);font-size:12px;}
+  .over{color:var(--err);}
+
+  .progress{height:8px;background:var(--ink);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:6px 0 2px;}
+  .progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--navy-hi),var(--brass));transition:width .3s;}
+
+  .results{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+  .card{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+  .card .thumb{aspect-ratio:1/1;background:var(--ink);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  .card .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .card .thumb .ph{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;padding:16px;}
+  .spinner{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--brass);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .card .body{padding:11px 12px 13px;display:flex;flex-direction:column;gap:8px;}
+  .card .idx{font-family:var(--mono);font-size:11px;color:var(--brass);}
+  .card .ptext{font-size:12px;color:var(--muted);line-height:1.45;max-height:3.2em;overflow:hidden;}
+  .card .stat{font-family:var(--mono);font-size:11px;display:flex;align-items:center;gap:6px;}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+  .dot.queued{background:var(--muted);}
+  .dot.run{background:var(--warn);animation:pulse 1s infinite;}
+  .dot.done{background:var(--ok);}
+  .dot.fail{background:var(--err);}
+  @keyframes pulse{50%{opacity:.35;}}
+  .card .dl{font-size:12px;color:var(--brass-hi);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:6px 8px;text-align:center;cursor:pointer;}
+  .card .dl:hover{border-color:var(--brass);}
+  .card .slidetext{width:100%;background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:11.5px;font-family:inherit;outline:none;resize:vertical;line-height:1.45;}
+  .card .slidetext::placeholder{color:var(--muted);}
+  .card .slidetext:focus{border-color:var(--brass);}
+  .card .slidestyle{width:100%;background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-size:11.5px;font-family:inherit;outline:none;margin-top:3px;}
+  .card .slidestyle:focus{border-color:var(--brass);}
+  .card .edittext{width:100%;background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:11.5px;font-family:inherit;outline:none;margin-top:2px;}
+  .card .edittext::placeholder{color:var(--muted);}
+  .card .edittext:focus{border-color:var(--navy-hi);}
+  .card .regenbtn{width:100%;background:transparent;border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:7px 8px;font-size:11.5px;font-weight:600;font-family:inherit;cursor:pointer;}
+  .card .regenbtn:hover:not(:disabled){border-color:var(--navy-hi);color:#9fc0ff;}
+  .card .regenbtn:disabled{opacity:.4;cursor:not-allowed;}
+  .card .titlebtn{width:100%;background:transparent;border:1px dashed var(--line);color:var(--muted);border-radius:8px;padding:6px 8px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:2px;}
+  .card .titlebtn:hover{border-color:var(--brass);color:var(--brass-hi);}
+  .card .titlebtn.active{border-style:solid;border-color:var(--brass);background:rgba(174,134,58,.14);color:var(--brass-hi);}
+  .errmsg{color:var(--err);font-size:11px;line-height:1.4;}
+
+  .toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px;}
+  .toolbar .left{font-size:13px;color:var(--muted);}
+  .toolbar .right{display:flex;gap:8px;}
+  .mini{background:transparent;border:1px solid var(--line);color:var(--paper);border-radius:9px;padding:8px 13px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .mini:hover{border-color:var(--brass);color:var(--brass-hi);}
+  .mini:disabled{opacity:.4;cursor:not-allowed;}
+
+  .empty{border:1px dashed var(--line);border-radius:12px;padding:46px 20px;text-align:center;color:var(--muted);font-size:13.5px;}
+  .empty b{color:var(--paper);}
+  footer.note{margin-top:34px;color:var(--muted);font-size:12px;line-height:1.7;border-top:1px solid var(--line);padding-top:18px;}
+  footer.note code{font-family:var(--mono);color:var(--brass-hi);background:var(--ink);padding:1px 6px;border-radius:5px;}
+  a.link{color:var(--brass-hi);}
+
+  /* 탭 */
+  .tabnav{display:flex;gap:8px;margin:0 0 24px;}
+  .tabbtn{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:11px;padding:11px 20px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .tabbtn:hover{border-color:var(--brass);color:var(--brass-hi);}
+  .tabbtn.active{background:linear-gradient(180deg,var(--brass-hi),var(--brass));color:#1a160b;border-color:var(--brass);}
+  .tabpane{display:none;}
+  .tabpane.active{display:block;}
+
+  /* 연령/톤 세그먼트 버튼 */
+  .seg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+  .segbtn{background:var(--ink);border:1px solid var(--line);color:var(--paper);border-radius:9px;padding:9px 13px;font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer;}
+  .segbtn:hover{border-color:var(--brass);}
+  .segbtn.active{background:rgba(174,134,58,.16);border-color:var(--brass);color:var(--brass-hi);}
+
+  /* 기획 출력 영역 */
+  .planout{margin-top:14px;}
+  textarea.plan{min-height:200px;width:100%;background:var(--ink);color:var(--paper);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:13px;font-family:var(--mono);line-height:1.55;outline:none;}
+  textarea.plan:focus{border-color:var(--brass);}
+  .usage{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:var(--ink);}
+  .usage b{color:var(--brass-hi);}
+  .src{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;}
+  .src a{color:var(--navy-hi);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="kicker">Church School Content Pipeline</div>
+      <h1>교회학교 <span class="accent">설교·자료 제작</span></h1>
+      <p class="sub">부서를 고르고 본문을 넣으면, 부서 눈높이에 맞춰 설교 기획·이미지·주보·공과까지 만듭니다. 슬라이드는 ②제작 탭에서 PPTX로 묶습니다.</p>
+    </div>
+    <div class="badge" id="modelBadge">model: gemini-3-pro-image-preview</div>
+  </header>
+
+  <div class="tabnav">
+    <button class="tabbtn active" data-tab="tabPlan">① 설교 기획</button>
+    <button class="tabbtn" data-tab="tabProduce">② 이미지·슬라이드 제작</button>
+  </div>
+
+  <!-- ===== 기획 탭 ===== -->
+  <section id="tabPlan" class="tabpane active">
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <h2>연결 · 모델</h2>
+          <p class="hint">기획 단계는 텍스트 모델 + 구글 검색을 사용합니다(이미지 모델과 별개).</p>
+          <label class="field"><span>Gemini API Key</span>
+            <input type="password" id="planApiKey" placeholder="AIza... (제작 탭과 공유)" autocomplete="off"></label>
+          <label class="field"><span>텍스트 모델</span>
+            <input type="text" id="planModel" value="gemini-2.5-flash"></label>
+          <label class="check" style="margin-bottom:12px;">
+            <input type="checkbox" id="useSearch" checked> 구글 검색으로 트렌드 조사(그라운딩)
+          </label>
+          <div class="row2">
+            <label class="field" style="margin-bottom:0;"><span>최근 N개월 트렌드</span>
+              <input type="text" id="trendMonths" value="3" inputmode="numeric"></label>
+            <label class="field" style="margin-bottom:0;"><span>출력 토큰 상한</span>
+              <input type="text" id="maxTokens" value="4096" inputmode="numeric"></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>교회학교 부서</h2>
+          <p class="hint">부서를 고르면 눈높이·트렌드 대상·이미지 톤·산출물 분량이 자동 전환됩니다.</p>
+          <div class="seg" id="deptSeg">
+            <button class="segbtn" data-dept="infant">영유아부</button>
+            <button class="segbtn" data-dept="younger">유년부</button>
+            <button class="segbtn active" data-dept="elementary">초등부</button>
+            <button class="segbtn" data-dept="middle">중등부</button>
+            <button class="segbtn" data-dept="high">고등부</button>
+          </div>
+          <h2 style="margin-top:16px;">산출물 유형</h2>
+          <p class="hint">만들 자료를 고르세요. 유형에 따라 ②단계 생성 버튼이 바뀝니다. 슬라이드는 제작 탭에서 PPTX로, 주보·공과는 텍스트로 나옵니다.</p>
+          <div class="seg" id="outputSeg">
+            <button class="segbtn active" data-output="slide">예배 슬라이드(PPT)</button>
+            <button class="segbtn" data-output="bulletin">주보</button>
+            <button class="segbtn" data-output="lesson">공과공부</button>
+          </div>
+          <h2 style="margin-top:16px;">이미지 톤</h2>
+          <p class="hint">슬라이드용 이미지 스타일. 부서에 맞는 후보만 표시됩니다.</p>
+          <div class="seg" id="toneSeg" style="margin-top:4px;"></div>
+        </div>
+
+        <div class="panel">
+          <h2>설교 본문</h2>
+          <p class="hint">장절을 입력하세요. 예: 마가복음 4:35-41</p>
+          <label class="field" style="margin-bottom:12px;"><span>설교 구절</span>
+            <input type="text" id="passage" placeholder="예: 마가복음 4:35-41"></label>
+          <button class="btn btn-primary" id="planBtn">① 트렌드 조사 + 설교 기획 생성</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h2>설교 기획안 (설교자 검토·수정)</h2>
+          <p class="hint">트렌드·눈높이 풀이·설교 포인트·개요·봉독이 여기 나옵니다. 직접 고친 뒤 다음 단계로 넘기세요.</p>
+          <textarea class="plan" id="planText" placeholder="‘기획 생성’을 누르면 결과가 여기에 표시됩니다."></textarea>
+          <div class="usage" id="planUsage" style="display:none;"></div>
+          <div class="src" id="planSrc"></div>
+          <div class="btnrow" style="margin-top:12px;">
+            <button class="btn btn-ghost" id="scriptBtn">＋ 풀스크립트 생성 — 토큰 많이 사용</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>② 산출물 생성</h2>
+          <p class="hint" id="outputHint">검토한 기획안을 바탕으로 선택한 산출물을 만듭니다.</p>
+          <div class="btnrow">
+            <button class="btn btn-primary" id="genSlideBtn">② 이미지 프롬프트 16개 생성</button>
+            <button class="btn btn-primary" id="genBulletinBtn" style="display:none;">② 주보 원고 생성</button>
+            <button class="btn btn-primary" id="genLessonBtn" style="display:none;">② 공과공부 워크시트 생성</button>
+          </div>
+          <textarea class="plan" id="promptText" style="margin-top:12px;" placeholder="‘생성’ 결과가 여기에 표시됩니다."></textarea>
+          <div class="usage" id="promptUsage" style="display:none;"></div>
+          <div class="btnrow" style="margin-top:12px;">
+            <button class="btn btn-primary" id="toProduceBtn">→ 제작 탭으로 프롬프트 보내기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 제작 탭 ===== -->
+  <section id="tabProduce" class="tabpane">
+  <div class="grid">
+
+    <!-- 좌측 설정 -->
+    <div>
+      <div class="panel">
+        <h2>연결 설정</h2>
+        <p class="hint">Google AI Studio의 API 키를 붙여넣으세요.</p>
+
+        <label class="field">
+          <span>Gemini API Key</span>
+          <input type="password" id="apiKey" placeholder="AIza... 형식의 키 붙여넣기" autocomplete="off">
+        </label>
+        <label class="check" style="margin-bottom:16px;">
+          <input type="checkbox" id="rememberKey"> 이 브라우저에 키 저장(로컬에서만)
+        </label>
+
+        <label class="field">
+          <span>모델</span>
+          <select id="model">
+            <option value="gemini-3-pro-image-preview">Nano Banana Pro · gemini-3-pro-image-preview (최신·고품질·4K)</option>
+            <option value="gemini-2.5-flash-image">Nano Banana · gemini-2.5-flash-image (빠름·무료티어)</option>
+          </select>
+        </label>
+
+        <div class="row2">
+          <label class="field" style="margin-bottom:0;">
+            <span>화면비</span>
+            <select id="aspect">
+              <option value="">기본(자동)</option>
+              <option value="1:1">1:1 정사각</option>
+              <option value="16:9">16:9 가로</option>
+              <option value="9:16">9:16 세로</option>
+              <option value="4:3">4:3</option>
+              <option value="3:4">3:4</option>
+            </select>
+          </label>
+          <label class="field" style="margin-bottom:0;">
+            <span>호출 간격(초)</span>
+            <input type="text" id="delay" value="3" inputmode="decimal">
+          </label>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>약간 수정</h2>
+        <p class="hint">모든 프롬프트에 공통으로 덧붙일 지시문입니다(스타일·톤·일관성).</p>
+        <label class="field">
+          <span>앞에 붙일 말 (prefix)</span>
+          <input type="text" id="prefix" placeholder="예: A clean flat illustration of">
+        </label>
+        <label class="field" style="margin-bottom:0;">
+          <span>뒤에 붙일 말 (suffix)</span>
+          <input type="text" id="suffix" placeholder="예: , muted palette, no text, high detail">
+        </label>
+      </div>
+
+      <div class="panel">
+        <h2>구분 방식</h2>
+        <p class="hint">붙여넣은 텍스트를 어떻게 개별 프롬프트로 나눌지 선택합니다.</p>
+        <label class="field" style="margin-bottom:0;">
+          <span>분리 기준</span>
+          <select id="splitMode">
+            <option value="auto">자동(번호/빈 줄 감지)</option>
+            <option value="blank">빈 줄 단위</option>
+            <option value="line">줄 단위(한 줄 = 한 개)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="panel">
+        <h2>슬라이드 출력</h2>
+        <p class="hint">생성된 이미지를 순서대로 PPTX로 묶습니다. 각 카드의 ‘슬라이드 글자’는 편집 가능한 텍스트로 얹힙니다. <b>제목형</b>은 금색 외곽선·글로우 큰 글씨(제목·헌금기도·축도), <b>말씀형</b>은 첫 줄=금색 장절, 다음 줄부터=흰색 본문(봉독)으로 나옵니다. ‘자동’이면 장절(장·절·:)이 보이면 말씀형, 아니면 제목형으로 판단합니다.</p>
+        <div class="row2">
+          <label class="field" style="margin-bottom:12px;">
+            <span>슬라이드 비율</span>
+            <select id="slideRatio">
+              <option value="16:9">16:9 가로</option>
+              <option value="4:3">4:3</option>
+              <option value="9:16">9:16 세로</option>
+            </select>
+          </label>
+          <label class="field" style="margin-bottom:12px;">
+            <span>이미지 맞춤</span>
+            <select id="slideFit">
+              <option value="cover">꽉 채우기</option>
+              <option value="contain">여백 맞춤</option>
+            </select>
+          </label>
+        </div>
+        <label class="field" style="margin-bottom:0;">
+          <span>파일명</span>
+          <input type="text" id="pptxName" value="설교슬라이드">
+        </label>
+        <label class="check" style="margin-top:14px;margin-bottom:10px;">
+          <input type="checkbox" id="addClosing" checked> 끝에 마침 슬라이드 추가
+        </label>
+        <label class="field" style="margin-bottom:0;">
+          <span>마침 슬라이드 문구</span>
+          <input type="text" id="closingText" value="예배가 마쳤습니다">
+        </label>
+        <p class="hint" style="margin:8px 0 0;">배경은 카드에서 <b>‘제목 배경으로 지정’</b>한 이미지를 자동 사용합니다(지정 안 하면 단색).</p>
+      </div>
+    </div>
+
+    <!-- 우측 입력/실행/결과 -->
+    <div>
+      <div class="panel">
+        <h2>프롬프트 입력</h2>
+        <p class="hint">제미나이가 만들어준 이미지 프롬프트 전체를 그대로 붙여넣으세요.</p>
+        <textarea id="prompts" placeholder="1. A serene mountain lake at dawn...&#10;2. A cozy reading nook by a rainy window...&#10;3. ..."></textarea>
+
+        <div class="meter">
+          감지된 프롬프트 <span class="count-pill" id="countPill">0</span>
+          <span id="overMsg" class="over" style="display:none;">· 20개 초과분은 잘립니다</span>
+        </div>
+
+        <div class="btnrow">
+          <button class="btn btn-primary" id="startBtn">일괄 생성 시작</button>
+          <button class="btn btn-stop" id="stopBtn" style="display:none;">중단</button>
+        </div>
+
+        <div class="progress" id="progWrap" style="display:none;"><i id="progBar"></i></div>
+        <div class="meter" id="progText" style="display:none;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="toolbar">
+          <div class="left" id="resultSummary">결과</div>
+          <div class="right">
+            <button class="mini" id="retryBtn" disabled>실패 항목 재시도</button>
+            <button class="mini" id="downloadAllBtn" disabled>모두 다운로드</button>
+            <button class="mini" id="makePptxBtn" disabled>슬라이드(PPTX) 만들기</button>
+          </div>
+        </div>
+        <div id="resultsArea">
+          <div class="empty"><b>아직 생성된 이미지가 없습니다.</b><br>왼쪽에서 키·모델을 설정하고, 프롬프트를 붙여넣은 뒤 시작하세요.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  </section>
+
+  <footer class="note">
+    이 도구는 브라우저에서 직접 Gemini API를 호출합니다. <b>반드시 파일을 PC에 저장해 더블클릭으로 열어</b> 사용하세요(미리보기 환경에서는 키 저장·일부 호출이 막힐 수 있습니다).
+    API 키는 서버로 전송되지 않고 이 페이지 안에서만 사용됩니다. 모델별 요금·일일 한도는 Google AI Studio 정책을 따릅니다.
+    엔드포인트: <code>generativelanguage.googleapis.com/v1beta</code>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var KEY_STORE = "gemini_batch_apikey";
+  var MAX_ITEMS = 20;
+  var cancelFlag = false;
+  var running = false;
+  var items = []; // { prompt, finalPrompt, status, mime, b64, error, slideText, editText, slideStyle }
+  var titleIndex = -1; // '제목 배경'으로 지정된 카드 인덱스(마침 슬라이드 배경에 사용)
+
+  function $(id){ return document.getElementById(id); }
+
+  // ---- 키 저장/복원 (로컬 파일 환경에서만 동작) ----
+  try{
+    var saved = localStorage.getItem(KEY_STORE);
+    if(saved){ $("apiKey").value = saved; $("rememberKey").checked = true; }
+  }catch(e){}
+
+  $("rememberKey").addEventListener("change", function(){
+    try{
+      if(this.checked){ localStorage.setItem(KEY_STORE, $("apiKey").value.trim()); }
+      else{ localStorage.removeItem(KEY_STORE); }
+    }catch(e){}
+  });
+  $("apiKey").addEventListener("input", function(){
+    if($("rememberKey").checked){
+      try{ localStorage.setItem(KEY_STORE, this.value.trim()); }catch(e){}
+    }
+  });
+
+  $("model").addEventListener("change", function(){
+    $("modelBadge").textContent = "model: " + this.value;
+  });
+
+  // ---- 프롬프트 파싱 ----
+  function stripBullet(s){
+    return s.replace(/^\s*\d+\s*[\.\)\]]\s*/, "")
+            .replace(/^\s*[-*•·]\s+/, "")
+            .trim();
+  }
+
+  function looksNumbered(text){
+    var lines = text.split(/\r?\n/);
+    var hits = 0;
+    for(var i=0;i<lines.length;i++){
+      if(/^\s*\d+\s*[\.\)\]]\s+/.test(lines[i])) hits++;
+    }
+    return hits >= 2;
+  }
+
+  function parsePrompts(){
+    var raw = $("prompts").value;
+    var mode = $("splitMode").value;
+    var text = raw.replace(/\r\n/g, "\n").trim();
+    if(!text) return [];
+
+    var chunks = [];
+    if(mode === "line"){
+      chunks = text.split(/\n/);
+    } else if(mode === "blank"){
+      chunks = text.split(/\n\s*\n/);
+    } else {
+      // auto
+      if(looksNumbered(text)){
+        // 번호 시작 지점마다 잘라서 다중 줄 프롬프트도 묶음 처리
+        var lines = text.split(/\n/);
+        var cur = "";
+        for(var i=0;i<lines.length;i++){
+          if(/^\s*\d+\s*[\.\)\]]\s+/.test(lines[i])){
+            if(cur.trim()) chunks.push(cur);
+            cur = lines[i];
+          } else {
+            cur += "\n" + lines[i];
+          }
+        }
+        if(cur.trim()) chunks.push(cur);
+      } else if(/\n\s*\n/.test(text)){
+        chunks = text.split(/\n\s*\n/);
+      } else {
+        chunks = text.split(/\n/);
+      }
+    }
+
+    var out = [];
+    for(var j=0;j<chunks.length;j++){
+      var c = stripBullet(chunks[j].replace(/\s+/g, " "));
+      if(c.length) out.push(c);
+    }
+    return out;
+  }
+
+  function applyEdits(p){
+    var pre = $("prefix").value.trim();
+    var suf = $("suffix").value.trim();
+    var result = p;
+    if(pre) result = pre + " " + result;
+    if(suf) result = result + " " + suf;
+    return result.trim();
+  }
+
+  function refreshCount(){
+    var list = parsePrompts();
+    $("countPill").textContent = String(list.length);
+    $("overMsg").style.display = (list.length > MAX_ITEMS) ? "inline" : "none";
+  }
+  $("prompts").addEventListener("input", refreshCount);
+  $("splitMode").addEventListener("change", refreshCount);
+
+  // ---- API 호출 ----
+  function endpointFor(model){
+    return "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent";
+  }
+
+  function findImagePart(data){
+    if(!data || !data.candidates || !data.candidates[0]) return null;
+    var cand = data.candidates[0];
+    var content = cand.content;
+    if(!content || !content.parts) return null;
+    for(var i=0;i<content.parts.length;i++){
+      var part = content.parts[i];
+      var inline = part.inlineData || part.inline_data;
+      if(inline && inline.data){
+        return { mime: inline.mimeType || inline.mime_type || "image/png", data: inline.data };
+      }
+    }
+    return null;
+  }
+
+  function blockReason(data){
+    if(data && data.promptFeedback && data.promptFeedback.blockReason){
+      return "차단됨: " + data.promptFeedback.blockReason;
+    }
+    if(data && data.candidates && data.candidates[0] && data.candidates[0].finishReason){
+      var fr = data.candidates[0].finishReason;
+      if(fr !== "STOP") return "종료사유: " + fr;
+    }
+    return "이미지가 반환되지 않았습니다.";
+  }
+
+  function generateOne(finalPrompt, apiKey, model, aspect, refImage){
+    var parts = [];
+    if(refImage && refImage.b64){
+      parts.push({ inlineData: { mimeType: refImage.mime || "image/png", data: refImage.b64 } });
+    }
+    parts.push({ text: finalPrompt });
+
+    var body = {
+      contents: [ { parts: parts } ],
+      generationConfig: { responseModalities: [ "TEXT", "IMAGE" ] }
+    };
+    if(aspect){ body.generationConfig.imageConfig = { aspectRatio: aspect }; }
+
+    return fetch(endpointFor(model), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+      body: JSON.stringify(body)
+    }).then(function(res){
+      return res.json().then(function(data){ return { ok: res.ok, status: res.status, data: data }; });
+    }).then(function(r){
+      if(!r.ok){
+        var msg = (r.data && r.data.error && r.data.error.message) ? r.data.error.message : ("HTTP " + r.status);
+        throw new Error(msg);
+      }
+      var img = findImagePart(r.data);
+      if(!img){ throw new Error(blockReason(r.data)); }
+      return img;
+    });
+  }
+
+  function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+  // 아이템 상태에 따라 신규 생성 / 이미지 편집(img2img)을 자동 선택
+  function genForItem(it, apiKey, model, aspect){
+    var et = (it.editText || "").trim();
+    if(et && it.b64){
+      // 기존 이미지 + 수정 지시 → 편집(원본 비율 유지, aspect 미지정)
+      return generateOne(et, apiKey, model, "", { b64: it.b64, mime: it.mime });
+    }
+    // 신규 생성(수정 지시가 있으면 프롬프트에 덧붙여 반영)
+    var prompt = it.finalPrompt;
+    if(et) prompt = prompt + " " + et;
+    return generateOne(prompt, apiKey, model, aspect, null);
+  }
+
+  // ---- 렌더링 ----
+  function dataUrl(item){ return "data:" + item.mime + ";base64," + item.b64; }
+
+  function fileExt(mime){
+    if(/png/.test(mime)) return "png";
+    if(/jpe?g/.test(mime)) return "jpg";
+    if(/webp/.test(mime)) return "webp";
+    return "png";
+  }
+
+  function statusDot(status){
+    var cls = "queued", lbl = "대기";
+    if(status === "run"){ cls="run"; lbl="생성 중"; }
+    else if(status === "done"){ cls="done"; lbl="완료"; }
+    else if(status === "fail"){ cls="fail"; lbl="실패"; }
+    return '<span class="dot ' + cls + '"></span>' + lbl;
+  }
+
+  function renderResults(){
+    var area = $("resultsArea");
+    if(items.length === 0){
+      area.innerHTML = '<div class="empty"><b>아직 생성된 이미지가 없습니다.</b><br>왼쪽에서 키·모델을 설정하고, 프롬프트를 붙여넣은 뒤 시작하세요.</div>';
+      return;
+    }
+    var html = '<div class="results">';
+    for(var i=0;i<items.length;i++){
+      var it = items[i];
+      var thumb;
+      if(it.status === "done" && it.b64){
+        thumb = '<img src="' + dataUrl(it) + '" alt="result ' + (i+1) + '">';
+      } else if(it.status === "run"){
+        thumb = '<div class="spinner"></div>';
+      } else if(it.status === "fail"){
+        thumb = '<div class="ph">⚠</div>';
+      } else {
+        thumb = '<div class="ph">대기 중</div>';
+      }
+
+      var dl = "";
+      if(it.status === "done" && it.b64){
+        dl = '<a class="dl" data-dl="' + i + '">PNG 다운로드</a>';
+      }
+      var errLine = "";
+      if(it.status === "fail" && it.error){
+        errLine = '<div class="errmsg">' + escapeHtml(it.error) + '</div>';
+      }
+
+      var shortP = escapeHtml(it.prompt.length > 90 ? it.prompt.slice(0,90) + "…" : it.prompt);
+
+      var titleActive = (titleIndex === i);
+      var titleLbl = titleActive ? "★ 제목 배경 (마침에 사용)" : "제목 배경으로 지정";
+
+      html += '<div class="card">'
+            +   '<div class="thumb">' + thumb + '</div>'
+            +   '<div class="body">'
+            +     '<div class="idx">#' + (i+1) + '</div>'
+            +     '<div class="stat">' + statusDot(it.status) + '</div>'
+            +     '<div class="ptext">' + shortP + '</div>'
+            +     errLine
+            +     dl
+            +     '<textarea class="slidetext" data-st="' + i + '" rows="2" placeholder="슬라이드 글자(선택) — 말씀형은 첫 줄에 장절, 다음 줄부터 본문">' + escapeHtml(it.slideText || "") + '</textarea>'
+            +     '<select class="slidestyle" data-ss="' + i + '">'
+            +       '<option value="auto"' + ((it.slideStyle === "title" || it.slideStyle === "verse") ? "" : " selected") + '>글자 스타일: 자동</option>'
+            +       '<option value="title"' + (it.slideStyle === "title" ? " selected" : "") + '>제목형 (금색·큰글씨)</option>'
+            +       '<option value="verse"' + (it.slideStyle === "verse" ? " selected" : "") + '>말씀형 (장절 + 본문)</option>'
+            +     '</select>'
+            +     '<input class="edittext" data-et="' + i + '" type="text" placeholder="이미지 수정 지시(선택): 더 밝게…" value="' + escapeHtml(it.editText || "") + '">'
+            +     '<button class="regenbtn" data-regen="' + i + '">재생성 / 수정반영</button>'
+            +     '<button class="titlebtn' + (titleActive ? ' active' : '') + '" data-title="' + i + '">' + titleLbl + '</button>'
+            +   '</div>'
+            + '</div>';
+    }
+    html += '</div>';
+    area.innerHTML = html;
+
+    var links = area.querySelectorAll("[data-dl]");
+    for(var k=0;k<links.length;k++){
+      links[k].addEventListener("click", function(){
+        var idx = parseInt(this.getAttribute("data-dl"), 10);
+        downloadItem(idx);
+      });
+    }
+
+    var sts = area.querySelectorAll("[data-st]");
+    for(var m=0;m<sts.length;m++){
+      sts[m].addEventListener("input", function(){
+        var idx = parseInt(this.getAttribute("data-st"), 10);
+        if(items[idx]) items[idx].slideText = this.value;
+      });
+    }
+
+    var sss = area.querySelectorAll("[data-ss]");
+    for(var s2=0;s2<sss.length;s2++){
+      sss[s2].addEventListener("change", function(){
+        var idx = parseInt(this.getAttribute("data-ss"), 10);
+        if(items[idx]) items[idx].slideStyle = this.value;
+      });
+    }
+
+    var ets = area.querySelectorAll("[data-et]");
+    for(var e=0;e<ets.length;e++){
+      ets[e].addEventListener("input", function(){
+        var idx = parseInt(this.getAttribute("data-et"), 10);
+        if(items[idx]) items[idx].editText = this.value;
+      });
+    }
+
+    var regs = area.querySelectorAll("[data-regen]");
+    for(var g=0;g<regs.length;g++){
+      regs[g].addEventListener("click", function(){
+        var idx = parseInt(this.getAttribute("data-regen"), 10);
+        regenItem(idx);
+      });
+    }
+
+    var tts = area.querySelectorAll("[data-title]");
+    for(var t=0;t<tts.length;t++){
+      tts[t].addEventListener("click", function(){
+        var idx = parseInt(this.getAttribute("data-title"), 10);
+        titleIndex = (titleIndex === idx) ? -1 : idx; // 다시 누르면 해제
+        renderResults();
+      });
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function downloadItem(i){
+    var it = items[i];
+    if(!it || !it.b64) return;
+    var a = document.createElement("a");
+    a.href = dataUrl(it);
+    var num = (i+1 < 10) ? ("0" + (i+1)) : String(i+1);
+    a.download = "gemini_" + num + "." + fileExt(it.mime);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function updateSummary(){
+    var done=0, fail=0;
+    for(var i=0;i<items.length;i++){
+      if(items[i].status==="done") done++;
+      else if(items[i].status==="fail") fail++;
+    }
+    $("resultSummary").textContent = "결과 · 완료 " + done + " / 실패 " + fail + " / 전체 " + items.length;
+    $("downloadAllBtn").disabled = (done === 0);
+    $("retryBtn").disabled = (fail === 0 || running);
+    var mp = $("makePptxBtn"); if(mp){ mp.disabled = (done === 0 || running); }
+  }
+
+  // ---- 메인 실행 루프 ----
+  function setRunningUI(on){
+    running = on;
+    $("startBtn").style.display = on ? "none" : "inline-flex";
+    $("stopBtn").style.display = on ? "inline-flex" : "none";
+    $("progWrap").style.display = on ? "block" : ($("progWrap").style.display);
+    $("progText").style.display = on ? "flex" : ($("progText").style.display);
+    $("retryBtn").disabled = on ? true : $("retryBtn").disabled;
+  }
+
+  function setProgress(done, total){
+    var pct = total ? Math.round(done/total*100) : 0;
+    $("progBar").style.width = pct + "%";
+    $("progText").textContent = "진행 " + done + " / " + total + " (" + pct + "%)";
+  }
+
+  function runQueue(indices){
+    var apiKey = $("apiKey").value.trim();
+    var model = $("model").value;
+    var aspect = $("aspect").value;
+    var delayMs = Math.max(0, parseFloat($("delay").value || "0")) * 1000;
+
+    if(!apiKey){ alert("API 키를 먼저 입력하세요."); return; }
+    if(indices.length === 0){ return; }
+
+    cancelFlag = false;
+    setRunningUI(true);
+    $("progWrap").style.display = "block";
+    $("progText").style.display = "flex";
+
+    var total = indices.length;
+    var processed = 0;
+    setProgress(0, total);
+
+    var chain = Promise.resolve();
+    indices.forEach(function(idx, order){
+      chain = chain.then(function(){
+        if(cancelFlag) return;
+        items[idx].status = "run";
+        renderResults();
+
+        return genForItem(items[idx], apiKey, model, aspect)
+          .then(function(img){
+            items[idx].mime = img.mime;
+            items[idx].b64 = img.data;
+            items[idx].status = "done";
+            items[idx].error = "";
+          })
+          .catch(function(err){
+            items[idx].status = "fail";
+            items[idx].error = err && err.message ? err.message : "알 수 없는 오류";
+          })
+          .then(function(){
+            processed++;
+            setProgress(processed, total);
+            renderResults();
+            updateSummary();
+            if(order < indices.length - 1 && !cancelFlag && delayMs > 0){
+              return sleep(delayMs);
+            }
+          });
+      });
+    });
+
+    chain.then(function(){
+      setRunningUI(false);
+      if(cancelFlag){
+        // 대기 상태로 남은 항목 표시 유지
+        for(var i=0;i<items.length;i++){
+          if(items[i].status === "run") items[i].status = "queued";
+        }
+        renderResults();
+      }
+      updateSummary();
+    });
+  }
+
+  // ---- 버튼 핸들러 ----
+  function regenItem(i){
+    if(running){ alert("일괄 생성이 진행 중입니다. 끝난 뒤에 다시 시도하세요."); return; }
+    var it = items[i];
+    if(!it){ return; }
+    if(!$("apiKey").value.trim()){ alert("API 키를 먼저 입력하세요."); return; }
+    it.status = "queued";
+    it.error = "";
+    renderResults();
+    runQueue([i]);
+  }
+
+  $("startBtn").addEventListener("click", function(){
+    var list = parsePrompts();
+    if(list.length === 0){ alert("프롬프트를 입력하세요."); return; }
+    if(list.length > MAX_ITEMS) list = list.slice(0, MAX_ITEMS);
+
+    items = list.map(function(p){
+      return { prompt: p, finalPrompt: applyEdits(p), status: "queued", mime:"", b64:"", error:"", slideText:"", editText:"", slideStyle:"auto" };
+    });
+    titleIndex = -1;
+    renderResults();
+    updateSummary();
+
+    var idxs = [];
+    for(var i=0;i<items.length;i++) idxs.push(i);
+    runQueue(idxs);
+  });
+
+  $("stopBtn").addEventListener("click", function(){
+    cancelFlag = true;
+    $("stopBtn").disabled = true;
+    setTimeout(function(){ $("stopBtn").disabled = false; }, 400);
+  });
+
+  $("retryBtn").addEventListener("click", function(){
+    var idxs = [];
+    for(var i=0;i<items.length;i++){
+      if(items[i].status === "fail"){
+        items[i].status = "queued";
+        items[i].error = "";
+        idxs.push(i);
+      }
+    }
+    if(idxs.length === 0) return;
+    renderResults();
+    runQueue(idxs);
+  });
+
+  $("downloadAllBtn").addEventListener("click", function(){
+    var done = [];
+    for(var i=0;i<items.length;i++){ if(items[i].status==="done" && items[i].b64) done.push(i); }
+    var n = 0;
+    function next(){
+      if(n >= done.length) return;
+      downloadItem(done[n]);
+      n++;
+      setTimeout(next, 350); // 브라우저 연속 다운로드 차단 방지
+    }
+    next();
+  });
+
+  // ---- 슬라이드(PPTX) 출력 ----
+  function loadPptxGen(){
+    return new Promise(function(resolve, reject){
+      if(window.PptxGenJS){ resolve(); return; }
+      var s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js";
+      s.onload = function(){ window.PptxGenJS ? resolve() : reject(new Error("PptxGenJS 로드 실패")); };
+      s.onerror = function(){ reject(new Error("PptxGenJS 스크립트를 불러오지 못했습니다. 인터넷 연결을 확인하세요.")); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function ratioDims(ratio){
+    if(ratio === "4:3")  return { w:10,    h:7.5 };
+    if(ratio === "9:16") return { w:7.5,   h:13.333 };
+    return { w:13.333, h:7.5 }; // 16:9 기본
+  }
+
+  function makePptx(){
+    var done = [];
+    for(var i=0;i<items.length;i++){
+      if(items[i].status === "done" && items[i].b64) done.push(i);
+    }
+    if(done.length === 0){ alert("완료된 이미지가 없습니다."); return; }
+
+    var ratio = $("slideRatio").value;
+    var fit   = $("slideFit").value;
+    var fname = ($("pptxName").value.trim() || "슬라이드");
+    var dim   = ratioDims(ratio);
+
+    var btn = $("makePptxBtn");
+    var oldLabel = btn.textContent;
+    btn.disabled = true; btn.textContent = "슬라이드 만드는 중…";
+
+    loadPptxGen().then(function(){
+      var pptx = new PptxGenJS();
+      pptx.defineLayout({ name:"CUSTOM", width:dim.w, height:dim.h });
+      pptx.layout = "CUSTOM";
+
+      for(var n=0;n<done.length;n++){
+        var it = items[done[n]];
+        var slide = pptx.addSlide();
+        slide.background = { color:"000000" };
+        var data = "data:" + it.mime + ";base64," + it.b64;
+
+        if(fit === "contain"){
+          slide.addImage({ data:data, x:0, y:0, w:dim.w, h:dim.h, sizing:{ type:"contain", w:dim.w, h:dim.h } });
+        } else {
+          slide.addImage({ data:data, x:0, y:0, w:dim.w, h:dim.h });
+        }
+
+        var txt = (it.slideText || "").trim();
+        if(txt){
+          var style = it.slideStyle || "auto";
+          if(style === "auto"){
+            var looksVerse = (txt.indexOf("\n") >= 0) || /\d+\s*장|\d+\s*절|\d+\s*:\s*\d+/.test(txt);
+            style = looksVerse ? "verse" : "title";
+          }
+
+          if(style === "verse"){
+            // 말씀형: 첫 줄 = 금색 장절 제목, 나머지 = 흰색 본문 (첨부 이미지 3 스타일)
+            var parts = txt.split(/\r?\n/);
+            var headTxt = (parts.shift() || "").trim();
+            var bodyTxt = parts.join("\n").trim();
+
+            // 가독성 스크림(반투명 띠)
+            slide.addShape(pptx.ShapeType.rect, {
+              x:0, y:dim.h * 0.18, w:dim.w, h:dim.h * 0.64,
+              fill:{ color:"000000", transparency:55 }
+            });
+            if(headTxt){
+              slide.addText(headTxt, {
+                x:0.4, y:dim.h * 0.20, w:dim.w - 0.8, h:dim.h * 0.18,
+                align:"center", valign:"middle",
+                fontFace:"Malgun Gothic", fontSize:32, bold:true, color:"F2CB5B",
+                outline:{ size:1, color:"3A2A0E" },
+                glow:{ size:7, color:"FFE9A8", opacity:0.4 },
+                shadow:{ type:"outer", color:"000000", blur:5, offset:2, angle:90, opacity:0.75 }
+              });
+            }
+            if(bodyTxt){
+              slide.addText(bodyTxt, {
+                x:0.5, y:dim.h * 0.40, w:dim.w - 1.0, h:dim.h * 0.40,
+                align:"center", valign:"top",
+                fontFace:"Malgun Gothic", fontSize:21, bold:true, color:"FFF6E0",
+                lineSpacingMultiple:1.22,
+                outline:{ size:0.5, color:"2A1C08" },
+                shadow:{ type:"outer", color:"000000", blur:5, offset:2, angle:90, opacity:0.8 }
+              });
+            }
+          } else {
+            // 제목형: 금색 외곽선 + 글로우 큰 글씨, 중앙 (첨부 이미지 1·2 스타일)
+            slide.addText(txt, {
+              x:0.4, y:dim.h * 0.30, w:dim.w - 0.8, h:dim.h * 0.40,
+              align:"center", valign:"middle",
+              fontFace:"Malgun Gothic", fontSize:40, bold:true, color:"F2CB5B",
+              lineSpacingMultiple:1.16,
+              outline:{ size:1.5, color:"3A2A0E" },
+              glow:{ size:9, color:"FFE9A8", opacity:0.45 },
+              shadow:{ type:"outer", color:"000000", blur:6, offset:3, angle:90, opacity:0.8 }
+            });
+          }
+        }
+      }
+
+      if($("addClosing").checked){
+        var ctext = ($("closingText").value.trim() || "예배가 마쳤습니다");
+        var cs = pptx.addSlide();
+
+        var titleIt = (titleIndex >= 0) ? items[titleIndex] : null;
+        if(titleIt && titleIt.status === "done" && titleIt.b64){
+          // 제목 슬라이드 배경 이미지 재사용 + 가독성 스크림
+          cs.background = { data: "data:" + titleIt.mime + ";base64," + titleIt.b64 };
+          cs.addShape(pptx.ShapeType.rect, { x:0, y:0, w:dim.w, h:dim.h, fill:{ color:"000000", transparency:50 } });
+        } else {
+          cs.background = { color:"1C2B49" }; // 지정 없으면 단색
+        }
+
+        cs.addText(ctext, {
+          x:0.4, y:0, w:dim.w - 0.8, h:dim.h,
+          align:"center", valign:"middle",
+          fontFace:"Malgun Gothic", fontSize:40, bold:true, color:"FFFFFF",
+          lineSpacingMultiple:1.2,
+          shadow:{ type:"outer", color:"000000", blur:5, offset:2, angle:90, opacity:0.8 }
+        });
+      }
+
+      return pptx.writeFile({ fileName: fname + ".pptx" });
+    }).then(function(){
+      btn.textContent = oldLabel; btn.disabled = false;
+    }).catch(function(err){
+      alert("슬라이드 생성 실패: " + (err && err.message ? err.message : err));
+      btn.textContent = oldLabel; btn.disabled = false;
+    });
+  }
+
+  $("makePptxBtn").addEventListener("click", makePptx);
+
+  refreshCount();
+
+  /* ===================== 기획 탭 로직 ===================== */
+  // 탭 전환
+  function switchTab(id){
+    var panes = document.querySelectorAll(".tabpane");
+    for(var i=0;i<panes.length;i++){ panes[i].classList.toggle("active", panes[i].id === id); }
+    var btns = document.querySelectorAll(".tabbtn");
+    for(var j=0;j<btns.length;j++){ btns[j].classList.toggle("active", btns[j].getAttribute("data-tab") === id); }
+  }
+  var tbs = document.querySelectorAll(".tabbtn");
+  for(var ti=0;ti<tbs.length;ti++){
+    tbs[ti].addEventListener("click", function(){ switchTab(this.getAttribute("data-tab")); });
+  }
+
+  // 연령/톤 프리셋 (포지티브 키워드 + 전용 네거티브)
+  var TONE_PRESETS = {
+    toddler:        { label:"포근한 그림책", pos:"soft rounded children's picture book illustration, simple chunky shapes, thick gentle outlines, warm pastel colors, cozy friendly mood, minimal detail", neg:"scary, dark, photorealistic, complex detail, sharp edges, text, letters, words, numbers, watermark, subtitle" },
+    lower_pixar:    { label:"픽사 3D", pos:"Pixar-style 3D animation, expressive lighting, high detail, 8k", neg:"anime style, watercolor style, text, letters, words, numbers, watermark, subtitle" },
+    lower_cartoon:  { label:"밝은 2D 카툰", pos:"bright flat 2D cartoon illustration, bold clean outlines, vivid cheerful saturated colors, playful energetic mood", neg:"photorealistic, 3d render, dark, scary, text, letters, words, numbers, watermark, subtitle" },
+    upper_webtoon:  { label:"웹툰/셀셰이딩", pos:"Korean webtoon style, clean cel shading, dynamic composition, cinematic lighting, semi-stylized characters", neg:"photorealistic, childish scribble, text, letters, words, numbers, watermark, subtitle" },
+    upper_cinematic:{ label:"시네마틱 일러스트", pos:"semi-realistic cinematic storybook illustration, painterly detail, dramatic warm lighting, rich atmosphere", neg:"flat cartoon, text, letters, words, numbers, watermark, subtitle" },
+    upper_pixar:    { label:"픽사 3D(고학년)", pos:"cinematic Pixar-style 3D animation, refined detailed character design, dramatic expressive lighting, rich textures, high detail, 8k", neg:"babyish, chibi, anime style, watercolor, text, letters, words, numbers, watermark, subtitle" },
+    upper_voxel:    { label:"게임 복셀(로블록스·마인크래프트풍)", pos:"stylized 3D voxel game render, blocky low-poly characters, vibrant game-world lighting, clean colorful shapes, adventurous video game aesthetic", neg:"photorealistic, gore, childish scribble, text, letters, words, numbers, watermark, subtitle" },
+    upper_anime:    { label:"애니메이션풍", pos:"clean Japanese animation style, vibrant cel shading, expressive dynamic characters, crisp lineart, adventurous bright atmosphere", neg:"photorealistic, 3d render, chibi, childish scribble, text, letters, words, numbers, watermark, subtitle" },
+    watercolor:     { label:"수채화 동화", pos:"soft watercolor storybook illustration, gentle washes, delicate textures, warm tender mood", neg:"3d render, photorealistic, harsh lines, dark, scary, text, letters, words, numbers, watermark, subtitle" }
+  };
+
+  // 부서별 프리셋: tier(child/youth) + 톤 후보 + 기획 눈높이 가이드 + 산출물 분량
+  // (현장조사 반영 교정본 — 중·고등부는 본문 중심 강해 설교 흐름으로 변경)
+  var DEPT_PRESETS = {
+    infant:     { tier:"child", label:"영유아부", tones:["toddler","watercolor"],
+                  guide:"대상은 영아~유치부(만 7세 이하). 아주 짧고 반복적인 문장, 감각·소리·친숙한 사물(동물·간식·가족) 중심으로 풀어내세요. 유행/밈은 최소화하고 친숙한 것으로 연결. 폭력·공포 묘사 금지.",
+                  scriptLen:"3,000자 내외, 8개 챕터" },
+    younger:    { tier:"child", label:"유년부", tones:["lower_pixar","lower_cartoon","watercolor"],
+                  guide:"대상은 초등 저학년(1~3학년). 쉬운 언어와 상황극, 또래 학교생활을 활용. 최근 저학년에게 유행하는 콘텐츠/캐릭터를 본문과 자연스럽게 연결.",
+                  scriptLen:"5,000자 내외, 10개 챕터" },
+    elementary: { tier:"child", label:"초등부", tones:["upper_pixar","upper_webtoon","upper_voxel","upper_anime","upper_cinematic"],
+                  guide:"대상은 초등 고학년(4~6학년). 게임·유튜브·밈 등 또래 트렌드를 본문 메시지와 연결하고, 논리적 흐름과 적용을 또래 상황으로 구체화.",
+                  scriptLen:"7,000자 이상, 12개 챕터" },
+    middle:     { tier:"youth", label:"중등부", tones:["upper_webtoon","upper_anime","upper_cinematic"],
+                  guide:"대상은 중학생(13~15세, 디지털 네이티브). 학교·학원·또래관계·자존감·정체성 고민이 일상. 인기 드라마/노래/영상/뉴스·청소년 이슈를 '공감 도입'으로만 쓰되 반드시 본문 메시지로 수렴하세요. 본문과 무관한 개그·재미 위주로 흐르지 말고 본문 중심을 유지. 텍스트(본문)는 그대로, 콘텍스트(청소년 상황)에 적용점을 던지는 방식. 진지하되 친근하게, 따뜻함·공감이 신뢰를 만든다.",
+                  scriptLen:"20~25분 분량. 12챕터 상황극이 아니라 도입(공감/트렌드)→본문 관찰·강해→삶의 적용 2~3개→결단·기도 흐름" },
+    high:       { tier:"youth", label:"고등부", tones:["upper_cinematic","upper_webtoon","upper_anime"],
+                  guide:"대상은 고등학생(16~18세). 입시·진로·미래불안·실존적 질문이 핵심. 본문을 배경·문맥과 함께 깊이 있게 강해하고 신앙과 삶(진로·관계·세계관)을 연결. 트렌드·뉴스는 공감 도구로만 절제 사용. 가벼운 재미보다 말씀의 무게와 진정성으로 다가가되, 권위적·일방적 강요는 피하고 스스로 질문하게.",
+                  scriptLen:"25~30분 분량. 도입→본문 강해(배경·문맥)→신학적 핵심→삶의 적용→결단. 깊이 우선" }
+  };
+  var selectedDept = "elementary";
+  var selectedOutput = "slide";
+  var selectedTone = "upper_pixar";
+
+  function renderTones(){
+    var seg = $("toneSeg");
+    var keys = (DEPT_PRESETS[selectedDept] && DEPT_PRESETS[selectedDept].tones) || [];
+    if(keys.indexOf(selectedTone) === -1){ selectedTone = keys[0]; }
+    var h = "";
+    for(var i=0;i<keys.length;i++){
+      h += '<button class="segbtn' + (keys[i]===selectedTone?' active':'') + '" data-tone="' + keys[i] + '">' + TONE_PRESETS[keys[i]].label + '</button>';
+    }
+    seg.innerHTML = h;
+    var tb = seg.querySelectorAll("[data-tone]");
+    for(var j=0;j<tb.length;j++){
+      tb[j].addEventListener("click", function(){ selectedTone = this.getAttribute("data-tone"); renderTones(); });
+    }
+  }
+
+  // 산출물 유형에 따라 ②단계 버튼/안내 전환
+  function renderOutputUI(){
+    var slide = $("genSlideBtn"), bull = $("genBulletinBtn"), less = $("genLessonBtn"), to = $("toProduceBtn"), hint = $("outputHint");
+    var isSlide = (selectedOutput === "slide");
+    if(slide) slide.style.display = isSlide ? "" : "none";
+    if(bull)  bull.style.display  = (selectedOutput === "bulletin") ? "" : "none";
+    if(less)  less.style.display  = (selectedOutput === "lesson") ? "" : "none";
+    if(to)    to.style.display    = isSlide ? "" : "none";
+    if(hint){
+      if(isSlide) hint.textContent = "검토한 기획안으로 이미지 프롬프트 16개(스토리12+행정4)를 만들고 제작 탭에서 PPTX로 묶습니다.";
+      else if(selectedOutput === "bulletin") hint.textContent = "검토한 기획안으로 부서 예배 주보 원고를 만듭니다. 결과는 아래 칸에서 바로 편집·인쇄하세요.";
+      else hint.textContent = "검토한 기획안으로 부서 공과공부 워크시트를 만듭니다. 교사가 바로 출력해 쓸 수 있습니다.";
+    }
+  }
+
+  var deptBtns = document.querySelectorAll("#deptSeg [data-dept]");
+  for(var a=0;a<deptBtns.length;a++){
+    deptBtns[a].addEventListener("click", function(){
+      selectedDept = this.getAttribute("data-dept");
+      var sib = document.querySelectorAll("#deptSeg [data-dept]");
+      for(var s=0;s<sib.length;s++){ sib[s].classList.toggle("active", sib[s].getAttribute("data-dept")===selectedDept); }
+      renderTones();
+    });
+  }
+  var outBtns = document.querySelectorAll("#outputSeg [data-output]");
+  for(var o=0;o<outBtns.length;o++){
+    outBtns[o].addEventListener("click", function(){
+      selectedOutput = this.getAttribute("data-output");
+      var sib = document.querySelectorAll("#outputSeg [data-output]");
+      for(var s=0;s<sib.length;s++){ sib[s].classList.toggle("active", sib[s].getAttribute("data-output")===selectedOutput); }
+      renderOutputUI();
+    });
+  }
+  renderTones();
+  renderOutputUI();
+
+  // 키 공유(제작 탭과 동기화 + 로컬 저장)
+  try{ var sv = localStorage.getItem(KEY_STORE); if(sv){ $("planApiKey").value = sv; } }catch(e){}
+  $("planApiKey").addEventListener("input", function(){
+    if($("apiKey")) $("apiKey").value = this.value;
+    try{ if($("rememberKey") && $("rememberKey").checked) localStorage.setItem(KEY_STORE, this.value.trim()); }catch(e){}
+  });
+
+  // 텍스트 모델 호출(그라운딩 옵션)
+  function callGeminiText(sys, userText, useSearch, maxTok){
+    var apiKey = ($("planApiKey").value || "").trim();
+    var model = ($("planModel").value || "gemini-2.5-flash").trim();
+    if(!apiKey) return Promise.reject(new Error("API 키를 입력하세요."));
+    var body = {
+      systemInstruction: { parts: [ { text: sys } ] },
+      contents: [ { role:"user", parts: [ { text: userText } ] } ],
+      generationConfig: { temperature: 0.8 }
+    };
+    if(maxTok) body.generationConfig.maxOutputTokens = maxTok;
+    if(useSearch) body.tools = [ { google_search: {} } ];
+    return fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "x-goog-api-key": apiKey },
+      body: JSON.stringify(body)
+    }).then(function(res){ return res.json().then(function(d){ return { ok:res.ok, status:res.status, data:d }; }); })
+    .then(function(r){
+      if(!r.ok){
+        var m = (r.data && r.data.error && r.data.error.message) ? r.data.error.message : ("HTTP " + r.status);
+        throw new Error(m);
+      }
+      var d = r.data, text = "";
+      if(d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts){
+        var ps = d.candidates[0].content.parts;
+        for(var i=0;i<ps.length;i++){ if(ps[i].text) text += ps[i].text; }
+      }
+      if(!text){ throw new Error("텍스트가 반환되지 않았습니다(차단 또는 토큰상한 확인)."); }
+      var sources = [];
+      var gm = d.candidates && d.candidates[0] && d.candidates[0].groundingMetadata;
+      if(gm && gm.groundingChunks){
+        for(var k=0;k<gm.groundingChunks.length;k++){
+          var w = gm.groundingChunks[k].web;
+          if(w && w.uri) sources.push({ title: w.title || w.uri, uri: w.uri });
+        }
+      }
+      return { text:text, usage:d.usageMetadata || null, sources:sources };
+    });
+  }
+
+  function showUsage(elId, usage){
+    var el = $(elId);
+    if(!usage){ el.style.display="none"; return; }
+    el.style.display="block";
+    el.innerHTML = "토큰 · 입력 <b>" + (usage.promptTokenCount||0) + "</b> / 출력 <b>" + (usage.candidatesTokenCount||0) + "</b> / 합계 <b>" + (usage.totalTokenCount||0) + "</b>";
+  }
+  function showSources(elId, sources){
+    var el = $(elId);
+    if(!sources || !sources.length){ el.innerHTML=""; return; }
+    var arr = [];
+    for(var i=0;i<sources.length && i<6;i++){
+      arr.push('<a href="' + escapeHtml(sources[i].uri) + '" target="_blank" rel="noopener">' + escapeHtml(sources[i].title) + '</a>');
+    }
+    el.innerHTML = "출처: " + arr.join(" · ");
+  }
+  function setBusy(btn, on, busyLabel){
+    if(on){ btn._old = btn.textContent; btn.disabled = true; btn.textContent = busyLabel; }
+    else { btn.disabled = false; if(btn._old) btn.textContent = btn._old; }
+  }
+
+  // ---- 부서별 동적 시스템 프롬프트 빌더 (4종: 기획/풀스크립트/주보/공과) ----
+  function buildSysPlan(n){
+    var g = DEPT_PRESETS[selectedDept];
+    return "당신은 교회학교 " + g.label + " 설교를 돕는 기획자입니다. " + g.guide + " "
+      + "주어진 설교 본문으로 다음을 한국어로 작성하세요. "
+      + "1) 본문 핵심 메시지 요약(3줄). "
+      + "2) [트렌드] 검색으로 최근 " + n + "개월 내 위 대상 연령에게 유행하는 콘텐츠/밈/이슈 3가지를 찾고, 각각을 본문 메시지와 어떻게 연결할지 1줄로. 부적절·자극적 트렌드는 제외. "
+      + "3) [눈높이 풀이] 본문을 대상 연령의 언어와 눈높이로 풀어낸 한 단락. "
+      + "4) [설교자 포인트] 설교에 넣으면 좋은 포인트 5개(제안 형식). "
+      + "5) [개요] 후킹 제목 1개 + 다음 구성/분량 기준의 개요: " + g.scriptLen + ". "
+      + "6) [봉독] 본문 장절과 본문 전체 텍스트(개역개정 기준, 정확히). "
+      + "읽고 수정하기 쉬운 일반 텍스트로 출력하고, 마크다운 코드블록으로 감싸지 마세요.";
+  }
+  function buildSysScript(){
+    var g = DEPT_PRESETS[selectedDept];
+    return "다음 설교 기획안을 바탕으로 " + g.label + " 설교 풀스크립트를 한국어로 작성하세요. 구성/분량: " + g.scriptLen + ". 대상 연령에 맞는 표현과 적용. " + g.guide + " 마크다운 코드블록 없이 일반 텍스트로.";
+  }
+  function buildSysBulletin(){
+    var g = DEPT_PRESETS[selectedDept];
+    var common = "다음 설교 기획안을 바탕으로 " + g.label + " 예배 주보 원고를 한국어로 작성하세요. ";
+    if(g.tier === "youth"){
+      return common + "구성: [예배 순서](경배와찬양-기도-성경봉독-말씀-결단찬양-광고-축도, 청소년부 예배에 맞게), [오늘의 말씀](본문 장절 + 제목 + 한 줄 핵심), [설교 요약 5줄], [이번 주 소그룹/큐티 나눔 질문 2개], [암송구절 1개], [광고/안내] 수련회·소그룹·모임 자리표시자 3줄. 마크다운 코드블록 없이 바로 편집·인쇄할 수 있는 일반 텍스트로.";
+    }
+    return common + "구성: [예배 순서](부서 예배에 맞게), [오늘의 말씀](본문 장절 + 한 줄 핵심), [설교 요약 5줄], [이번 주 암송구절 1개], [가정 연계] 부모가 자녀와 나눌 질문 2개, [광고/안내] 자리표시자 3줄. 마크다운 코드블록 없이 바로 편집·인쇄할 수 있는 일반 텍스트로.";
+  }
+  function buildSysLesson(){
+    var g = DEPT_PRESETS[selectedDept];
+    var common = "다음 설교 기획안을 바탕으로 " + g.label + " 공과공부 워크시트를 한국어로 작성하세요. 대상 연령에 맞는 난이도로. ";
+    if(g.tier === "youth"){
+      return common + "구성(관찰->해석->적용 귀납식): [열기] 오늘 주제 관련 공감 질문/이슈 1개, [본문 관찰] 핵심 구절 + 관찰 질문 3개, [본문 해석] 본문이 말하는 핵심 1~2개, [적용·나눔] 내 삶(관계·진로·신앙) 적용 토의 질문 4개, [결단] 이번 주 실천 1개, [암송구절] 본문 중 1구절, [기도] 마무리 기도문 예시. 빈칸 채우기형은 쓰지 마세요. 마크다운 코드블록 없이 교사가 바로 출력해 쓸 일반 텍스트로.";
+    }
+    return common + "구성: [들어가기] 흥미 유발 질문/활동 1개, [본문 살피기] 본문 요약 + 빈칸 채우기형 질문 3개, [묵상 나눔] 토의 질문 4개(생각->느낌->적용), [삶으로] 이번 주 실천 과제 1개, [암송구절] 본문 중 1구절, [기도] 마무리 기도문 예시. 마크다운 코드블록 없이 교사가 바로 출력해 쓸 일반 텍스트로.";
+  }
+
+  $("planBtn").addEventListener("click", function(){
+    var passage = ($("passage").value||"").trim();
+    if(!passage){ alert("설교 구절을 입력하세요."); return; }
+    var n = ($("trendMonths").value||"3").trim();
+    var maxTok = parseInt(($("maxTokens").value||"4096"),10) || 4096;
+    var sys = buildSysPlan(n);
+    var user = "오늘(요청일) 기준으로 작성합니다. 설교 본문: " + passage;
+    var btn = this; setBusy(btn, true, "조사·기획 중…");
+    callGeminiText(sys, user, $("useSearch").checked, maxTok)
+      .then(function(r){ $("planText").value = r.text; showUsage("planUsage", r.usage); showSources("planSrc", r.sources); })
+      .catch(function(e){ alert("기획 생성 실패: " + e.message); })
+      .then(function(){ setBusy(btn, false); });
+  });
+
+  $("scriptBtn").addEventListener("click", function(){
+    var plan = ($("planText").value||"").trim();
+    if(!plan){ alert("먼저 설교 기획을 생성하세요."); return; }
+    var btn = this; setBusy(btn, true, "풀스크립트 생성 중…");
+    callGeminiText(buildSysScript(), plan, false, 8192)
+      .then(function(r){ $("planText").value = plan + "\n\n===== 풀스크립트 =====\n" + r.text; showUsage("planUsage", r.usage); })
+      .catch(function(e){ alert("스크립트 생성 실패: " + e.message); })
+      .then(function(){ setBusy(btn, false); });
+  });
+
+  $("genSlideBtn").addEventListener("click", function(){
+    var plan = ($("planText").value||"").trim();
+    if(!plan){ alert("먼저 설교 기획을 생성·검토하세요."); return; }
+    var tone = TONE_PRESETS[selectedTone];
+    var sys = "다음 설교 기획안으로 이미지 생성 프롬프트 16개를 만드세요(스토리 12 + 행정 4: 타이틀/봉독/헌금기도/축도). "
+      + "각 프롬프트는 영어로. 모든 프롬프트 앞부분에 공통 스타일 키워드를 포함: '" + tone.pos + "'. "
+      + "스토리 12개는 이미지 안에 글자 금지, 각 프롬프트 끝에 네거티브 '--no " + tone.neg + "' 포함. "
+      + "첫 프롬프트에서 정한 등장인물 외형을 모든 컷에서 동일하게 유지. "
+      + "행정 4개는 배경만 묘사하고 글자는 넣지 마세요. "
+      + "출력은 16개 프롬프트만, 번호 없이 각 프롬프트를 빈 줄 하나로 구분. 코드블록·설명·머리말 금지.";
+    var maxTok = Math.max(parseInt(($("maxTokens").value||"4096"),10)||4096, 6144);
+    var btn = this; setBusy(btn, true, "프롬프트 생성 중…");
+    callGeminiText(sys, plan, false, maxTok)
+      .then(function(r){ $("promptText").value = r.text.trim(); showUsage("promptUsage", r.usage); })
+      .catch(function(e){ alert("프롬프트 생성 실패: " + e.message); })
+      .then(function(){ setBusy(btn, false); });
+  });
+
+  function runOutputText(sysFn, busyLabel){
+    var plan = ($("planText").value||"").trim();
+    if(!plan){ alert("먼저 설교 기획을 생성·검토하세요."); return; }
+    var maxTok = Math.max(parseInt(($("maxTokens").value||"4096"),10)||4096, 4096);
+    var btn = this; setBusy(btn, true, busyLabel);
+    callGeminiText(sysFn(), plan, false, maxTok)
+      .then(function(r){ $("promptText").value = r.text.trim(); showUsage("promptUsage", r.usage); })
+      .catch(function(e){ alert("생성 실패: " + e.message); })
+      .then(function(){ setBusy(btn, false); });
+  }
+  $("genBulletinBtn").addEventListener("click", function(){ runOutputText.call(this, buildSysBulletin, "주보 생성 중…"); });
+  $("genLessonBtn").addEventListener("click", function(){ runOutputText.call(this, buildSysLesson, "공과 생성 중…"); });
+
+  $("toProduceBtn").addEventListener("click", function(){
+    var txt = ($("promptText").value||"").trim();
+    if(!txt){ alert("먼저 프롬프트를 생성하세요."); return; }
+    $("prompts").value = txt;
+    $("splitMode").value = "blank";
+    switchTab("tabProduce");
+    refreshCount();
+    window.scrollTo(0,0);
+  });
+})();
+</script>
+</body>
+</html>

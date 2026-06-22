@@ -1,0 +1,10 @@
+---
+layout: base.njk
+title: 주보 목록
+---
+<h1>주보</h1>
+<ul class="bulletin-list">
+{% for item in collections.bulletins %}
+  <li><a href="{{ item.url | absUrl }}">{{ item.date | dateKorean }}</a></li>
+{% endfor %}
+</ul>

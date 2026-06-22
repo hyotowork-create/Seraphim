@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title or church.name }}</title>
+{% if description %}<meta name="description" content="{{ description | truncate(120) }}">{% endif %}
+<meta property="og:title" content="{{ title or church.name }}">
+{% if description %}<meta property="og:description" content="{{ description | truncate(120) }}">{% endif %}
+<link rel="stylesheet" href="{{ '/assets/css/style.css' | absUrl }}">
+</head>
+<body>
+<header class="site-header">
+  <a href="{{ '/' | absUrl }}">{{ church.name }}</a>
+</header>
+<main>
+{{ content | safe }}
+</main>
+</body>
+</html>
