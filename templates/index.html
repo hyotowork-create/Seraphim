@@ -12,18 +12,32 @@
     <span class="logo">✦</span>
     <div>
       <h1>Seraphim</h1>
-      <p>교회 방송실 업무 자동화 · 찬양 PPT · 설교 · 주보 · 설교 영상 쇼츠</p>
+      <p>교회 방송실 올인원 · 주보 · PPT · 설교 영상 쇼츠</p>
     </div>
   </div>
-  <span class="ver">v{{ version }}</span>
+  <div class="header-right">
+    <span id="plan-badge" class="plan-badge">…</span>
+    <span class="ver">v{{ version }}</span>
+  </div>
 </header>
 
 <nav class="tabs">
-  <button class="tab active" data-tab="bulletin" onclick="switchTab('bulletin')">📄 주보 · PPT 제작</button>
+  <button class="tab active" data-tab="home" onclick="switchTab('home')">🏠 홈</button>
+  <button class="tab" data-tab="bulletin" onclick="switchTab('bulletin')">📄 주보 · PPT 제작</button>
   <button class="tab" data-tab="video" onclick="switchTab('video')">🎬 설교 영상 쇼츠 · 요약</button>
 </nav>
 
-<main class="layout tab-pane" id="tab-bulletin">
+<!-- ===== 홈(통합 대시보드) ===== -->
+<main class="home tab-pane" id="tab-home">
+  <section class="hero">
+    <h2>이번 주 예배, 한 곳에서 준비하세요</h2>
+    <p>찬양·설교·광고를 한 번 입력하면 <b>주보</b>와 <b>PPT</b>가 동시에 만들어지고,
+       설교 영상으로는 <b>전도용 쇼츠</b>와 <b>요약 PDF</b>까지 자동 생성됩니다.</p>
+  </section>
+  <div class="feature-grid" id="feature-grid"><!-- JS가 채움 --></div>
+</main>
+
+<main class="layout tab-pane hidden" id="tab-bulletin">
   <!-- ===== 입력 영역 ===== -->
   <section class="panel form-panel">
     <div class="card">

@@ -34,6 +34,45 @@ body {
 .app-header p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
 .ver { color: var(--muted); font-size: 12px; }
 
+.header-right { display: flex; align-items: center; gap: 14px; }
+.plan-badge {
+  font-size: 12.5px; font-weight: 700; color: #0b1020;
+  background: linear-gradient(135deg, var(--ok), #6fe0b0);
+  padding: 6px 13px; border-radius: 999px; white-space: nowrap;
+}
+.plan-badge.sub { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+
+/* 홈(대시보드) */
+.home { max-width: 1100px; margin: 0 auto; padding: 26px 22px; }
+.hero {
+  background: linear-gradient(135deg, #18203a, #221a44);
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 34px 30px; margin-bottom: 22px;
+}
+.hero h2 { margin: 0 0 10px; font-size: 26px; }
+.hero p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.7; }
+.feature-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+@media (max-width: 900px) { .feature-grid { grid-template-columns: 1fr; } }
+.fcard {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 22px; cursor: pointer;
+  transition: border-color .15s, transform .15s;
+}
+.fcard:hover { border-color: var(--accent); transform: translateY(-2px); }
+.fcard .ficon { font-size: 30px; }
+.fcard h3 { margin: 12px 0 6px; font-size: 17px; }
+.fcard p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.fcard .ftag {
+  display: inline-block; margin-top: 12px; font-size: 11.5px; font-weight: 700;
+  padding: 3px 10px; border-radius: 999px;
+}
+.ftag.free { background: rgba(62,207,142,.15); color: #7fe7b6; }
+.ftag.pro { background: rgba(139,111,255,.18); color: #c3b1ff; }
+.fcard.locked { opacity: .85; }
+.fcard.locked .ficon { filter: grayscale(.3); }
+
 .tabs {
   display: flex; gap: 8px; padding: 14px 22px 0;
   max-width: 1500px; margin: 0 auto;

@@ -85,6 +85,32 @@ def test_job_manager():
     print("✓ JobManager OK")
 
 
+def test_plans_gating():
+    """무료/구독 모드에서 기능 게이팅이 올바른지."""
+    import importlib
+    import seraphim.plans as plans
+
+    # free_launch: 전 기능 개방
+    plans.BILLING_MODE = "free_launch"
+    assert plans.is_allowed(plans.FEATURE_SHORTS)
+    assert plans.is_allowed(plans.FEATURE_BULLETIN)
+    st = plans.plan_state()
+    assert st["features"]["shorts"]["allowed"] is True
+
+    # subscription + 로그인 없음(free): 영상 잠금, 주보·PPT 개방
+    plans.BILLING_MODE = "subscription"
+    assert plans.is_allowed(plans.FEATURE_BULLETIN)
+    assert not plans.is_allowed(plans.FEATURE_SHORTS)
+    assert not plans.is_allowed(plans.FEATURE_SUMMARY)
+
+    # subscription + pro 사용자: 전부 개방
+    pro = {"plan": "pro"}
+    assert plans.is_allowed(plans.FEATURE_SHORTS, pro)
+
+    importlib.reload(plans)  # 모드 원복(기본 free_launch)
+    print("✓ 요금제 게이팅 OK")
+
+
 if __name__ == "__main__":
     Path("output").mkdir(exist_ok=True)
     test_split()
@@ -92,4 +118,5 @@ if __name__ == "__main__":
     test_bulletin()
     test_video_module_imports()
     test_job_manager()
+    test_plans_gating()
     print("\n모든 테스트 통과 ✓")

@@ -126,12 +126,58 @@ let currentAspect = "9:16";
 let currentStt = "A";
 let pollTimer = null;
 
+let planState = null;
+
 function switchTab(name) {
   document.querySelectorAll(".tab").forEach(t =>
     t.classList.toggle("active", t.dataset.tab === name));
-  document.getElementById("tab-bulletin").classList.toggle("hidden", name !== "bulletin");
-  document.getElementById("tab-video").classList.toggle("hidden", name !== "video");
+  ["home", "bulletin", "video"].forEach(t =>
+    document.getElementById("tab-" + t).classList.toggle("hidden", t !== name));
   if (name === "video") loadVideoStatus();
+}
+
+async function loadPlan() {
+  try {
+    const res = await fetch("/api/plan");
+    planState = await res.json();
+  } catch (e) {
+    planState = null;
+  }
+  renderPlanBadge();
+  renderHome();
+}
+
+function renderPlanBadge() {
+  const badge = el("plan-badge");
+  if (!badge || !planState) return;
+  badge.textContent = "● " + planState.badge;
+  badge.className = "plan-badge" + (planState.billing_mode === "subscription"
+    && planState.plan === "pro" ? " sub" : "");
+}
+
+function renderHome() {
+  const grid = el("feature-grid");
+  if (!grid || !planState) return;
+  const order = ["bulletin", "ppt", "shorts", "summary"];
+  const goto = { bulletin: "bulletin", ppt: "bulletin", shorts: "video", summary: "video" };
+  const desc = {
+    bulletin: "교회명·설교·찬양·광고를 입력하면 인쇄용 A4 주보를 즉시 생성합니다.",
+    ppt: "찬양 가사·설교·광고로 16:9 와이드 PPT를 자동 제작합니다.",
+    shorts: "설교 영상에서 은혜로운 핵심 구간을 골라 9:16 자막 쇼츠로 만듭니다.",
+    summary: "설교 대본을 분석해 성도 배포용 요약 PDF를 생성합니다.",
+  };
+  grid.innerHTML = order.map(k => {
+    const f = planState.features[k];
+    const locked = !f.allowed;
+    const tag = f.min_plan === "pro"
+      ? '<span class="ftag pro">프로</span>' : '<span class="ftag free">무료</span>';
+    return `<div class="fcard ${locked ? "locked" : ""}" onclick="switchTab('${goto[k]}')">
+      <div class="ficon">${f.icon}${locked ? " 🔒" : ""}</div>
+      <h3>${f.name}</h3>
+      <p>${desc[k]}</p>
+      ${tag}
+    </div>`;
+  }).join("");
 }
 
 function pickSeg(groupId, btn) {
@@ -199,6 +245,10 @@ async function submitVideo(kind) {
       body: JSON.stringify(body),
     });
     const data = await res.json();
+    if (res.status === 402 || data.upgrade_required) {
+      setVStatus("🔒 " + (data.error || "프로(구독) 플랜 전용 기능입니다."), true);
+      return;
+    }
     if (!res.ok) { setVStatus("❌ " + (data.error || "오류"), true); return; }
     setVStatus("✅ 작업이 등록되었습니다 (작업 ID: " + data.job_id + "). 아래에서 진행상황을 확인하세요.");
     startPolling(data.job_id);
@@ -229,8 +279,9 @@ function startPolling(jobId) {
   pollTimer = setInterval(tick, 2000);
 }
 
-/* ---------- 초기화: 샘플 1개씩 ---------- */
+/* ---------- 초기화 ---------- */
 window.addEventListener("DOMContentLoaded", () => {
+  loadPlan();          // 요금제/권한 → 배지 + 홈 카드
   addSong();
   addAd();
   refreshPreview();

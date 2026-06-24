@@ -27,6 +27,7 @@ from flask import (Flask, jsonify, render_template, request,
                    send_file, send_from_directory)
 
 from seraphim import __version__
+from seraphim import plans
 from seraphim import sermon_video
 from seraphim.bulletin import render_bulletin
 from seraphim.jobs import manager as job_manager
@@ -141,6 +142,21 @@ def output_files(filename):
     return send_from_directory(OUTPUT_DIR, filename)
 
 
+# ── 요금제 / 기능 게이팅 ──────────────────────────────────────────────
+def _current_user() -> dict | None:
+    """현재 로그인 사용자. 인증·결제 연동 전까지는 None(=free_launch 개방).
+
+    SaaS 전환 시 여기서 세션/JWT 를 읽어 {'plan': 'pro'|'free'} 를 돌려주면
+    유료 잠금이 자동으로 동작한다.
+    """
+    return None
+
+
+@app.route("/api/plan")
+def api_plan():
+    return jsonify(plans.plan_state(_current_user()))
+
+
 # ── 설교 영상 파이프라인 (선택 기능) ──────────────────────────────────
 @app.route("/api/video/status")
 def video_status():
@@ -158,6 +174,9 @@ def _video_common(raw: dict) -> tuple[str, str]:
 
 @app.route("/api/video/shorts", methods=["POST"])
 def video_shorts():
+    if not plans.is_allowed(plans.FEATURE_SHORTS, _current_user()):
+        return jsonify({"error": plans.upgrade_message(plans.FEATURE_SHORTS),
+                        "upgrade_required": True}), 402
     raw = request.get_json(force=True, silent=True) or {}
     path, err = _video_common(raw)
     if err:
@@ -176,6 +195,9 @@ def video_shorts():
 
 @app.route("/api/video/summary", methods=["POST"])
 def video_summary():
+    if not plans.is_allowed(plans.FEATURE_SUMMARY, _current_user()):
+        return jsonify({"error": plans.upgrade_message(plans.FEATURE_SUMMARY),
+                        "upgrade_required": True}), 402
     raw = request.get_json(force=True, silent=True) or {}
     path, err = _video_common(raw)
     if err:
