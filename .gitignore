@@ -10,6 +10,14 @@ build/
 dist/
 *.spec
 
+# 환경변수(비밀키)
+.env
+
+# 설교 영상 파이프라인 캐시/산출물
+seraphim/.transcript_cache/
+**/shorts_output/
+**/summary_output/
+
 # 생성된 결과물
 output/*.pptx
 output/*.html

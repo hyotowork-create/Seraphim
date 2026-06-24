@@ -54,9 +54,42 @@ def test_bulletin():
     print(f"✓ 주보 OK — {len(html)} chars")
 
 
+def test_video_module_imports():
+    """설교 영상 모듈이 무거운 의존성 없이도 import·기본동작 하는지 확인."""
+    from seraphim import sermon_video, jobs, config  # noqa: F401
+    assert sermon_video.resolve_stt("A") == ("local", "medium")
+    assert sermon_video.resolve_stt("CLOUD") == ("openai", "whisper-1")
+    # 18자 그리드 규칙
+    assert sermon_video._two_lines("가나다라마바사아자차카타파") [0]
+    status = sermon_video.video_feature_status()
+    assert "python_packages_ok" in status and "ffmpeg_ok" in status
+    print("✓ 설교 영상 모듈 import/기본동작 OK")
+
+
+def test_job_manager():
+    """백그라운드 작업 제출 → 상태/로그 수집이 동작하는지."""
+    import time
+    from seraphim.jobs import manager
+
+    def work(job, x):
+        job.log(f"입력 {x}")
+        return {"doubled": x * 2}
+
+    job = manager.submit("test", work, 21)
+    for _ in range(50):
+        if job.status in ("done", "error"):
+            break
+        time.sleep(0.05)
+    assert job.status == "done", job.to_dict()
+    assert job.result == {"doubled": 42}
+    print("✓ JobManager OK")
+
+
 if __name__ == "__main__":
     Path("output").mkdir(exist_ok=True)
     test_split()
     test_ppt()
     test_bulletin()
+    test_video_module_imports()
+    test_job_manager()
     print("\n모든 테스트 통과 ✓")

@@ -5,6 +5,11 @@
   2) HTML 기반 주보 (인쇄·PDF 저장 가능)
 를 한 번에 생성한다.
 
+또한 설교/예배 영상 파일을 입력하면 (선택 기능, 추가 의존성 필요)
+  3) 설교 하이라이트 쇼츠(9:16 자막 번인) — 전도·SNS 용
+  4) 성도 배포용 설교 요약 PDF
+를 백그라운드로 생성한다.
+
 로컬 웹 서버로 동작하며 PyInstaller 로 단일 EXE 패키징이 가능하다.
 EXE 로 실행하면 기본 브라우저가 자동으로 열린다.
 """
@@ -22,7 +27,9 @@ from flask import (Flask, jsonify, render_template, request,
                    send_file, send_from_directory)
 
 from seraphim import __version__
+from seraphim import sermon_video
 from seraphim.bulletin import render_bulletin
+from seraphim.jobs import manager as job_manager
 from seraphim.ppt_generator import build_presentation
 from seraphim.themes import theme_choices
 
@@ -132,6 +139,63 @@ def generate_ppt():
 @app.route("/output/<path:filename>")
 def output_files(filename):
     return send_from_directory(OUTPUT_DIR, filename)
+
+
+# ── 설교 영상 파이프라인 (선택 기능) ──────────────────────────────────
+@app.route("/api/video/status")
+def video_status():
+    """영상 기능 사용 가능 여부(의존성·키 설치 상태)를 반환."""
+    return jsonify(sermon_video.video_feature_status())
+
+
+def _video_common(raw: dict) -> tuple[str, str]:
+    """공통 검증: 영상 경로 확인. (실경로, 에러메시지) 반환."""
+    path = sermon_video.resolve_path(raw.get("video_path") or "")
+    if not path:
+        return "", "영상 파일 경로를 찾을 수 없습니다. 경로 양끝의 따옴표·공백을 확인하세요."
+    return path, ""
+
+
+@app.route("/api/video/shorts", methods=["POST"])
+def video_shorts():
+    raw = request.get_json(force=True, silent=True) or {}
+    path, err = _video_common(raw)
+    if err:
+        return jsonify({"error": err}), 404
+    job = job_manager.submit(
+        "shorts", sermon_video.run_shorts_pipeline,
+        path,
+        (raw.get("church_name") or "").strip(),
+        (raw.get("sermon_title") or "").strip(),
+        raw.get("aspect_ratio") or "9:16",
+        raw.get("stt_option") or "A",
+        (raw.get("slack_channel") or "").strip(),
+    )
+    return jsonify({"job_id": job.id, "status": job.status})
+
+
+@app.route("/api/video/summary", methods=["POST"])
+def video_summary():
+    raw = request.get_json(force=True, silent=True) or {}
+    path, err = _video_common(raw)
+    if err:
+        return jsonify({"error": err}), 404
+    job = job_manager.submit(
+        "summary", sermon_video.run_summary_pdf,
+        path,
+        (raw.get("sermon_title") or "").strip(),
+        raw.get("stt_option") or "A",
+        (raw.get("slack_channel") or "").strip(),
+    )
+    return jsonify({"job_id": job.id, "status": job.status})
+
+
+@app.route("/api/jobs/<job_id>")
+def job_status(job_id):
+    job = job_manager.get(job_id)
+    if not job:
+        return jsonify({"error": "작업을 찾을 수 없습니다."}), 404
+    return jsonify(job.to_dict())
 
 
 @app.route("/api/health")

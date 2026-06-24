@@ -119,6 +119,116 @@ async function downloadFrom(url, label) {
 function downloadPPT() { downloadFrom("/api/generate-ppt", "PPT"); }
 function downloadBulletin() { downloadFrom("/api/generate-bulletin", "주보"); }
 
+/* ===================================================================
+   설교 영상 탭
+   =================================================================== */
+let currentAspect = "9:16";
+let currentStt = "A";
+let pollTimer = null;
+
+function switchTab(name) {
+  document.querySelectorAll(".tab").forEach(t =>
+    t.classList.toggle("active", t.dataset.tab === name));
+  document.getElementById("tab-bulletin").classList.toggle("hidden", name !== "bulletin");
+  document.getElementById("tab-video").classList.toggle("hidden", name !== "video");
+  if (name === "video") loadVideoStatus();
+}
+
+function pickSeg(groupId, btn) {
+  const group = document.getElementById(groupId);
+  group.querySelectorAll(".seg-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  if (groupId === "aspect-seg") currentAspect = btn.dataset.v;
+  else if (groupId === "stt-seg") currentStt = btn.dataset.v;
+}
+
+async function loadVideoStatus() {
+  const banner = el("video-banner");
+  try {
+    const res = await fetch("/api/video/status");
+    const s = await res.json();
+    const issues = [];
+    if (!s.python_packages_ok)
+      issues.push("필수 패키지 미설치: <b>" + s.missing_packages.join(", ") + "</b> (pip install)");
+    if (!s.ffmpeg_ok) issues.push("<b>ffmpeg</b> 미설치 (영상 처리 필수)");
+    if (!s.llm_ok) issues.push("LLM 키 없음 — <b>.env</b> 에 GEMINI_API_KEY 또는 OPENAI_API_KEY 필요");
+
+    if (issues.length === 0) {
+      banner.className = "banner ok";
+      banner.innerHTML = "✅ 영상 기능 준비 완료" +
+        (s.slack_ok ? " · Slack 알림 연동됨" : " · (Slack 미설정: 화면 로그로 표시)") +
+        " · LLM: <b>" + s.llm_provider + "</b>";
+    } else {
+      banner.className = "banner warn";
+      banner.innerHTML = "⚠️ 영상 기능을 쓰려면 아래가 필요합니다:<br>· " + issues.join("<br>· ") +
+        "<br><span style='opacity:.7'>설정 방법은 README의 '설교 영상 기능' 항목 참고. " +
+        "이 설정 없이도 주보·PPT 기능은 정상 동작합니다.</span>";
+    }
+  } catch (e) {
+    banner.className = "banner warn";
+    banner.innerHTML = "상태 확인 실패: " + e.message;
+  }
+}
+
+function setVStatus(msg, isErr = false) {
+  const s = el("v_status");
+  s.textContent = msg;
+  s.className = "status" + (isErr ? " err" : "");
+}
+
+async function submitVideo(kind) {
+  const videoPath = el("video_path").value.trim();
+  if (!videoPath) { setVStatus("❌ 영상 파일 경로를 입력하세요.", true); return; }
+
+  const body = {
+    video_path: videoPath,
+    church_name: el("v_church").value,
+    sermon_title: el("v_sermon").value,
+    aspect_ratio: currentAspect,
+    stt_option: currentStt,
+    slack_channel: el("v_slack").value,
+  };
+  const url = kind === "shorts" ? "/api/video/shorts" : "/api/video/summary";
+  const label = kind === "shorts" ? "쇼츠 생성" : "요약 PDF 생성";
+
+  try {
+    setVStatus(label + " 작업 등록 중…");
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) { setVStatus("❌ " + (data.error || "오류"), true); return; }
+    setVStatus("✅ 작업이 등록되었습니다 (작업 ID: " + data.job_id + "). 아래에서 진행상황을 확인하세요.");
+    startPolling(data.job_id);
+  } catch (e) {
+    setVStatus("❌ 요청 실패: " + e.message, true);
+  }
+}
+
+function startPolling(jobId) {
+  if (pollTimer) clearInterval(pollTimer);
+  const logEl = el("job-log");
+  logEl.textContent = "작업 시작 대기 중…";
+
+  const tick = async () => {
+    try {
+      const res = await fetch("/api/jobs/" + jobId);
+      const job = await res.json();
+      if (job.error) { logEl.textContent = job.error; clearInterval(pollTimer); return; }
+      const head = `작업 ${job.id} · ${job.kind} · 상태: ${job.status}\n` + "─".repeat(40) + "\n";
+      logEl.textContent = head + job.logs.map(l => `[${l.t}] ${l.msg}`).join("\n");
+      logEl.scrollTop = logEl.scrollHeight;
+      if (job.status === "done" || job.status === "error") clearInterval(pollTimer);
+    } catch (e) {
+      logEl.textContent += "\n(폴링 오류: " + e.message + ")";
+    }
+  };
+  tick();
+  pollTimer = setInterval(tick, 2000);
+}
+
 /* ---------- 초기화: 샘플 1개씩 ---------- */
 window.addEventListener("DOMContentLoaded", () => {
   addSong();

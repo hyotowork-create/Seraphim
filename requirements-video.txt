@@ -1,0 +1,11 @@
+# 설교 영상 기능 전용 의존성 (선택 설치)
+# 사용 전 시스템에 ffmpeg/ffprobe 실행파일도 설치되어 있어야 합니다.
+#   Windows: https://www.gyan.dev/ffmpeg/builds/ 에서 받아 PATH 등록
+#   (또는 winget install Gyan.FFmpeg)
+ffmpeg-python>=0.2.0
+faster-whisper>=1.1.0
+fpdf2>=2.8.0
+openai>=1.40.0
+google-genai>=1.0.0
+slack-sdk>=3.27.0
+python-dotenv>=1.0.0

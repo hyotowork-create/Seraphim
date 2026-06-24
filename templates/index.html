@@ -12,13 +12,18 @@
     <span class="logo">✦</span>
     <div>
       <h1>Seraphim</h1>
-      <p>교회 방송실 업무 자동화 · 찬양 PPT · 설교 · 주보</p>
+      <p>교회 방송실 업무 자동화 · 찬양 PPT · 설교 · 주보 · 설교 영상 쇼츠</p>
     </div>
   </div>
   <span class="ver">v{{ version }}</span>
 </header>
 
-<main class="layout">
+<nav class="tabs">
+  <button class="tab active" data-tab="bulletin" onclick="switchTab('bulletin')">📄 주보 · PPT 제작</button>
+  <button class="tab" data-tab="video" onclick="switchTab('video')">🎬 설교 영상 쇼츠 · 요약</button>
+</nav>
+
+<main class="layout tab-pane" id="tab-bulletin">
   <!-- ===== 입력 영역 ===== -->
   <section class="panel form-panel">
     <div class="card">
@@ -79,6 +84,58 @@
   <section class="panel preview-panel">
     <h2>주보 미리보기</h2>
     <iframe id="preview" title="주보 미리보기"></iframe>
+  </section>
+</main>
+
+<!-- ===== 설교 영상 탭 ===== -->
+<main class="layout tab-pane hidden" id="tab-video">
+  <section class="panel form-panel">
+    <div id="video-banner" class="banner"></div>
+
+    <div class="card">
+      <h2>설교 영상 입력</h2>
+      <p class="hint">방송실 PC에 저장된 설교/예배 영상 파일의 <b>로컬 절대경로</b>를 입력하세요.
+        영상은 업로드하지 않고 경로만 참조하므로 등록은 즉시 완료되고, 처리는 백그라운드로 진행됩니다.</p>
+      <label>영상 파일 경로
+        <input id="video_path" placeholder="예) C:\Videos\2026-06-21_주일설교.mp4">
+      </label>
+      <div class="grid-2">
+        <label>교회명 (쇼츠 하단·골드)<input id="v_church" placeholder="예) 세라핌교회"></label>
+        <label>설교 제목 (쇼츠 하단·요약 제목)<input id="v_sermon" placeholder="예) 사랑 안에 거하라"></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>출력 옵션</h2>
+      <label>쇼츠 출력 비율</label>
+      <div class="seg" id="aspect-seg">
+        <button type="button" class="seg-btn active" data-v="9:16" onclick="pickSeg('aspect-seg', this)">9:16</button>
+        <button type="button" class="seg-btn" data-v="4:3" onclick="pickSeg('aspect-seg', this)">4:3</button>
+        <button type="button" class="seg-btn" data-v="1:1" onclick="pickSeg('aspect-seg', this)">1:1</button>
+        <button type="button" class="seg-btn" data-v="16:9" onclick="pickSeg('aspect-seg', this)">16:9</button>
+      </div>
+      <label style="margin-top:14px">자막 추출(STT) 방식</label>
+      <div class="seg seg-2" id="stt-seg">
+        <button type="button" class="seg-btn active" data-v="A" onclick="pickSeg('stt-seg', this)">A · 로컬 medium <em>균형·무료</em></button>
+        <button type="button" class="seg-btn" data-v="B" onclick="pickSeg('stt-seg', this)">B · 로컬 large-v3 <em>정확·느림</em></button>
+        <button type="button" class="seg-btn" data-v="C" onclick="pickSeg('stt-seg', this)">C · 로컬 small <em>최速</em></button>
+        <button type="button" class="seg-btn" data-v="CLOUD" onclick="pickSeg('stt-seg', this)">☁ OpenAI <em>빠름·유료</em></button>
+      </div>
+      <label style="margin-top:14px">Slack 채널 ID (선택 · 진행 알림)
+        <input id="v_slack" placeholder="예) C1234567890 (비우면 화면 로그만 표시)">
+      </label>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="submitVideo('shorts')">🔥 설교 하이라이트 쇼츠 생성</button>
+      <button class="btn-primary" onclick="submitVideo('summary')">📄 설교 요약 PDF 생성</button>
+    </div>
+    <div id="v_status" class="status"></div>
+  </section>
+
+  <section class="panel preview-panel">
+    <h2>처리 진행 상황</h2>
+    <div id="job-log" class="job-log">아직 시작한 작업이 없습니다.</div>
   </section>
 </main>
 
