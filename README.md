@@ -65,6 +65,40 @@ npm start
 
 ---
 
+## Vercel 배포
+
+표준 Next.js 앱이라 별도 설정 없이 배포됩니다. (저장소 루트에 앱이 있음)
+
+### 방법 A — GitHub 연동 (권장)
+
+1. [vercel.com/new](https://vercel.com/new) → **Import Git Repository** → 이 저장소 선택
+2. Framework: **Next.js** (자동 감지), Root Directory: `./`, 기본값 그대로 **Deploy**
+3. 배포 후 **Settings → Environment Variables** 에 추가:
+   - `ANTHROPIC_API_KEY = sk-ant-...` (실제 Claude 생성용)
+   - (선택) `SLACK_WEBHOOK_URL`, `AI_PROVIDER`
+4. **Deployments → Redeploy** 로 환경변수 반영
+
+### 방법 B — Vercel CLI
+
+```bash
+npm i -g vercel
+vercel                       # 최초 1회: 프로젝트 연결
+vercel env add ANTHROPIC_API_KEY
+vercel --prod                # 프로덕션 배포
+```
+
+### ⚠️ 함수 타임아웃 (중요)
+
+`/api/generate` 는 실제 Claude 로 최대 6개 산출물을 병렬 생성하므로 시간이 걸립니다.
+`maxDuration = 60` 으로 설정되어 있습니다.
+
+- **Hobby(무료) 플랜**: 함수 최대 **60초**. 전체 패키지 생성이 60초에 근접할 수 있으니,
+  필요하면 입력 화면에서 **산출물을 나눠 생성**하세요.
+- **Pro 플랜**: 최대 300초까지 가능 (`maxDuration` 을 더 늘릴 수 있음).
+- `ANTHROPIC_API_KEY` 미설정 시에는 mock 으로 즉시 생성되어 타임아웃과 무관합니다.
+
+---
+
 ## 폴더 구조
 
 ```text

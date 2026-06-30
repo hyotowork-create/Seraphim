@@ -8,6 +8,9 @@ import { ALL_OUTPUT_TYPES } from '@/lib/types';
 import type { ProjectInput, OutputType } from '@/lib/types';
 
 export const runtime = 'nodejs';
+// 실제 Claude 로 여러 산출물을 병렬 생성할 때 시간이 걸리므로
+// 서버리스 함수 타임아웃을 늘린다. (Vercel Hobby 최대 60초, Pro 최대 300초)
+export const maxDuration = 60;
 
 function sanitizeTypes(value: unknown): OutputType[] {
   if (!Array.isArray(value) || value.length === 0) return ALL_OUTPUT_TYPES;
