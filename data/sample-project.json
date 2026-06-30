@@ -1,0 +1,27 @@
+{
+  "id": "sample_luke15",
+  "input": {
+    "bibleReference": "누가복음 15:11-32",
+    "bibleText": "또 이르시되 어떤 사람에게 두 아들이 있는데...",
+    "audience": "아동부",
+    "serviceType": "주일예배",
+    "sermonLength": "10분",
+    "tone": "복음 중심",
+    "imageStyle": "어린이 성경 그림책",
+    "churchName": "비전성음교회",
+    "departmentName": "아동부",
+    "serviceDate": "2026-07-05",
+    "outputs": [
+      "bibleAnalysis",
+      "sermon",
+      "bulletin",
+      "pptOutline",
+      "youtube",
+      "slackReport"
+    ]
+  },
+  "outputs": [],
+  "progress": 0,
+  "createdAt": "2026-06-30T00:00:00.000Z",
+  "updatedAt": "2026-06-30T00:00:00.000Z"
+}
