@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: linear-gradient(180deg, hsl(244 76% 99%) 0%, hsl(0 0% 100%) 320px);
+  color: hsl(222 47% 11%);
+  font-feature-settings: "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  border-color: hsl(214 32% 91%);
+}
+
+@layer utilities {
+  .prose-faithops {
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.7;
+  }
+}
