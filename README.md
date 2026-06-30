@@ -9,6 +9,24 @@ Slack 일일보고가 한 번에 생성되는 웹 대시보드입니다. (1차 M
 
 ---
 
+## 화면 미리보기
+
+성경본문(누가복음 15:11-32) 하나를 입력하면 아래 산출물이 한 번에 생성됩니다.
+
+| 홈 | 본문 입력 | 본문 분석 |
+|---|---|---|
+| ![홈](docs/mockups/01-home.png) | ![본문 입력](docs/mockups/02-create.png) | ![본문 분석](docs/mockups/03-results-analysis.png) |
+
+| 설교문 | PPT 구성안 | 유튜브 패키지 |
+|---|---|---|
+| ![설교문](docs/mockups/04-results-sermon.png) | ![PPT](docs/mockups/05-results-ppt.png) | ![유튜브](docs/mockups/06-results-youtube.png) |
+
+| Slack 보고 | 보관함 |
+|---|---|
+| ![Slack](docs/mockups/07-results-slack.png) | ![보관함](docs/mockups/08-projects.png) |
+
+---
+
 ## 핵심 기능 (1차 MVP)
 
 | 기능 | 설명 |
