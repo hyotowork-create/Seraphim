@@ -1,0 +1,19 @@
+{
+  "_comment": [
+    "OPT-IN, DISABLED BY DEFAULT. Codex is NOT a native Seraphim layer — it is an",
+    "optional external second opinion. To enable it deliberately, copy the",
+    "'mcpServers' block below into a project-root '.mcp.json' (or into",
+    ".claude/settings.json under 'mcpServers'), fill in a real command, and",
+    "provide OPENAI_API_KEY in the environment. Leaving this file here keeps it",
+    "inert: Claude Code does not load '.claude/mcp/*.json'."
+  ],
+  "mcpServers": {
+    "codex-second-opinion": {
+      "command": "REPLACE_WITH_CODEX_MCP_COMMAND",
+      "args": [],
+      "env": {
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}"
+      }
+    }
+  }
+}
