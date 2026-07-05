@@ -9,11 +9,14 @@
   </head>
   <body>
     <!--
-      Sveltia CMS 로더.
-      이 한 줄이 같은 폴더의 config.yml 을 읽어 입력 폼을 만들어 줍니다.
-      (대안: Decap CMS 로 교체하려면 아래 src 를
-       https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js 로 바꾸면 됩니다.)
+      Sveltia CMS 로더 (오프라인 지원).
+      인터넷/CDN 없이도 동작하도록 CMS 스크립트를 저장소 안에 함께 넣어둡니다.
+      vendor/sveltia-cms.js = @sveltia/cms 번들. 나중에 새 버전으로 갱신하려면:
+        npm pack @sveltia/cms
+        tar xzf sveltia-cms-*.tgz
+        cp package/dist/sveltia-cms.js src/admin/vendor/sveltia-cms.js
+      (대안: Decap CMS 번들을 같은 방식으로 넣고 아래 경로만 바꾸면 됩니다.)
     -->
-    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+    <script src="./vendor/sveltia-cms.js"></script>
   </body>
 </html>

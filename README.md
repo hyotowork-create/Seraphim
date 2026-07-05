@@ -178,6 +178,36 @@ offering:                # 선택 (헌금 계좌)
 
 ---
 
+## 8. 오프라인(인터넷 없이)에서 실행하기
+
+인터넷이 약하거나 끊긴 환경에서도 쓸 수 있도록, 외부 CDN 의존성을 없앴습니다.
+`/admin` 의 CMS 스크립트도 저장소 안(`src/admin/vendor/sveltia-cms.js`)에 함께 넣어
+두었습니다.
+
+**① 공개 사이트 미리보기(오프라인)**
+
+```bash
+npm ci          # 인터넷 되는 곳에서 처음 한 번만 (의존성 캐시)
+npm run build   # 정적 파일 생성 → _site/
+npm start       # http://localhost:8080  (이후로는 인터넷 없이 동작)
+```
+
+- 홈·주보 상세·아카이브·검색·인쇄까지 **외부 요청 0개**로 완전히 동작합니다.
+  (실제로 브라우저 네트워크를 차단하고 검증 완료)
+
+**② 오프라인으로 주보 편집·저장 — "Work with Local Repository"**
+
+1. 크로미움 계열 브라우저(Chrome/Edge)에서 `http://localhost:8080/admin/` 접속
+2. **"Work with Local Repository"** 버튼 클릭 → 이 저장소 폴더 선택
+3. 폼으로 주보를 작성/수정하면 `src/bulletins/` 파일에 **바로 저장**됩니다.
+   (GitHub 로그인도, 인터넷도 필요 없음)
+4. 나중에 인터넷이 되면 `git push` 로 올리면 사이트에 반영됩니다.
+
+> 참고: `/admin` 편집 화면의 아이콘·글꼴은 Google Fonts 를 쓰므로 오프라인에서는
+> 시스템 기본 글꼴로 대체되어 보일 수 있습니다. **기능에는 영향이 없습니다.**
+
+---
+
 ## 기술 스택
 
-Eleventy(11ty) · Nunjucks · GitHub Pages · Sveltia CMS(예정) — 모두 무료.
+Eleventy(11ty) · Nunjucks · GitHub Pages · Sveltia CMS(오프라인 번들 포함) — 모두 무료.

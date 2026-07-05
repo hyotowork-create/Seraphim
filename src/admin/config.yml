@@ -16,7 +16,11 @@ backend:
   # auth-worker/ 를 배포한 뒤 받은 주소로 바꾸세요. (끝에 /auth, /callback 붙이지 않음)
   base_url: https://sveltia-cms-auth.example.workers.dev   # ← 배포한 워커 주소로 수정
 
-# 로컬에서 폼을 시험해 볼 때 사용 (npx @sveltia/cms-proxy-server 와 함께)
+# 오프라인/로컬 편집:
+#  - Sveltia CMS 화면의 "Work with Local Repository" 버튼을 누르면 인터넷·GitHub 없이
+#    이 저장소 폴더를 직접 열어 주보를 편집·저장할 수 있습니다. (Chrome/Edge 등 크로미움 계열)
+#  - Decap CMS 프록시 방식으로 로컬 편집하려면 아래 줄의 주석을 해제하고
+#    `npx @sveltia/cms-proxy-server` 를 함께 실행하세요.
 # local_backend: true
 
 # 관리자 화면에서 "사이트 보기" 링크로 쓰입니다.
