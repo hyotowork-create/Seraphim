@@ -1,0 +1,160 @@
+// KSA-FLOW Prisma schema
+//
+// 설계 note: SQLite provider는 Prisma native enum을 지원하지 않고, SPEC §1은
+// "SQLite 전용 기능 금지 / PostgreSQL 전환 가능" 을 요구한다. 따라서 enum 성격의
+// 필드는 String 컬럼 + TypeScript union 타입(@/lib/enums) + Zod 검증으로 표현한다.
+// (Postgres 전환 시 String → enum 승격이 용이하다.)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String           @id @default(cuid())
+  email        String           @unique
+  name         String
+  passwordHash String
+  role         String // STAFF | ADMIN | DIRECTOR | AUDITOR | SYSADMIN
+  active       Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+
+  budgetCodes  BudgetCode[]     @relation("BudgetCodeCreatedBy")
+  evidences    Evidence[]       @relation("EvidenceCreatedBy")
+  requests     ExpenseRequest[] @relation("RequestCreatedBy")
+  approvals    Approval[]
+  batches      PaymentBatch[]
+}
+
+model BudgetCode {
+  id          String           @id @default(cuid())
+  code        String           @unique // 예: "2026-사업-01"
+  name        String // 예: "이웃 도시락 프로그램"
+  fiscalYear  Int
+  fundSource  String // GENERAL | SUBSIDY | DESIGNATED
+  annualLimit Int // 연간 한도(원, 정수)
+  active      Boolean          @default(true)
+  createdById String?
+  createdBy   User?            @relation("BudgetCodeCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime         @default(now())
+
+  requests    ExpenseRequest[]
+}
+
+model MonthlyPlan {
+  id           String @id @default(cuid())
+  budgetCodeId String
+  yearMonth    String // "2026-08"
+  planned      Int
+
+  @@unique([budgetCodeId, yearMonth])
+}
+
+model Vendor {
+  id       String   @id @default(cuid())
+  name     String
+  bizNo    String?  @unique // 사업자번호
+  bank     String?
+  account  String? // 계좌 — 등록·수정 시 ADMIN 승인 필요(변경이력 audit)
+  holder   String?
+  verified Boolean  @default(false)
+
+  evidences Evidence[]
+  requests  ExpenseRequest[]
+}
+
+model Evidence {
+  id        String    @id @default(cuid())
+  type      String // TAX_INVOICE | RECEIPT | CONTRACT | CARD_SLIP | ETC
+  issueDate DateTime
+  vendorId  String?
+  vendor    Vendor?   @relation(fields: [vendorId], references: [id])
+  supplyAmt Int? // 공급가액
+  taxAmt    Int? // 세액
+  totalAmt  Int
+  filePath  String
+  fileHash  String // SHA-256, 원본 무결성
+  source    String // "hometax_excel" | "manual_upload"
+  ntsNumber String?   @unique // 세금계산서 승인번호 — 중복수취 차단
+  usedById  String? // 연결된 ExpenseRequest (1:1)
+  createdById String
+  createdBy   User    @relation("EvidenceCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model ExpenseRequest {
+  id           String     @id @default(cuid())
+  docNo        String     @unique // "KSA-2026-0001"
+  title        String
+  amount       Int
+  budgetCodeId String
+  budgetCode   BudgetCode @relation(fields: [budgetCodeId], references: [id])
+  vendorId     String
+  vendor       Vendor     @relation(fields: [vendorId], references: [id])
+  evidenceIds  String // JSON array — 최소 1개 필수
+  status       String // ReqStatus
+  createdById  String
+  createdBy    User       @relation("RequestCreatedBy", fields: [createdById], references: [id])
+  approvals    Approval[]
+  paymentId    String?
+  createdAt    DateTime   @default(now())
+}
+
+model Approval {
+  id         String         @id @default(cuid())
+  requestId  String
+  request    ExpenseRequest @relation(fields: [requestId], references: [id])
+  approverId String
+  approver   User           @relation(fields: [approverId], references: [id])
+  action     String // APPROVE | REJECT
+  comment    String?
+  step       Int // 1=사무국장, 2=상임이사
+  createdAt  DateTime       @default(now())
+}
+
+model PaymentBatch {
+  id         String   @id @default(cuid())
+  batchNo    String   @unique
+  requestIds String // JSON array
+  totalAmt   Int
+  filePath   String? // 생성된 대량이체 엑셀
+  status     String // CREATED | EXPORTED | EXECUTED
+  makerId    String // 배치 생성자 = Checker
+  maker      User     @relation(fields: [makerId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model BankTxn {
+  id               String   @id @default(cuid())
+  txnDate          DateTime
+  amount           Int // 출금 음수 / 입금 양수 통일
+  memo             String
+  balance          Int?
+  matchedRequestId String?
+  uploadBatch      String
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  entity    String // "ExpenseRequest" 등
+  entityId  String
+  action    String // CREATE | STATUS_CHANGE | APPROVE ...
+  before    String? // JSON snapshot
+  after     String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+model Setting {
+  key   String @id // "final_approval_threshold" = "1000000"
+  value String
+}

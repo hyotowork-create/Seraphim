@@ -1,0 +1,27 @@
+node_modules/
+.next/
+out/
+build/
+*.log
+
+# Next / TS 생성물
+next-env.d.ts
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env.*.local
+
+# prisma / sqlite
+*.db
+*.db-journal
+prisma/*.db
+prisma/*.db-journal
+
+# 증빙 원본 (민감) — 저장소에 커밋 금지
+storage/evidences/*
+!storage/evidences/.gitkeep
+
+# 테스트 임시 DB
+tests/.tmp/
