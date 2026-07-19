@@ -1,2 +1,6 @@
 _site/
 node_modules/
+
+# 환경변수
+.env
+.env.local

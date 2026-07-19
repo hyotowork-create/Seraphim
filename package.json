@@ -2,9 +2,16 @@
   "name": "seraphim-church-bulletin",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "eleventy",
-    "serve": "eleventy --serve"
+    "serve": "eleventy --serve",
+    "check:api": "node --check api/me.mjs && node --check api/generate/text.mjs && node --check api/generate/image.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
   },
   "devDependencies": {
     "@11ty/eleventy": "^2.0.1"
