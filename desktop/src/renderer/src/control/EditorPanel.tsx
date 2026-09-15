@@ -98,15 +98,6 @@ export function EditorPanel(): JSX.Element {
               className="accent-accent"
             />
           </Field>
-
-          <Field label="배경색">
-            <input
-              type="color"
-              value={/^#/.test(state.background) ? state.background : '#000000'}
-              onChange={(e) => patch({ background: e.target.value })}
-              className="h-6 w-10 bg-transparent"
-            />
-          </Field>
         </div>
       </div>
     </div>

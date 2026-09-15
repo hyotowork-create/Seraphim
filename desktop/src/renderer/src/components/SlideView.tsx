@@ -1,34 +1,94 @@
-import type { CSSProperties } from 'react'
-import type { LiveState } from '@shared/ipc'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import type { Background, LiveState } from '@shared/ipc'
 
 interface Props {
   state: LiveState
   /** 1080p 기준 값에 곱할 스케일 (Output 해상도 대응). 프리뷰는 컨테이너 높이/1080 */
   scale: number
+  /** 프리뷰에서 카메라 실제 스트림 대신 표시만 (기본 false = 실제 렌더) */
+  cameraPlaceholder?: boolean
+}
+
+/** 라이브 카메라 배경 — getUserMedia로 지정 장치를 실시간 렌더 */
+function CameraView({ deviceId }: { deviceId?: string }): JSX.Element {
+  const ref = useRef<HTMLVideoElement>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let stream: MediaStream | null = null
+    let cancelled = false
+    setError(null)
+
+    navigator.mediaDevices
+      .getUserMedia({
+        video: deviceId ? { deviceId: { exact: deviceId } } : true,
+        audio: false
+      })
+      .then((s) => {
+        if (cancelled) {
+          s.getTracks().forEach((t) => t.stop())
+          return
+        }
+        stream = s
+        if (ref.current) {
+          ref.current.srcObject = s
+          void ref.current.play().catch(() => {})
+        }
+      })
+      .catch((e: unknown) => {
+        setError(e instanceof Error ? e.message : '카메라를 열 수 없습니다')
+      })
+
+    return () => {
+      cancelled = true
+      stream?.getTracks().forEach((t) => t.stop())
+    }
+  }, [deviceId])
+
+  if (error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-black text-slate-400 text-sm gap-2">
+        <span>📷</span>
+        <span>{error}</span>
+      </div>
+    )
+  }
+  return <video ref={ref} className="w-full h-full object-cover" muted playsInline />
+}
+
+function BackgroundLayer({
+  bg,
+  cameraPlaceholder
+}: {
+  bg: Background
+  cameraPlaceholder?: boolean
+}): JSX.Element {
+  if (bg.kind === 'image' && bg.imageUrl) {
+    return (
+      <img src={bg.imageUrl} alt="" className="w-full h-full object-cover" draggable={false} />
+    )
+  }
+  if (bg.kind === 'camera') {
+    if (cameraPlaceholder) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-black text-slate-400 text-sm gap-2">
+          <span>📷</span>
+          <span>{bg.cameraLabel || '라이브 카메라'}</span>
+        </div>
+      )
+    }
+    return <CameraView deviceId={bg.cameraDeviceId} />
+  }
+  return <div className="w-full h-full" style={{ background: bg.color || '#000' }} />
 }
 
 /**
  * 자막/가사 렌더러 — Control 프리뷰와 Output 송출이 동일 컴포넌트를 공유.
- * 흰색 글자 + 검정 외곽선/그림자로 어떤 배경에서도 가독성 확보.
+ * 배경(색상/이미지/카메라) 위에 어둡게(dim) 레이어, 그 위에 흰색+검정 외곽선 가사.
  */
-export function SlideView({ state, scale }: Props): JSX.Element {
+export function SlideView({ state, scale, cameraPlaceholder }: Props): JSX.Element {
   if (state.blackout) {
     return <div className="w-full h-full bg-black" />
-  }
-
-  const bg: CSSProperties = { background: state.background || '#000' }
-
-  if (state.showLogo) {
-    return (
-      <div className="w-full h-full flex items-center justify-center" style={bg}>
-        <div
-          className="font-bold tracking-[0.3em] text-white/90 select-none"
-          style={{ fontSize: 64 * scale, textShadow: '0 4px 16px rgba(0,0,0,.7)' }}
-        >
-          SERAPHIM
-        </div>
-      </div>
-    )
   }
 
   const o = state.overlay
@@ -54,9 +114,32 @@ export function SlideView({ state, scale }: Props): JSX.Element {
     o.align === 'left' ? 'justify-start' : o.align === 'right' ? 'justify-end' : 'justify-center'
 
   return (
-    <div className={`w-full h-full flex items-center ${justify}`} style={bg}>
-      <div style={textStyle} className="w-full">
-        {state.text || ' '}
+    <div className="relative w-full h-full overflow-hidden bg-black">
+      {/* 배경 레이어 */}
+      <div className="absolute inset-0">
+        <BackgroundLayer bg={state.background} cameraPlaceholder={cameraPlaceholder} />
+      </div>
+      {/* 가독성용 어둡게 레이어 */}
+      {state.background.dim > 0 && (
+        <div
+          className="absolute inset-0 bg-black pointer-events-none"
+          style={{ opacity: state.background.dim }}
+        />
+      )}
+      {/* 콘텐츠 (로고 / 가사) */}
+      <div className={`absolute inset-0 flex items-center ${justify}`}>
+        {state.showLogo ? (
+          <div
+            className="w-full text-center font-bold tracking-[0.3em] text-white/90 select-none"
+            style={{ fontSize: 64 * scale, textShadow: '0 4px 16px rgba(0,0,0,.7)' }}
+          >
+            SERAPHIM
+          </div>
+        ) : (
+          <div style={textStyle} className="w-full">
+            {state.text || ' '}
+          </div>
+        )}
       </div>
     </div>
   )

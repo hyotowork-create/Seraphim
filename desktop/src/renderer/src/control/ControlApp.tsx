@@ -3,6 +3,7 @@ import { useLive } from '../store/live'
 import { PreviewPanel } from './PreviewPanel'
 import { QuickPanel } from './QuickPanel'
 import { EditorPanel } from './EditorPanel'
+import { MediaPanel } from './MediaPanel'
 import { OutputBar } from './OutputBar'
 import { useShortcuts } from './useShortcuts'
 
@@ -59,7 +60,7 @@ export function ControlApp(): JSX.Element {
       {/* 하단: [5] 에디터 / [6] 미디어 / [7] 오디오 / [8] 전환 */}
       <div className="grid grid-cols-[1fr_260px_220px_200px] gap-2 p-2 pt-0 h-[240px] shrink-0">
         <EditorPanel />
-        <Placeholder title="[6] 미디어" note="배경이미지·영상·오버레이·로고 (M5)" />
+        <MediaPanel />
         <Placeholder title="[7] 오디오" note="MP3 재생·볼륨 (M5)" />
         <Placeholder title="[8] 전환 효과" note="Fade·지속시간·자동전환 (M5)" />
       </div>

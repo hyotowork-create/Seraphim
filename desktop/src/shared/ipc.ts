@@ -8,7 +8,8 @@ export const IPC = {
   OUTPUT_OPEN: 'output:open',
   OUTPUT_CLOSE: 'output:close',
   OUTPUT_TOGGLE_FULLSCREEN: 'output:toggle-fullscreen',
-  DISPLAYS_LIST: 'displays:list'
+  DISPLAYS_LIST: 'displays:list',
+  MEDIA_PICK_IMAGE: 'media:pick-image'
 } as const
 
 export type WindowRole = 'control' | 'output'
@@ -26,6 +27,23 @@ export interface OverlayStyle {
   shadow: boolean
 }
 
+/** 배경 소스 종류: 단색 / 이미지 / 라이브 카메라 */
+export type BackgroundKind = 'color' | 'image' | 'camera'
+
+export interface Background {
+  kind: BackgroundKind
+  /** kind==='color' */
+  color: string
+  /** kind==='image' — 앱 미디어 프로토콜(seraphim-media://) URL */
+  imageUrl?: string
+  imageName?: string
+  /** kind==='camera' — MediaDeviceInfo.deviceId */
+  cameraDeviceId?: string
+  cameraLabel?: string
+  /** 배경 위에 덧입히는 어둡게(가독성용) 0~1 */
+  dim: number
+}
+
 /** 현재 송출 상태 (main이 단일 진실원으로 보유, Output/프리뷰가 구독) */
 export interface LiveState {
   /** 현재 슬라이드 텍스트 (여러 줄 가능) */
@@ -36,13 +54,13 @@ export interface LiveState {
   showLogo: boolean
   /** 일시정지 (P) — 전환 잠금 */
   paused: boolean
-  /** 배경 (M0: CSS 색상. 이후 배경 이미지/영상으로 확장) */
-  background: string
+  background: Background
   overlay: OverlayStyle
 }
 
-export type LivePatch = Partial<Omit<LiveState, 'overlay'>> & {
+export type LivePatch = Partial<Omit<LiveState, 'overlay' | 'background'>> & {
   overlay?: Partial<OverlayStyle>
+  background?: Partial<Background>
 }
 
 export interface DisplayInfo {
@@ -63,11 +81,17 @@ export const DEFAULT_OVERLAY: OverlayStyle = {
   shadow: true
 }
 
+export const DEFAULT_BACKGROUND: Background = {
+  kind: 'color',
+  color: '#000000',
+  dim: 0
+}
+
 export const DEFAULT_LIVE_STATE: LiveState = {
   text: '',
   blackout: false,
   showLogo: false,
   paused: false,
-  background: '#000000',
+  background: DEFAULT_BACKGROUND,
   overlay: DEFAULT_OVERLAY
 }

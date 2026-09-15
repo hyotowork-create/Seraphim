@@ -27,6 +27,8 @@ const api = {
   },
 
   listDisplays: (): Promise<DisplayInfo[]> => ipcRenderer.invoke(IPC.DISPLAYS_LIST),
+  pickBackgroundImage: (): Promise<{ url: string; name: string } | null> =>
+    ipcRenderer.invoke(IPC.MEDIA_PICK_IMAGE),
   openOutput: (displayId?: number): Promise<boolean> =>
     ipcRenderer.invoke(IPC.OUTPUT_OPEN, displayId),
   closeOutput: (): Promise<boolean> => ipcRenderer.invoke(IPC.OUTPUT_CLOSE),
