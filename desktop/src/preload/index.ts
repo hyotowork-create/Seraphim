@@ -4,7 +4,10 @@ import {
   type LiveState,
   type LivePatch,
   type DisplayInfo,
-  type WindowRole
+  type WindowRole,
+  type PickedMedia,
+  type DataDirInfo,
+  type DbStats
 } from '../shared/ipc'
 
 function resolveRole(): WindowRole {
@@ -27,13 +30,21 @@ const api = {
   },
 
   listDisplays: (): Promise<DisplayInfo[]> => ipcRenderer.invoke(IPC.DISPLAYS_LIST),
-  pickBackgroundImage: (): Promise<{ url: string; name: string } | null> =>
-    ipcRenderer.invoke(IPC.MEDIA_PICK_IMAGE),
+  pickBackgroundImage: (): Promise<PickedMedia | null> => ipcRenderer.invoke(IPC.MEDIA_PICK),
   openOutput: (displayId?: number): Promise<boolean> =>
     ipcRenderer.invoke(IPC.OUTPUT_OPEN, displayId),
   closeOutput: (): Promise<boolean> => ipcRenderer.invoke(IPC.OUTPUT_CLOSE),
   toggleOutputFullscreen: (): Promise<boolean> =>
-    ipcRenderer.invoke(IPC.OUTPUT_TOGGLE_FULLSCREEN)
+    ipcRenderer.invoke(IPC.OUTPUT_TOGGLE_FULLSCREEN),
+
+  // 데이터 폴더 / 설정 / DB (M1)
+  getDataDir: (): Promise<DataDirInfo> => ipcRenderer.invoke(IPC.DATADIR_GET),
+  chooseDataDir: (): Promise<DataDirInfo> => ipcRenderer.invoke(IPC.DATADIR_CHOOSE),
+  openDataDir: (): Promise<string> => ipcRenderer.invoke(IPC.DATADIR_OPEN),
+  getSetting: (key: string): Promise<string | null> => ipcRenderer.invoke(IPC.SETTINGS_GET, key),
+  setSetting: (key: string, value: string): Promise<boolean> =>
+    ipcRenderer.invoke(IPC.SETTINGS_SET, key, value),
+  dbStats: (): Promise<DbStats> => ipcRenderer.invoke(IPC.DB_STATS)
 }
 
 export type SeraphimApi = typeof api

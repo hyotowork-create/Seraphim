@@ -9,7 +9,14 @@ export const IPC = {
   OUTPUT_CLOSE: 'output:close',
   OUTPUT_TOGGLE_FULLSCREEN: 'output:toggle-fullscreen',
   DISPLAYS_LIST: 'displays:list',
-  MEDIA_PICK_IMAGE: 'media:pick-image'
+  MEDIA_PICK: 'media:pick',
+  // 데이터 폴더 / 설정 / DB (M1)
+  DATADIR_GET: 'datadir:get',
+  DATADIR_CHOOSE: 'datadir:choose',
+  DATADIR_OPEN: 'datadir:open',
+  SETTINGS_GET: 'settings:get',
+  SETTINGS_SET: 'settings:set',
+  DB_STATS: 'db:stats'
 } as const
 
 export type WindowRole = 'control' | 'output'
@@ -94,4 +101,51 @@ export const DEFAULT_LIVE_STATE: LiveState = {
   paused: false,
   background: DEFAULT_BACKGROUND,
   overlay: DEFAULT_OVERLAY
+}
+
+// ── 데이터 폴더 / DB (M1) ─────────────────────────────
+
+/** 데이터 폴더 위치·상태 */
+export interface DataDirInfo {
+  /** 데이터 저장 폴더 (SQLite DB + 미디어) */
+  dataDir: string
+  /** seraphim.db 절대경로 */
+  dbPath: string
+  /** 동기화 폴더(구글드라이브/드롭박스/원드라이브) 위에 있는 것으로 추정되는지 */
+  looksSynced: boolean
+}
+
+/** DB 현황 (설정 화면 표시용) */
+export interface DbStats {
+  schemaVersion: number
+  songs: number
+  verses: number
+  playlists: number
+  bibleSlides: number
+  media: number
+}
+
+export type MediaType =
+  | 'background'
+  | 'video'
+  | 'overlay'
+  | 'logo'
+  | 'audio'
+  | 'score'
+
+/** 미디어 파일 (데이터 폴더 기준 상대경로 저장) */
+export interface MediaRow {
+  id: number
+  type: MediaType
+  /** 데이터 폴더 기준 상대경로 (예: 'media/backgrounds/uuid.png') */
+  relPath: string
+  name: string
+}
+
+/** 미디어 선택 결과 — url은 seraphim-media://local/<relPath> */
+export interface PickedMedia {
+  id: number
+  url: string
+  relPath: string
+  name: string
 }

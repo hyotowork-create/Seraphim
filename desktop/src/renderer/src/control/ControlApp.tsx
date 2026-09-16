@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useLive } from '../store/live'
 import { PreviewPanel } from './PreviewPanel'
 import { QuickPanel } from './QuickPanel'
 import { EditorPanel } from './EditorPanel'
 import { MediaPanel } from './MediaPanel'
 import { OutputBar } from './OutputBar'
+import { SettingsModal } from './SettingsModal'
 import { useShortcuts } from './useShortcuts'
 
 function Placeholder({ title, note }: { title: string; note: string }): JSX.Element {
@@ -20,6 +21,7 @@ function Placeholder({ title, note }: { title: string; note: string }): JSX.Elem
 
 export function ControlApp(): JSX.Element {
   const init = useLive((s) => s.init)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   useShortcuts()
 
   useEffect(() => {
@@ -34,8 +36,16 @@ export function ControlApp(): JSX.Element {
       <header className="flex items-center gap-3 px-4 h-11 border-b border-line bg-panel2 shrink-0">
         <span className="font-bold tracking-wide text-accent">SERAPHIM</span>
         <span className="text-xs text-slate-400">예배 송출 · 자막 · 주보</span>
-        <span className="ml-auto text-[11px] text-slate-500">v0.1 · MVP M0</span>
+        <button
+          onClick={() => setSettingsOpen(true)}
+          className="ml-auto px-3 py-1 rounded border border-line bg-panel text-xs text-slate-200 hover:border-slate-500"
+        >
+          ⚙️ 설정
+        </button>
+        <span className="text-[11px] text-slate-500">v0.1 · M1</span>
       </header>
+
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
 
       {/* 본문: 좌 라이브러리 / 중 슬라이드 / 프리뷰+퀵 */}
       <div className="flex-1 grid grid-cols-[220px_240px_1fr] gap-2 p-2 min-h-0">
