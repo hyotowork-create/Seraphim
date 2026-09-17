@@ -17,7 +17,9 @@ import {
   saveSong,
   deleteSong,
   setFavorite,
-  touchSong
+  touchSong,
+  setSongBackground,
+  getMediaRelPath
 } from './db/songs'
 import {
   IPC,
@@ -143,8 +145,19 @@ function registerIpc(): void {
 
   // 곡/가사 (M2)
   ipcMain.handle(IPC.SONG_LIST, (_e, filter: SongFilter) => listSongs(filter))
-  ipcMain.handle(IPC.SONG_GET, (_e, id: number) => getSong(id))
+  ipcMain.handle(IPC.SONG_GET, (_e, id: number) => {
+    const song = getSong(id)
+    if (song && song.bgMediaId != null) {
+      const rel = getMediaRelPath(song.bgMediaId)
+      song.bgUrl = rel ? mediaUrl(rel) : null
+    }
+    return song
+  })
   ipcMain.handle(IPC.SONG_SAVE, (_e, input: SongInput) => saveSong(input))
+  ipcMain.handle(IPC.SONG_SET_BG, (_e, songId: number, mediaId: number | null) => {
+    setSongBackground(songId, mediaId)
+    return true
+  })
   ipcMain.handle(IPC.SONG_DELETE, (_e, id: number) => {
     deleteSong(id)
     return true

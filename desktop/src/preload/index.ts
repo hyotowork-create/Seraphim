@@ -58,7 +58,9 @@ const api = {
   deleteSong: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.SONG_DELETE, id),
   setSongFavorite: (id: number, favorite: boolean): Promise<boolean> =>
     ipcRenderer.invoke(IPC.SONG_FAVORITE, id, favorite),
-  touchSong: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.SONG_TOUCH, id)
+  touchSong: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.SONG_TOUCH, id),
+  setSongBackground: (songId: number, mediaId: number | null): Promise<boolean> =>
+    ipcRenderer.invoke(IPC.SONG_SET_BG, songId, mediaId)
 }
 
 export type SeraphimApi = typeof api

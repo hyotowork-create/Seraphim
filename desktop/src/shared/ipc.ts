@@ -23,7 +23,8 @@ export const IPC = {
   SONG_SAVE: 'song:save',
   SONG_DELETE: 'song:delete',
   SONG_FAVORITE: 'song:favorite',
-  SONG_TOUCH: 'song:touch'
+  SONG_TOUCH: 'song:touch',
+  SONG_SET_BG: 'song:set-bg'
 } as const
 
 /** 찬양 카테고리 */
@@ -55,6 +56,8 @@ export interface Background {
   /** kind==='image' — 앱 미디어 프로토콜(seraphim-media://) URL */
   imageUrl?: string
   imageName?: string
+  /** kind==='image' — media 테이블 id (곡별 배경 저장용) */
+  mediaId?: number
   /** kind==='camera' — MediaDeviceInfo.deviceId */
   cameraDeviceId?: string
   cameraLabel?: string
@@ -188,6 +191,10 @@ export interface SongDetail {
   subtitle: string | null
   author: string | null
   copyright: string | null
+  /** 곡에 연결된 배경 미디어 id */
+  bgMediaId: number | null
+  /** 배경 미디어의 앱 URL (main이 상대경로로부터 해석) */
+  bgUrl: string | null
   verses: Verse[]
 }
 

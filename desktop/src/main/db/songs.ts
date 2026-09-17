@@ -9,6 +9,7 @@ interface SongRow {
   subtitle: string | null
   author: string | null
   copyright: string | null
+  bg_media_id: number | null
 }
 
 interface VerseRow {
@@ -67,6 +68,8 @@ export function getSong(id: number): SongDetail | null {
     subtitle: s.subtitle,
     author: s.author,
     copyright: s.copyright,
+    bgMediaId: s.bg_media_id,
+    bgUrl: null, // main의 SONG_GET 핸들러가 상대경로로부터 채움
     verses: verses.map(
       (v): Verse => ({ id: v.id, label: v.label, orderIndex: v.order_index, text: v.text })
     )
@@ -130,4 +133,17 @@ export function setFavorite(id: number, favorite: boolean): void {
 /** 최근 사용 갱신 */
 export function touchSong(id: number): void {
   getDb().prepare('UPDATE songs SET last_used_at = ? WHERE id = ?').run(new Date().toISOString(), id)
+}
+
+/** 곡에 배경 미디어 연결/해제 */
+export function setSongBackground(songId: number, mediaId: number | null): void {
+  getDb().prepare('UPDATE songs SET bg_media_id = ? WHERE id = ?').run(mediaId, songId)
+}
+
+/** 미디어 id → 상대경로 (없으면 null) */
+export function getMediaRelPath(id: number): string | null {
+  const row = getDb().prepare('SELECT rel_path FROM media WHERE id = ?').get(id) as
+    | { rel_path: string }
+    | undefined
+  return row?.rel_path ?? null
 }

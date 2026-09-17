@@ -14,6 +14,22 @@ const LABEL_RE =
  * - 블록 첫 줄이 라벨처럼 보이면 그 줄을 라벨로, 나머지를 가사로 사용
  * - 아니면 "1절, 2절 …" 자동 번호를 라벨로 부여
  */
+/** 송출 시 한 화면에 보일 최대 줄 수 (가사 4줄 기준) */
+export const PAGE_MAX_LINES = 4
+
+/**
+ * 한 절의 텍스트를 4줄 기준 페이지로 분할.
+ * 긴 절은 4줄씩 여러 장으로 나눠 순차 송출한다.
+ */
+export function paginate(text: string, maxLines: number = PAGE_MAX_LINES): string[] {
+  const lines = text.replace(/\r\n?/g, '\n').split('\n')
+  const pages: string[] = []
+  for (let i = 0; i < lines.length; i += maxLines) {
+    pages.push(lines.slice(i, i + maxLines).join('\n'))
+  }
+  return pages.length ? pages : ['']
+}
+
 export function splitVerses(raw: string): SplitVerse[] {
   const blocks = raw.replace(/\r\n?/g, '\n').split(/\n[ \t]*\n+/)
   const out: SplitVerse[] = []

@@ -40,7 +40,8 @@ export function MediaPanel(): JSX.Element {
 
   const pickImage = async (): Promise<void> => {
     const r = await window.seraphim.pickBackgroundImage()
-    if (r) await patch({ background: { kind: 'image', imageUrl: r.url, imageName: r.name } })
+    if (r)
+      await patch({ background: { kind: 'image', imageUrl: r.url, imageName: r.name, mediaId: r.id } })
   }
 
   const chooseCamera = (id: string): void => {

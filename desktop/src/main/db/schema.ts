@@ -86,5 +86,11 @@ export const MIGRATIONS: Migration[] = [
         created_at   TEXT NOT NULL
       );
     `
+  },
+  {
+    version: 2,
+    sql: /* sql */ `
+      ALTER TABLE songs ADD COLUMN bg_media_id INTEGER REFERENCES media(id);
+    `
   }
 ]
