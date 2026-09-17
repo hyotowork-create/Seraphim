@@ -58,7 +58,12 @@ export interface OverlayStyle {
   outlineColor: string
   /** 1080p 기준 px */
   outlineWidth: number
+  /** 가로 정렬 */
   align: 'left' | 'center' | 'right'
+  /** 세로 정렬 */
+  vAlign: 'top' | 'middle' | 'bottom'
+  /** 세로 미세 위치 (화면 높이 대비 %, + = 아래로) */
+  offsetY: number
   shadow: boolean
 }
 
@@ -132,6 +137,8 @@ export const DEFAULT_OVERLAY: OverlayStyle = {
   outlineColor: '#000000',
   outlineWidth: 4,
   align: 'center',
+  vAlign: 'middle',
+  offsetY: 0,
   shadow: true
 }
 

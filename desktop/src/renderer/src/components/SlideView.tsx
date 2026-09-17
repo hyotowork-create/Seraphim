@@ -125,6 +125,8 @@ export function SlideView({ state, scale, cameraPlaceholder }: Props): JSX.Eleme
 
   const justify =
     o.align === 'left' ? 'justify-start' : o.align === 'right' ? 'justify-end' : 'justify-center'
+  const vClass =
+    o.vAlign === 'top' ? 'items-start' : o.vAlign === 'bottom' ? 'items-end' : 'items-center'
 
   const fade = state.transition?.type === 'fade'
   const dur = state.transition?.durationMs ?? 0
@@ -146,8 +148,11 @@ export function SlideView({ state, scale, cameraPlaceholder }: Props): JSX.Eleme
       {/* 콘텐츠 (로고 / 가사) — 전환 시 페이드 인 (key 변경으로 애니메이션 재생) */}
       <div
         key={fade ? contentKey : undefined}
-        className={`absolute inset-0 flex items-center ${justify}`}
-        style={fade && dur > 0 ? { animation: `seraphimFade ${dur}ms ease` } : undefined}
+        className={`absolute inset-0 flex ${vClass} ${justify} py-[4%]`}
+        style={{
+          transform: o.offsetY ? `translateY(${o.offsetY}%)` : undefined,
+          animation: fade && dur > 0 ? `seraphimFade ${dur}ms ease` : undefined
+        }}
       >
         {state.showLogo ? (
           <div

@@ -1,4 +1,5 @@
 import { useLive } from '../store/live'
+import { useDeck } from '../store/deck'
 import type { OverlayStyle } from '@shared/ipc'
 
 function Field({ label, children }: { label: string; children: React.ReactNode }): JSX.Element {
@@ -14,6 +15,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export function EditorPanel(): JSX.Element {
   const state = useLive((s) => s.state)
   const patch = useLive((s) => s.patch)
+  const maxLines = useDeck((s) => s.maxLines)
+  const setMaxLines = useDeck((s) => s.setMaxLines)
   const o = state.overlay
 
   const setOverlay = (p: Partial<OverlayStyle>): void => void patch({ overlay: p })
@@ -88,6 +91,49 @@ export function EditorPanel(): JSX.Element {
                 </button>
               ))}
             </div>
+          </Field>
+
+          <Field label="세로 위치">
+            <div className="flex gap-1">
+              {(['top', 'middle', 'bottom'] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setOverlay({ vAlign: v })}
+                  className={
+                    'px-2 py-1 rounded border text-[11px] ' +
+                    (o.vAlign === v
+                      ? 'bg-accent/20 border-accent text-white'
+                      : 'bg-panel2 border-line text-slate-300')
+                  }
+                >
+                  {v === 'top' ? '상단' : v === 'middle' ? '중앙' : '하단'}
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          <Field label="위치조정">
+            <input
+              type="range"
+              min={-40}
+              max={40}
+              value={o.offsetY}
+              onChange={(e) => setOverlay({ offsetY: Number(e.target.value) })}
+              className="flex-1 accent-accent"
+            />
+            <span className="w-8 text-right text-slate-300">{o.offsetY}</span>
+          </Field>
+
+          <Field label="줄 수">
+            <input
+              type="range"
+              min={1}
+              max={8}
+              value={maxLines}
+              onChange={(e) => void setMaxLines(Number(e.target.value))}
+              className="flex-1 accent-accent"
+            />
+            <span className="w-8 text-right text-slate-300">{maxLines}줄</span>
           </Field>
 
           <Field label="그림자">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLive } from '../store/live'
+import { useDeck } from '../store/deck'
 import { PreviewPanel } from './PreviewPanel'
 import { QuickPanel } from './QuickPanel'
 import { EditorPanel } from './EditorPanel'
@@ -23,6 +24,7 @@ export function ControlApp(): JSX.Element {
   useEffect(() => {
     let unsub = (): void => {}
     void init().then((fn) => (unsub = fn))
+    void useDeck.getState().initSettings()
     return () => unsub()
   }, [init])
 
