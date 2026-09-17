@@ -309,6 +309,12 @@ app.whenReady().then(() => {
     setSetting('seeded.playlists', '1')
   }
 
+  // 저장된 출력 비율 복원
+  const savedAspect = getSetting('render.aspect')
+  if (savedAspect === '16:9' || savedAspect === '4:3' || savedAspect === 'fill') {
+    liveState = { ...liveState, aspect: savedAspect }
+  }
+
   registerMediaProtocol()
 
   // 카메라(라이브 배경)·전체화면 등 미디어 권한 허용

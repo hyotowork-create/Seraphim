@@ -101,6 +101,9 @@ export const DEFAULT_TRANSITION: Transition = { type: 'fade', durationMs: 400 }
 /** 미디어 선택 종류 */
 export type PickKind = 'image' | 'video' | 'audio'
 
+/** 출력 비율 (프로젝터 대응) */
+export type OutputAspect = '16:9' | '4:3' | 'fill'
+
 /** 현재 송출 상태 (main이 단일 진실원으로 보유, Output/프리뷰가 구독) */
 export interface LiveState {
   /** 현재 슬라이드 텍스트 (여러 줄 가능) */
@@ -111,6 +114,8 @@ export interface LiveState {
   showLogo: boolean
   /** 일시정지 (P) — 전환 잠금 */
   paused: boolean
+  /** 출력 비율 */
+  aspect: OutputAspect
   background: Background
   overlay: OverlayStyle
   transition: Transition
@@ -153,6 +158,7 @@ export const DEFAULT_LIVE_STATE: LiveState = {
   blackout: false,
   showLogo: false,
   paused: false,
+  aspect: '16:9',
   background: DEFAULT_BACKGROUND,
   overlay: DEFAULT_OVERLAY,
   transition: DEFAULT_TRANSITION

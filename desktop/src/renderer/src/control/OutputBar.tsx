@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react'
-import type { DisplayInfo } from '@shared/ipc'
+import type { DisplayInfo, OutputAspect } from '@shared/ipc'
+import { useLive } from '../store/live'
 
 /** [3] 상단 — 출력 대상(디스플레이) 선택 + 송출 창 열기/닫기/전체화면 */
 export function OutputBar(): JSX.Element {
   const [displays, setDisplays] = useState<DisplayInfo[]>([])
   const [selected, setSelected] = useState<number | undefined>(undefined)
   const [open, setOpen] = useState(false)
+  const aspect = useLive((s) => s.state.aspect)
+  const patch = useLive((s) => s.patch)
+
+  const setAspect = (a: OutputAspect): void => {
+    void patch({ aspect: a })
+    void window.seraphim.setSetting('render.aspect', a)
+  }
 
   useEffect(() => {
     void window.seraphim.listDisplays().then((d) => {
@@ -63,7 +71,17 @@ export function OutputBar(): JSX.Element {
         전체화면 전환
       </button>
 
-      <span className="ml-auto text-[11px] text-slate-500">1920×1080 기준 자동 스케일</span>
+      <span className="ml-auto text-xs text-slate-400">비율</span>
+      <select
+        value={aspect}
+        onChange={(e) => setAspect(e.target.value as OutputAspect)}
+        className="bg-black/40 border border-line rounded px-2 py-1 text-xs text-slate-200 outline-none"
+        title="출력 비율 (프로젝터에 맞춤)"
+      >
+        <option value="16:9">16:9</option>
+        <option value="4:3">4:3</option>
+        <option value="fill">화면 채우기</option>
+      </select>
     </div>
   )
 }
