@@ -15,6 +15,10 @@ interface UiStore {
   bibleEditId: number | null
   openBibleEditor: (id?: number | null) => void
   closeBibleEditor: () => void
+  /** 악보에서 가져오기 */
+  scoreOpen: boolean
+  openScore: () => void
+  closeScore: () => void
 }
 
 export const useUi = create<UiStore>((set) => ({
@@ -28,5 +32,8 @@ export const useUi = create<UiStore>((set) => ({
   bibleEditorOpen: false,
   bibleEditId: null,
   openBibleEditor: (id = null) => set({ bibleEditorOpen: true, bibleEditId: id }),
-  closeBibleEditor: () => set({ bibleEditorOpen: false })
+  closeBibleEditor: () => set({ bibleEditorOpen: false }),
+  scoreOpen: false,
+  openScore: () => set({ scoreOpen: true }),
+  closeScore: () => set({ scoreOpen: false })
 }))

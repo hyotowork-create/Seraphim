@@ -22,6 +22,7 @@ export function LibraryPanel(): JSX.Element {
   const openEditor = useUi((s) => s.openEditor)
   const openBibleEditor = useUi((s) => s.openBibleEditor)
   const openPicker = useUi((s) => s.openPicker)
+  const openScore = useUi((s) => s.openScore)
   const pl = usePlaylist()
   const [q, setQ] = useState('')
   const [newName, setNewName] = useState<string | null>(null)
@@ -76,12 +77,21 @@ export function LibraryPanel(): JSX.Element {
             + 새 말씀
           </button>
         ) : (
-          <button
-            onClick={() => openEditor(null)}
-            className="text-[11px] px-2 py-0.5 rounded bg-accent/20 border border-accent text-white hover:bg-accent/30"
-          >
-            + 새 곡
-          </button>
+          <div className="flex gap-1">
+            <button
+              onClick={openScore}
+              className="text-[11px] px-2 py-0.5 rounded bg-panel2 border border-line text-slate-200 hover:border-slate-500"
+              title="악보 이미지에서 가사 추출"
+            >
+              악보
+            </button>
+            <button
+              onClick={() => openEditor(null)}
+              className="text-[11px] px-2 py-0.5 rounded bg-accent/20 border border-accent text-white hover:bg-accent/30"
+            >
+              + 새 곡
+            </button>
+          </div>
         )}
       </div>
 

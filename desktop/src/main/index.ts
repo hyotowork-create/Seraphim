@@ -34,6 +34,7 @@ import {
   seedDefaultPlaylists
 } from './db/playlists'
 import { listBible, getBible, saveBible, deleteBible } from './db/bible'
+import { extractLyricsGemini, setGeminiKey, getGeminiKey, hasGeminiKey } from './gemini'
 import {
   IPC,
   DEFAULT_LIVE_STATE,
@@ -46,7 +47,9 @@ import {
   type PlaylistItemType,
   type BibleInput,
   type PickKind,
-  type MediaType
+  type MediaType,
+  type ExtractMethod,
+  type ExtractedSong
 } from '../shared/ipc'
 
 // 커스텀 미디어 스킴을 privileged로 등록 (app ready 이전 필수)
@@ -143,6 +146,12 @@ function registerIpc(): void {
         dir: 'audio',
         type: 'audio' as MediaType,
         filters: [{ name: '오디오', extensions: ['mp3', 'm4a', 'wav', 'ogg', 'aac'] }]
+      },
+      score: {
+        title: '악보 이미지 선택',
+        dir: 'scores',
+        type: 'score' as MediaType,
+        filters: [{ name: '이미지', extensions: ['jpg', 'jpeg', 'png', 'webp'] }]
       }
     }[kind]
 
@@ -267,6 +276,28 @@ function registerIpc(): void {
     reorderPlaylistItems(playlistId, orderedIds)
     return true
   })
+
+  // 악보 가사 추출 (M6)
+  ipcMain.handle(IPC.GEMINI_HAS_KEY, () => hasGeminiKey())
+  ipcMain.handle(IPC.GEMINI_SET_KEY, (_e, key: string) => {
+    setGeminiKey(key)
+    return true
+  })
+  ipcMain.handle(
+    IPC.SCORE_EXTRACT,
+    async (_e, relPath: string, method: ExtractMethod): Promise<ExtractedSong> => {
+      const abs = join(getDataDir(), relPath)
+      const data = await readFile(abs)
+      const ext = extname(abs).toLowerCase()
+      const mime = MIME[ext] ?? 'image/png'
+      if (method === 'ocr') {
+        throw new Error('로컬 OCR은 다음 단계에서 제공됩니다. 지금은 Gemini 방식을 사용하세요.')
+      }
+      const key = getGeminiKey()
+      if (!key) throw new Error('설정에서 Gemini API 키를 먼저 입력하세요.')
+      return extractLyricsGemini(data.toString('base64'), mime, key)
+    }
+  )
 
   // 성경 (M4b)
   ipcMain.handle(IPC.BIBLE_LIST, (_e, search?: string) => listBible(search))

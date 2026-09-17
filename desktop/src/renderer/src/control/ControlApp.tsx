@@ -14,6 +14,7 @@ import { SlideListPanel } from './SlideListPanel'
 import { SongEditorModal } from './SongEditorModal'
 import { SongPickerModal } from './SongPickerModal'
 import { BibleEditorModal } from './BibleEditorModal'
+import { ScoreImportModal } from './ScoreImportModal'
 import { useShortcuts } from './useShortcuts'
 
 export function ControlApp(): JSX.Element {
@@ -47,6 +48,7 @@ export function ControlApp(): JSX.Element {
       <SongEditorModal />
       <SongPickerModal />
       <BibleEditorModal />
+      <ScoreImportModal />
 
       {/* 본문: 좌 라이브러리 / 중 슬라이드 / 프리뷰+퀵 */}
       <div className="flex-1 grid grid-cols-[240px_260px_1fr] gap-2 p-2 min-h-0">

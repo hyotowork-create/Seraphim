@@ -1,5 +1,76 @@
 import { useEffect, useState } from 'react'
-import type { DataDirInfo, DbStats } from '@shared/ipc'
+import type { DataDirInfo, DbStats, ExtractMethod } from '@shared/ipc'
+
+/** 악보 가사 추출 설정 — Gemini API 키(무료 티어) + 방식 */
+function GeminiSection(): JSX.Element {
+  const [hasKey, setHasKey] = useState(false)
+  const [key, setKey] = useState('')
+  const [method, setMethod] = useState<ExtractMethod>('gemini')
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    void window.seraphim.hasGeminiKey().then(setHasKey)
+    void window.seraphim.getSetting('extract.method').then((m) => {
+      if (m === 'ocr' || m === 'gemini') setMethod(m)
+    })
+  }, [])
+
+  const saveKey = async (): Promise<void> => {
+    await window.seraphim.setGeminiKey(key)
+    setKey('')
+    setHasKey(await window.seraphim.hasGeminiKey())
+    setSaved(true)
+    setTimeout(() => setSaved(false), 1500)
+  }
+
+  const changeMethod = (m: ExtractMethod): void => {
+    setMethod(m)
+    void window.seraphim.setSetting('extract.method', m)
+  }
+
+  return (
+    <section>
+      <h3 className="text-sm font-semibold text-accent mb-2">악보 가사 추출 (Gemini)</h3>
+      <div className="rounded-lg bg-panel2/60 border border-line p-3 space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-400 w-20 shrink-0">API 키</span>
+          <input
+            type="password"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            placeholder={hasKey ? '저장됨 (다시 입력해 변경)' : 'Gemini API 키 입력'}
+            className="flex-1 bg-black/40 border border-line rounded px-2 py-1 text-sm text-slate-100 outline-none focus:border-accent"
+          />
+          <button
+            onClick={() => void saveKey()}
+            disabled={!key.trim()}
+            className="px-3 py-1 rounded bg-accent/20 border border-accent text-sm text-white hover:bg-accent/30 disabled:opacity-40"
+          >
+            {saved ? '저장됨' : '저장'}
+          </button>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-400 w-20 shrink-0">추출 방식</span>
+          <select
+            value={method}
+            onChange={(e) => changeMethod(e.target.value as ExtractMethod)}
+            className="bg-black/40 border border-line rounded px-2 py-1 text-sm text-slate-100"
+          >
+            <option value="gemini">Gemini Vision (온라인)</option>
+            <option value="ocr">로컬 OCR (준비 중)</option>
+          </select>
+          <span className={'text-[11px] ' + (hasKey ? 'text-emerald-400' : 'text-slate-500')}>
+            {hasKey ? '● 키 저장됨' : '키 없음'}
+          </span>
+        </div>
+        <p className="text-[11px] text-slate-500 leading-relaxed">
+          키는 이 PC에 안전하게 저장됩니다(가능 시 OS 암호화). Google AI Studio에서 무료로 발급받을 수
+          있습니다. 라이브러리 상단 “악보” 버튼으로 악보 사진에서 가사를 추출하세요.
+        </p>
+      </div>
+    </section>
+  )
+}
 
 interface Props {
   onClose: () => void
@@ -101,6 +172,9 @@ export function SettingsModal({ onClose }: Props): JSX.Element {
               </span>
             </p>
           </section>
+
+          {/* 악보 가사 추출 */}
+          <GeminiSection />
 
           {/* 백업/복원 */}
           <section>

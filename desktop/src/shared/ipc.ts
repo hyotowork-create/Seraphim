@@ -40,7 +40,11 @@ export const IPC = {
   BIBLE_LIST: 'bible:list',
   BIBLE_GET: 'bible:get',
   BIBLE_SAVE: 'bible:save',
-  BIBLE_DELETE: 'bible:delete'
+  BIBLE_DELETE: 'bible:delete',
+  // 악보 가사 추출 (M6)
+  SCORE_EXTRACT: 'score:extract',
+  GEMINI_SET_KEY: 'gemini:set-key',
+  GEMINI_HAS_KEY: 'gemini:has-key'
 } as const
 
 /** 찬양 카테고리 */
@@ -99,7 +103,16 @@ export interface Transition {
 export const DEFAULT_TRANSITION: Transition = { type: 'fade', durationMs: 400 }
 
 /** 미디어 선택 종류 */
-export type PickKind = 'image' | 'video' | 'audio'
+export type PickKind = 'image' | 'video' | 'audio' | 'score'
+
+/** 악보 가사 추출 방식 */
+export type ExtractMethod = 'gemini' | 'ocr'
+
+/** 가사 추출 결과 */
+export interface ExtractedSong {
+  title: string
+  verses: { label: string; lines: string[] }[]
+}
 
 /** 출력 비율 (프로젝터 대응) */
 export type OutputAspect = '16:9' | '4:3' | 'fill'

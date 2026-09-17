@@ -17,7 +17,9 @@ import {
   type PlaylistItemType,
   type BibleListItem,
   type BibleDetail,
-  type BibleInput
+  type BibleInput,
+  type ExtractMethod,
+  type ExtractedSong
 } from '../shared/ipc'
 
 function resolveRole(): WindowRole {
@@ -45,6 +47,7 @@ const api = {
   pickBackgroundVideo: (): Promise<PickedMedia | null> =>
     ipcRenderer.invoke(IPC.MEDIA_PICK, 'video'),
   pickAudio: (): Promise<PickedMedia | null> => ipcRenderer.invoke(IPC.MEDIA_PICK, 'audio'),
+  pickScore: (): Promise<PickedMedia | null> => ipcRenderer.invoke(IPC.MEDIA_PICK, 'score'),
   openOutput: (displayId?: number): Promise<boolean> =>
     ipcRenderer.invoke(IPC.OUTPUT_OPEN, displayId),
   closeOutput: (): Promise<boolean> => ipcRenderer.invoke(IPC.OUTPUT_CLOSE),
@@ -97,7 +100,13 @@ const api = {
     ipcRenderer.invoke(IPC.BIBLE_LIST, search),
   getBible: (id: number): Promise<BibleDetail | null> => ipcRenderer.invoke(IPC.BIBLE_GET, id),
   saveBible: (input: BibleInput): Promise<number> => ipcRenderer.invoke(IPC.BIBLE_SAVE, input),
-  deleteBible: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.BIBLE_DELETE, id)
+  deleteBible: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.BIBLE_DELETE, id),
+
+  // 악보 가사 추출 (M6)
+  extractScore: (relPath: string, method: ExtractMethod): Promise<ExtractedSong> =>
+    ipcRenderer.invoke(IPC.SCORE_EXTRACT, relPath, method),
+  hasGeminiKey: (): Promise<boolean> => ipcRenderer.invoke(IPC.GEMINI_HAS_KEY),
+  setGeminiKey: (key: string): Promise<boolean> => ipcRenderer.invoke(IPC.GEMINI_SET_KEY, key)
 }
 
 export type SeraphimApi = typeof api
