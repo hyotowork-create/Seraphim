@@ -4,6 +4,8 @@ import { PreviewPanel } from './PreviewPanel'
 import { QuickPanel } from './QuickPanel'
 import { EditorPanel } from './EditorPanel'
 import { MediaPanel } from './MediaPanel'
+import { AudioPanel } from './AudioPanel'
+import { TransitionPanel } from './TransitionPanel'
 import { OutputBar } from './OutputBar'
 import { SettingsModal } from './SettingsModal'
 import { LibraryPanel } from './LibraryPanel'
@@ -12,17 +14,6 @@ import { SongEditorModal } from './SongEditorModal'
 import { SongPickerModal } from './SongPickerModal'
 import { BibleEditorModal } from './BibleEditorModal'
 import { useShortcuts } from './useShortcuts'
-
-function Placeholder({ title, note }: { title: string; note: string }): JSX.Element {
-  return (
-    <div className="flex flex-col h-full border border-line rounded-lg bg-panel2/40 p-3">
-      <div className="text-xs font-semibold text-slate-300 mb-2">{title}</div>
-      <div className="flex-1 flex items-center justify-center text-[11px] text-slate-500 text-center px-2">
-        {note}
-      </div>
-    </div>
-  )
-}
 
 export function ControlApp(): JSX.Element {
   const init = useLive((s) => s.init)
@@ -74,8 +65,8 @@ export function ControlApp(): JSX.Element {
       <div className="grid grid-cols-[1fr_260px_220px_200px] gap-2 p-2 pt-0 h-[240px] shrink-0">
         <EditorPanel />
         <MediaPanel />
-        <Placeholder title="[7] 오디오" note="MP3 재생·볼륨 (M5)" />
-        <Placeholder title="[8] 전환 효과" note="Fade·지속시간·자동전환 (M5)" />
+        <AudioPanel />
+        <TransitionPanel />
       </div>
     </div>
   )

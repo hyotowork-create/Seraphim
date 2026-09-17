@@ -17,6 +17,8 @@ export const IPC = {
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',
   DB_STATS: 'db:stats',
+  BACKUP_EXPORT: 'backup:export',
+  BACKUP_IMPORT: 'backup:import',
   // 곡/가사 (M2)
   SONG_LIST: 'song:list',
   SONG_GET: 'song:get',
@@ -60,8 +62,8 @@ export interface OverlayStyle {
   shadow: boolean
 }
 
-/** 배경 소스 종류: 단색 / 이미지 / 라이브 카메라 */
-export type BackgroundKind = 'color' | 'image' | 'camera'
+/** 배경 소스 종류: 단색 / 이미지 / 영상 / 라이브 카메라 */
+export type BackgroundKind = 'color' | 'image' | 'video' | 'camera'
 
 export interface Background {
   kind: BackgroundKind
@@ -70,7 +72,10 @@ export interface Background {
   /** kind==='image' — 앱 미디어 프로토콜(seraphim-media://) URL */
   imageUrl?: string
   imageName?: string
-  /** kind==='image' — media 테이블 id (곡별 배경 저장용) */
+  /** kind==='video' */
+  videoUrl?: string
+  videoName?: string
+  /** kind==='image'|'video' — media 테이블 id (곡별 배경 저장용) */
   mediaId?: number
   /** kind==='camera' — MediaDeviceInfo.deviceId */
   cameraDeviceId?: string
@@ -78,6 +83,18 @@ export interface Background {
   /** 배경 위에 덧입히는 어둡게(가독성용) 0~1 */
   dim: number
 }
+
+/** 슬라이드 전환 효과 */
+export interface Transition {
+  type: 'none' | 'fade'
+  /** 지속 시간 ms */
+  durationMs: number
+}
+
+export const DEFAULT_TRANSITION: Transition = { type: 'fade', durationMs: 400 }
+
+/** 미디어 선택 종류 */
+export type PickKind = 'image' | 'video' | 'audio'
 
 /** 현재 송출 상태 (main이 단일 진실원으로 보유, Output/프리뷰가 구독) */
 export interface LiveState {
@@ -91,11 +108,13 @@ export interface LiveState {
   paused: boolean
   background: Background
   overlay: OverlayStyle
+  transition: Transition
 }
 
-export type LivePatch = Partial<Omit<LiveState, 'overlay' | 'background'>> & {
+export type LivePatch = Partial<Omit<LiveState, 'overlay' | 'background' | 'transition'>> & {
   overlay?: Partial<OverlayStyle>
   background?: Partial<Background>
+  transition?: Partial<Transition>
 }
 
 export interface DisplayInfo {
@@ -128,7 +147,8 @@ export const DEFAULT_LIVE_STATE: LiveState = {
   showLogo: false,
   paused: false,
   background: DEFAULT_BACKGROUND,
-  overlay: DEFAULT_OVERLAY
+  overlay: DEFAULT_OVERLAY,
+  transition: DEFAULT_TRANSITION
 }
 
 // ── 데이터 폴더 / DB (M1) ─────────────────────────────

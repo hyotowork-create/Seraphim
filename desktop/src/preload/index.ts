@@ -40,7 +40,11 @@ const api = {
   },
 
   listDisplays: (): Promise<DisplayInfo[]> => ipcRenderer.invoke(IPC.DISPLAYS_LIST),
-  pickBackgroundImage: (): Promise<PickedMedia | null> => ipcRenderer.invoke(IPC.MEDIA_PICK),
+  pickBackgroundImage: (): Promise<PickedMedia | null> =>
+    ipcRenderer.invoke(IPC.MEDIA_PICK, 'image'),
+  pickBackgroundVideo: (): Promise<PickedMedia | null> =>
+    ipcRenderer.invoke(IPC.MEDIA_PICK, 'video'),
+  pickAudio: (): Promise<PickedMedia | null> => ipcRenderer.invoke(IPC.MEDIA_PICK, 'audio'),
   openOutput: (displayId?: number): Promise<boolean> =>
     ipcRenderer.invoke(IPC.OUTPUT_OPEN, displayId),
   closeOutput: (): Promise<boolean> => ipcRenderer.invoke(IPC.OUTPUT_CLOSE),
@@ -55,6 +59,8 @@ const api = {
   setSetting: (key: string, value: string): Promise<boolean> =>
     ipcRenderer.invoke(IPC.SETTINGS_SET, key, value),
   dbStats: (): Promise<DbStats> => ipcRenderer.invoke(IPC.DB_STATS),
+  exportBackup: (): Promise<string | null> => ipcRenderer.invoke(IPC.BACKUP_EXPORT),
+  importBackup: (): Promise<boolean> => ipcRenderer.invoke(IPC.BACKUP_IMPORT),
 
   // 곡/가사 (M2)
   listSongs: (filter: SongFilter): Promise<SongListItem[]> =>

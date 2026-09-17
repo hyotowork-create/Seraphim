@@ -5,6 +5,7 @@ import type { BackgroundKind } from '@shared/ipc'
 const TABS: { key: BackgroundKind; label: string }[] = [
   { key: 'color', label: '단색' },
   { key: 'image', label: '이미지' },
+  { key: 'video', label: '영상' },
   { key: 'camera', label: '카메라' }
 ]
 
@@ -42,6 +43,12 @@ export function MediaPanel(): JSX.Element {
     const r = await window.seraphim.pickBackgroundImage()
     if (r)
       await patch({ background: { kind: 'image', imageUrl: r.url, imageName: r.name, mediaId: r.id } })
+  }
+
+  const pickVideo = async (): Promise<void> => {
+    const r = await window.seraphim.pickBackgroundVideo()
+    if (r)
+      await patch({ background: { kind: 'video', videoUrl: r.url, videoName: r.name, mediaId: r.id } })
   }
 
   const chooseCamera = (id: string): void => {
@@ -95,6 +102,23 @@ export function MediaPanel(): JSX.Element {
             <div className="truncate text-slate-400">
               {bg.imageName ? `선택됨: ${bg.imageName}` : '선택된 이미지 없음'}
             </div>
+          </div>
+        )}
+
+        {bg.kind === 'video' && (
+          <div className="space-y-2">
+            <button
+              onClick={() => void pickVideo()}
+              className="w-full px-2 py-2 rounded bg-accent/20 border border-accent text-white hover:bg-accent/30"
+            >
+              영상 파일 선택…
+            </button>
+            <div className="truncate text-slate-400">
+              {bg.videoName ? `선택됨: ${bg.videoName}` : '선택된 영상 없음'}
+            </div>
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              배경 영상은 자동 반복·무음으로 재생됩니다.
+            </p>
           </div>
         )}
 

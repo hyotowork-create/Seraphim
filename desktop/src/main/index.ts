@@ -11,6 +11,7 @@ import {
 import { initDataDir, setDataDir, getDataDir, dbPath, dataDirInfo } from './datadir'
 import { openDb, closeDb } from './db'
 import { getSetting, setSetting, insertMedia, dbStats } from './db/dao'
+import { exportZip, importZip } from './backup'
 import {
   listSongs,
   getSong,
@@ -43,7 +44,9 @@ import {
   type SongFilter,
   type SongInput,
   type PlaylistItemType,
-  type BibleInput
+  type BibleInput,
+  type PickKind,
+  type MediaType
 } from '../shared/ipc'
 
 // 커스텀 미디어 스킴을 privileged로 등록 (app ready 이전 필수)
@@ -87,7 +90,8 @@ function applyPatch(patch: LivePatch): LiveState {
     ...liveState,
     ...patch,
     overlay: { ...liveState.overlay, ...(patch.overlay ?? {}) },
-    background: { ...liveState.background, ...(patch.background ?? {}) }
+    background: { ...liveState.background, ...(patch.background ?? {}) },
+    transition: { ...liveState.transition, ...(patch.transition ?? {}) }
   }
   broadcastLiveState()
   return liveState
@@ -120,18 +124,39 @@ function registerIpc(): void {
   ipcMain.handle(IPC.OUTPUT_TOGGLE_FULLSCREEN, () => toggleOutputFullscreen())
 
   // 미디어 선택 → 데이터 폴더로 복사(상대경로 저장) → DB 등록
-  ipcMain.handle(IPC.MEDIA_PICK, async (): Promise<PickedMedia | null> => {
+  ipcMain.handle(IPC.MEDIA_PICK, async (_e, kind: PickKind = 'image'): Promise<PickedMedia | null> => {
+    const spec = {
+      image: {
+        title: '배경 이미지 선택',
+        dir: 'backgrounds',
+        type: 'background' as MediaType,
+        filters: [{ name: '이미지', extensions: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'] }]
+      },
+      video: {
+        title: '배경 영상 선택',
+        dir: 'videos',
+        type: 'video' as MediaType,
+        filters: [{ name: '영상', extensions: ['mp4', 'webm', 'mov', 'm4v'] }]
+      },
+      audio: {
+        title: '오디오(MP3) 선택',
+        dir: 'audio',
+        type: 'audio' as MediaType,
+        filters: [{ name: '오디오', extensions: ['mp3', 'm4a', 'wav', 'ogg', 'aac'] }]
+      }
+    }[kind]
+
     const r = await dialog.showOpenDialog({
-      title: '배경 이미지 선택',
+      title: spec.title,
       properties: ['openFile'],
-      filters: [{ name: '이미지', extensions: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'] }]
+      filters: spec.filters
     })
     const src = r.filePaths[0]
     if (r.canceled || !src) return null
-    const ext = (extname(src) || '.png').toLowerCase()
-    const relPath = join('media', 'backgrounds', `${randomUUID()}${ext}`)
+    const ext = (extname(src) || '').toLowerCase()
+    const relPath = join('media', spec.dir, `${randomUUID()}${ext}`)
     await copyFile(src, join(getDataDir(), relPath))
-    const row = insertMedia('background', relPath, basename(src))
+    const row = insertMedia(spec.type, relPath, basename(src))
     return { id: row.id, url: mediaUrl(row.relPath), relPath: row.relPath, name: row.name }
   })
 
@@ -156,6 +181,38 @@ function registerIpc(): void {
     return true
   })
   ipcMain.handle(IPC.DB_STATS, () => dbStats())
+
+  // 백업/복원 (.zip)
+  ipcMain.handle(IPC.BACKUP_EXPORT, async () => {
+    const stamp = new Date().toISOString().slice(0, 10)
+    const r = await dialog.showSaveDialog({
+      title: '프로젝트 내보내기 (.zip)',
+      defaultPath: `Seraphim-backup-${stamp}.zip`,
+      filters: [{ name: 'Zip', extensions: ['zip'] }]
+    })
+    if (r.canceled || !r.filePath) return null
+    exportZip(r.filePath)
+    return r.filePath
+  })
+  ipcMain.handle(IPC.BACKUP_IMPORT, async () => {
+    const r = await dialog.showOpenDialog({
+      title: '프로젝트 가져오기 (.zip)',
+      properties: ['openFile'],
+      filters: [{ name: 'Zip', extensions: ['zip'] }]
+    })
+    const src = r.filePaths[0]
+    if (r.canceled || !src) return false
+    const ok = await dialog.showMessageBox({
+      type: 'warning',
+      buttons: ['취소', '가져오기(덮어쓰기)'],
+      defaultId: 1,
+      cancelId: 0,
+      message: '현재 데이터 폴더의 DB와 미디어를 백업 내용으로 덮어씁니다. 계속할까요?'
+    })
+    if (ok.response !== 1) return false
+    importZip(src)
+    return true
+  })
 
   // 곡/가사 (M2)
   ipcMain.handle(IPC.SONG_LIST, (_e, filter: SongFilter) => listSongs(filter))

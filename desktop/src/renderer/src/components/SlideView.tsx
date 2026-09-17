@@ -68,6 +68,19 @@ function BackgroundLayer({
       <img src={bg.imageUrl} alt="" className="w-full h-full object-cover" draggable={false} />
     )
   }
+  if (bg.kind === 'video' && bg.videoUrl) {
+    return (
+      <video
+        key={bg.videoUrl}
+        src={bg.videoUrl}
+        className="w-full h-full object-cover"
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+    )
+  }
   if (bg.kind === 'camera') {
     if (cameraPlaceholder) {
       return (
@@ -113,6 +126,10 @@ export function SlideView({ state, scale, cameraPlaceholder }: Props): JSX.Eleme
   const justify =
     o.align === 'left' ? 'justify-start' : o.align === 'right' ? 'justify-end' : 'justify-center'
 
+  const fade = state.transition?.type === 'fade'
+  const dur = state.transition?.durationMs ?? 0
+  const contentKey = `${state.showLogo ? 'logo' : 'text'}|${state.text}`
+
   return (
     <div className="relative w-full h-full overflow-hidden bg-black">
       {/* 배경 레이어 */}
@@ -126,8 +143,12 @@ export function SlideView({ state, scale, cameraPlaceholder }: Props): JSX.Eleme
           style={{ opacity: state.background.dim }}
         />
       )}
-      {/* 콘텐츠 (로고 / 가사) */}
-      <div className={`absolute inset-0 flex items-center ${justify}`}>
+      {/* 콘텐츠 (로고 / 가사) — 전환 시 페이드 인 (key 변경으로 애니메이션 재생) */}
+      <div
+        key={fade ? contentKey : undefined}
+        className={`absolute inset-0 flex items-center ${justify}`}
+        style={fade && dur > 0 ? { animation: `seraphimFade ${dur}ms ease` } : undefined}
+      >
         {state.showLogo ? (
           <div
             className="w-full text-center font-bold tracking-[0.3em] text-white/90 select-none"

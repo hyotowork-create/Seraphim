@@ -17,11 +17,13 @@
     "build:mac": "electron-vite build && electron-builder --mac"
   },
   "dependencies": {
+    "adm-zip": "^0.5.14",
     "better-sqlite3": "^11.3.0",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.6.0",
+    "@types/adm-zip": "^0.5.5",
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^20.16.5",
     "@types/react": "^18.3.5",

@@ -102,6 +102,39 @@ export function SettingsModal({ onClose }: Props): JSX.Element {
             </p>
           </section>
 
+          {/* 백업/복원 */}
+          <section>
+            <h3 className="text-sm font-semibold text-accent mb-2">백업 / 복원 (.zip)</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  const p = await window.seraphim.exportBackup()
+                  if (p) alert(`내보내기 완료:\n${p}`)
+                }}
+                className="px-3 py-2 rounded bg-panel2 border border-line text-sm text-slate-200 hover:border-slate-500"
+              >
+                내보내기…
+              </button>
+              <button
+                onClick={async () => {
+                  const ok = await window.seraphim.importBackup()
+                  if (ok) {
+                    await refresh()
+                    alert('가져오기 완료. 라이브러리를 새로고침했습니다.')
+                    location.reload()
+                  }
+                }}
+                className="px-3 py-2 rounded bg-panel2 border border-line text-sm text-slate-200 hover:border-slate-500"
+              >
+                가져오기…
+              </button>
+            </div>
+            <p className="mt-2 text-[11px] text-slate-500 leading-relaxed">
+              DB와 모든 미디어를 하나의 .zip으로 묶어 USB로 옮기거나 보관할 수 있습니다. 오프라인
+              교회 PC에서 “가져오기”로 그대로 복원됩니다.
+            </p>
+          </section>
+
           {/* DB 현황 */}
           <section>
             <h3 className="text-sm font-semibold text-accent mb-2">데이터베이스 현황</h3>

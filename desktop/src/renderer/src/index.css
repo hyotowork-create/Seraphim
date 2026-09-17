@@ -19,3 +19,13 @@ body.seraphim-output {
   overflow: hidden;
   cursor: none;
 }
+
+/* 슬라이드 전환 페이드 인 */
+@keyframes seraphimFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
