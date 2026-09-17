@@ -10,6 +10,11 @@ interface UiStore {
   pickerOpen: boolean
   openPicker: () => void
   closePicker: () => void
+  /** 성경 편집기 (null = 신규) */
+  bibleEditorOpen: boolean
+  bibleEditId: number | null
+  openBibleEditor: (id?: number | null) => void
+  closeBibleEditor: () => void
 }
 
 export const useUi = create<UiStore>((set) => ({
@@ -19,5 +24,9 @@ export const useUi = create<UiStore>((set) => ({
   closeEditor: () => set({ editorOpen: false }),
   pickerOpen: false,
   openPicker: () => set({ pickerOpen: true }),
-  closePicker: () => set({ pickerOpen: false })
+  closePicker: () => set({ pickerOpen: false }),
+  bibleEditorOpen: false,
+  bibleEditId: null,
+  openBibleEditor: (id = null) => set({ bibleEditorOpen: true, bibleEditId: id }),
+  closeBibleEditor: () => set({ bibleEditorOpen: false })
 }))

@@ -14,7 +14,10 @@ import {
   type SongDetail,
   type Playlist,
   type PlaylistItem,
-  type PlaylistItemType
+  type PlaylistItemType,
+  type BibleListItem,
+  type BibleDetail,
+  type BibleInput
 } from '../shared/ipc'
 
 function resolveRole(): WindowRole {
@@ -81,7 +84,14 @@ const api = {
   removePlaylistItem: (itemId: number): Promise<boolean> =>
     ipcRenderer.invoke(IPC.PLAYLIST_REMOVE, itemId),
   reorderPlaylistItems: (playlistId: number, orderedIds: number[]): Promise<boolean> =>
-    ipcRenderer.invoke(IPC.PLAYLIST_REORDER, playlistId, orderedIds)
+    ipcRenderer.invoke(IPC.PLAYLIST_REORDER, playlistId, orderedIds),
+
+  // 성경 (M4b)
+  listBible: (search?: string): Promise<BibleListItem[]> =>
+    ipcRenderer.invoke(IPC.BIBLE_LIST, search),
+  getBible: (id: number): Promise<BibleDetail | null> => ipcRenderer.invoke(IPC.BIBLE_GET, id),
+  saveBible: (input: BibleInput): Promise<number> => ipcRenderer.invoke(IPC.BIBLE_SAVE, input),
+  deleteBible: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.BIBLE_DELETE, id)
 }
 
 export type SeraphimApi = typeof api

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { SongDetail, SongInput } from '@shared/ipc'
+import type { SongInput } from '@shared/ipc'
 import { paginate } from '@shared/lyrics'
 
 /** 송출 단위 = 페이지(4줄 기준). 긴 절은 여러 페이지로 나뉜다. */
@@ -11,9 +11,25 @@ export interface Page {
   text: string
 }
 
-function buildPages(song: SongDetail): Page[] {
+export interface DeckVerse {
+  id: number
+  label: string | null
+  text: string
+}
+
+/** 현재 로드된 소스 (곡 또는 성경) */
+export interface Loaded {
+  kind: 'song' | 'bible'
+  id: number
+  title: string
+  bgMediaId: number | null
+  bgUrl: string | null
+  verses: DeckVerse[]
+}
+
+function buildPages(verses: DeckVerse[]): Page[] {
   const pages: Page[] = []
-  song.verses.forEach((v, vi) => {
+  verses.forEach((v, vi) => {
     const chunks = paginate(v.text)
     chunks.forEach((text, pi) =>
       pages.push({
@@ -29,10 +45,11 @@ function buildPages(song: SongDetail): Page[] {
 }
 
 interface DeckStore {
-  song: SongDetail | null
+  loaded: Loaded | null
   pages: Page[]
   activeIndex: number
-  load: (id: number) => Promise<void>
+  load: (id: number) => Promise<void> // 곡 로드 (기존 호환)
+  loadBible: (id: number) => Promise<void>
   reloadCurrent: () => Promise<void>
   clear: () => void
   goTo: (pageIndex: number) => Promise<void>
@@ -44,35 +61,52 @@ interface DeckStore {
 }
 
 export const useDeck = create<DeckStore>((set, get) => ({
-  song: null,
+  loaded: null,
   pages: [],
   activeIndex: -1,
 
   load: async (id) => {
-    const song = await window.seraphim.getSong(id)
-    set({ song, pages: song ? buildPages(song) : [], activeIndex: -1 })
-    if (!song) return
+    const s = await window.seraphim.getSong(id)
+    if (!s) return
+    const loaded: Loaded = {
+      kind: 'song',
+      id: s.id,
+      title: s.title,
+      bgMediaId: s.bgMediaId,
+      bgUrl: s.bgUrl,
+      verses: s.verses.map((v) => ({ id: v.id, label: v.label, text: v.text }))
+    }
+    set({ loaded, pages: buildPages(loaded.verses), activeIndex: -1 })
     void window.seraphim.touchSong(id)
-    // 곡에 저장된 배경이 있으면 자동 적용, 없으면 현재 배경 유지
-    if (song.bgUrl) {
+    if (s.bgUrl) {
       await window.seraphim.setLive({
-        background: { kind: 'image', imageUrl: song.bgUrl, mediaId: song.bgMediaId ?? undefined }
+        background: { kind: 'image', imageUrl: s.bgUrl, mediaId: s.bgMediaId ?? undefined }
       })
     }
   },
 
-  reloadCurrent: async () => {
-    const id = get().song?.id
-    if (id == null) return
-    const song = await window.seraphim.getSong(id)
-    set((s) => ({
-      song,
-      pages: song ? buildPages(song) : [],
-      activeIndex: song ? Math.min(s.activeIndex, buildPages(song).length - 1) : -1
-    }))
+  loadBible: async (id) => {
+    const b = await window.seraphim.getBible(id)
+    if (!b) return
+    const loaded: Loaded = {
+      kind: 'bible',
+      id: b.id,
+      title: b.reference,
+      bgMediaId: null,
+      bgUrl: null,
+      verses: b.verses.map((v, i) => ({ id: i, label: v.label, text: v.text }))
+    }
+    set({ loaded, pages: buildPages(loaded.verses), activeIndex: -1 })
   },
 
-  clear: () => set({ song: null, pages: [], activeIndex: -1 }),
+  reloadCurrent: async () => {
+    const cur = get().loaded
+    if (!cur) return
+    if (cur.kind === 'song') await get().load(cur.id)
+    else await get().loadBible(cur.id)
+  },
+
+  clear: () => set({ loaded: null, pages: [], activeIndex: -1 }),
 
   goTo: async (pageIndex) => {
     const { pages } = get()
@@ -99,19 +133,21 @@ export const useDeck = create<DeckStore>((set, get) => ({
   },
 
   reorderVerses: async (from, to) => {
-    const { song } = get()
-    if (!song || from === to) return
-    const verses = [...song.verses]
+    const cur = get().loaded
+    if (!cur || cur.kind !== 'song' || from === to) return
+    const s = await window.seraphim.getSong(cur.id)
+    if (!s) return
+    const verses = [...s.verses]
     const [moved] = verses.splice(from, 1)
     verses.splice(to, 0, moved)
     const input: SongInput = {
-      id: song.id,
-      title: song.title,
-      category: song.category,
-      favorite: song.favorite,
-      subtitle: song.subtitle,
-      author: song.author,
-      copyright: song.copyright,
+      id: s.id,
+      title: s.title,
+      category: s.category,
+      favorite: s.favorite,
+      subtitle: s.subtitle,
+      author: s.author,
+      copyright: s.copyright,
       verses: verses.map((v) => ({ label: v.label, text: v.text }))
     }
     await window.seraphim.saveSong(input)
@@ -119,9 +155,9 @@ export const useDeck = create<DeckStore>((set, get) => ({
   },
 
   setSongBackground: async (mediaId) => {
-    const id = get().song?.id
-    if (id == null) return
-    await window.seraphim.setSongBackground(id, mediaId)
+    const cur = get().loaded
+    if (!cur || cur.kind !== 'song') return
+    await window.seraphim.setSongBackground(cur.id, mediaId)
     await get().reloadCurrent()
   }
 }))

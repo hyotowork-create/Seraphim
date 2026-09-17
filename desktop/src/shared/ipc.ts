@@ -33,7 +33,12 @@ export const IPC = {
   PLAYLIST_ITEMS: 'playlist:items',
   PLAYLIST_ADD: 'playlist:add',
   PLAYLIST_REMOVE: 'playlist:remove',
-  PLAYLIST_REORDER: 'playlist:reorder'
+  PLAYLIST_REORDER: 'playlist:reorder',
+  // 성경 (M4b)
+  BIBLE_LIST: 'bible:list',
+  BIBLE_GET: 'bible:get',
+  BIBLE_SAVE: 'bible:save',
+  BIBLE_DELETE: 'bible:delete'
 } as const
 
 /** 찬양 카테고리 */
@@ -245,4 +250,33 @@ export interface PlaylistItem {
   title: string
   /** 부가 정보(카테고리 등) */
   subtitle?: string
+}
+
+// ── 성경 슬라이드 (M4b) ───────────────────────────────
+
+export interface BibleListItem {
+  id: number
+  reference: string
+  translation: string | null
+  verseCount: number
+}
+
+export interface BibleDetail {
+  id: number
+  book: string
+  chapter: number
+  verseRange: string
+  translation: string | null
+  reference: string
+  text: string
+  verses: { label: string | null; text: string }[]
+}
+
+export interface BibleInput {
+  id?: number
+  book: string
+  chapter: number
+  verseRange: string
+  translation?: string | null
+  text: string
 }

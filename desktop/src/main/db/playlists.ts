@@ -1,4 +1,5 @@
 import { getDb } from './index'
+import { bibleReference } from './bible'
 import type { Playlist, PlaylistItem, PlaylistItemType } from '../../shared/ipc'
 
 const DEFAULT_PLAYLISTS = ['주일1부', '주일2부', '수요예배', '금요기도회', '청년부']
@@ -56,6 +57,9 @@ export function getPlaylistItems(playlistId: number): PlaylistItem[] {
     if (r.item_type === 'song') {
       title = r.song_title ?? '(삭제된 곡)'
       subtitle = r.song_category ?? undefined
+    } else if (r.item_type === 'bible') {
+      title = (r.ref_id != null ? bibleReference(r.ref_id) : null) ?? '(삭제된 말씀)'
+      subtitle = '성경'
     } else if (r.item_type === 'blank') {
       title = '검정 화면'
     } else if (r.item_type === 'logo') {

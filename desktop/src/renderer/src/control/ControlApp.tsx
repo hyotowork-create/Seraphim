@@ -10,6 +10,7 @@ import { LibraryPanel } from './LibraryPanel'
 import { SlideListPanel } from './SlideListPanel'
 import { SongEditorModal } from './SongEditorModal'
 import { SongPickerModal } from './SongPickerModal'
+import { BibleEditorModal } from './BibleEditorModal'
 import { useShortcuts } from './useShortcuts'
 
 function Placeholder({ title, note }: { title: string; note: string }): JSX.Element {
@@ -52,6 +53,7 @@ export function ControlApp(): JSX.Element {
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
       <SongEditorModal />
       <SongPickerModal />
+      <BibleEditorModal />
 
       {/* 본문: 좌 라이브러리 / 중 슬라이드 / 프리뷰+퀵 */}
       <div className="flex-1 grid grid-cols-[240px_260px_1fr] gap-2 p-2 min-h-0">

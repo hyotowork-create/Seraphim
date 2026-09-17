@@ -32,6 +32,7 @@ import {
   reorderPlaylistItems,
   seedDefaultPlaylists
 } from './db/playlists'
+import { listBible, getBible, saveBible, deleteBible } from './db/bible'
 import {
   IPC,
   DEFAULT_LIVE_STATE,
@@ -41,7 +42,8 @@ import {
   type PickedMedia,
   type SongFilter,
   type SongInput,
-  type PlaylistItemType
+  type PlaylistItemType,
+  type BibleInput
 } from '../shared/ipc'
 
 // 커스텀 미디어 스킴을 privileged로 등록 (app ready 이전 필수)
@@ -206,6 +208,15 @@ function registerIpc(): void {
   })
   ipcMain.handle(IPC.PLAYLIST_REORDER, (_e, playlistId: number, orderedIds: number[]) => {
     reorderPlaylistItems(playlistId, orderedIds)
+    return true
+  })
+
+  // 성경 (M4b)
+  ipcMain.handle(IPC.BIBLE_LIST, (_e, search?: string) => listBible(search))
+  ipcMain.handle(IPC.BIBLE_GET, (_e, id: number) => getBible(id))
+  ipcMain.handle(IPC.BIBLE_SAVE, (_e, input: BibleInput) => saveBible(input))
+  ipcMain.handle(IPC.BIBLE_DELETE, (_e, id: number) => {
+    deleteBible(id)
     return true
   })
 }
