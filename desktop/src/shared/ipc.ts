@@ -24,7 +24,16 @@ export const IPC = {
   SONG_DELETE: 'song:delete',
   SONG_FAVORITE: 'song:favorite',
   SONG_TOUCH: 'song:touch',
-  SONG_SET_BG: 'song:set-bg'
+  SONG_SET_BG: 'song:set-bg',
+  // 플레이리스트 (M4)
+  PLAYLIST_LIST: 'playlist:list',
+  PLAYLIST_CREATE: 'playlist:create',
+  PLAYLIST_RENAME: 'playlist:rename',
+  PLAYLIST_DELETE: 'playlist:delete',
+  PLAYLIST_ITEMS: 'playlist:items',
+  PLAYLIST_ADD: 'playlist:add',
+  PLAYLIST_REMOVE: 'playlist:remove',
+  PLAYLIST_REORDER: 'playlist:reorder'
 } as const
 
 /** 찬양 카테고리 */
@@ -215,4 +224,25 @@ export interface SongFilter {
   scope: 'all' | 'favorite' | 'recent' | 'category'
   category?: string
   search?: string
+}
+
+// ── 플레이리스트 (M4) ─────────────────────────────────
+
+export type PlaylistItemType = 'song' | 'bible' | 'media' | 'blank' | 'logo'
+
+export interface Playlist {
+  id: number
+  name: string
+  itemCount: number
+}
+
+export interface PlaylistItem {
+  id: number
+  itemType: PlaylistItemType
+  refId: number | null
+  orderIndex: number
+  /** 표시용 제목 (song이면 곡 제목 등) */
+  title: string
+  /** 부가 정보(카테고리 등) */
+  subtitle?: string
 }

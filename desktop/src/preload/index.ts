@@ -11,7 +11,10 @@ import {
   type SongFilter,
   type SongInput,
   type SongListItem,
-  type SongDetail
+  type SongDetail,
+  type Playlist,
+  type PlaylistItem,
+  type PlaylistItemType
 } from '../shared/ipc'
 
 function resolveRole(): WindowRole {
@@ -60,7 +63,25 @@ const api = {
     ipcRenderer.invoke(IPC.SONG_FAVORITE, id, favorite),
   touchSong: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.SONG_TOUCH, id),
   setSongBackground: (songId: number, mediaId: number | null): Promise<boolean> =>
-    ipcRenderer.invoke(IPC.SONG_SET_BG, songId, mediaId)
+    ipcRenderer.invoke(IPC.SONG_SET_BG, songId, mediaId),
+
+  // 플레이리스트 (M4)
+  listPlaylists: (): Promise<Playlist[]> => ipcRenderer.invoke(IPC.PLAYLIST_LIST),
+  createPlaylist: (name: string): Promise<number> => ipcRenderer.invoke(IPC.PLAYLIST_CREATE, name),
+  renamePlaylist: (id: number, name: string): Promise<boolean> =>
+    ipcRenderer.invoke(IPC.PLAYLIST_RENAME, id, name),
+  deletePlaylist: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.PLAYLIST_DELETE, id),
+  playlistItems: (playlistId: number): Promise<PlaylistItem[]> =>
+    ipcRenderer.invoke(IPC.PLAYLIST_ITEMS, playlistId),
+  addPlaylistItem: (
+    playlistId: number,
+    itemType: PlaylistItemType,
+    refId: number | null
+  ): Promise<number> => ipcRenderer.invoke(IPC.PLAYLIST_ADD, playlistId, itemType, refId),
+  removePlaylistItem: (itemId: number): Promise<boolean> =>
+    ipcRenderer.invoke(IPC.PLAYLIST_REMOVE, itemId),
+  reorderPlaylistItems: (playlistId: number, orderedIds: number[]): Promise<boolean> =>
+    ipcRenderer.invoke(IPC.PLAYLIST_REORDER, playlistId, orderedIds)
 }
 
 export type SeraphimApi = typeof api

@@ -22,6 +22,17 @@ import {
   getMediaRelPath
 } from './db/songs'
 import {
+  listPlaylists,
+  createPlaylist,
+  renamePlaylist,
+  deletePlaylist,
+  getPlaylistItems,
+  addPlaylistItem,
+  removePlaylistItem,
+  reorderPlaylistItems,
+  seedDefaultPlaylists
+} from './db/playlists'
+import {
   IPC,
   DEFAULT_LIVE_STATE,
   type LiveState,
@@ -29,7 +40,8 @@ import {
   type DisplayInfo,
   type PickedMedia,
   type SongFilter,
-  type SongInput
+  type SongInput,
+  type PlaylistItemType
 } from '../shared/ipc'
 
 // 커스텀 미디어 스킴을 privileged로 등록 (app ready 이전 필수)
@@ -170,6 +182,32 @@ function registerIpc(): void {
     touchSong(id)
     return true
   })
+
+  // 플레이리스트 (M4)
+  ipcMain.handle(IPC.PLAYLIST_LIST, () => listPlaylists())
+  ipcMain.handle(IPC.PLAYLIST_CREATE, (_e, name: string) => createPlaylist(name))
+  ipcMain.handle(IPC.PLAYLIST_RENAME, (_e, id: number, name: string) => {
+    renamePlaylist(id, name)
+    return true
+  })
+  ipcMain.handle(IPC.PLAYLIST_DELETE, (_e, id: number) => {
+    deletePlaylist(id)
+    return true
+  })
+  ipcMain.handle(IPC.PLAYLIST_ITEMS, (_e, playlistId: number) => getPlaylistItems(playlistId))
+  ipcMain.handle(
+    IPC.PLAYLIST_ADD,
+    (_e, playlistId: number, itemType: PlaylistItemType, refId: number | null) =>
+      addPlaylistItem(playlistId, itemType, refId)
+  )
+  ipcMain.handle(IPC.PLAYLIST_REMOVE, (_e, itemId: number) => {
+    removePlaylistItem(itemId)
+    return true
+  })
+  ipcMain.handle(IPC.PLAYLIST_REORDER, (_e, playlistId: number, orderedIds: number[]) => {
+    reorderPlaylistItems(playlistId, orderedIds)
+    return true
+  })
 }
 
 /** 커스텀 미디어 프로토콜: 데이터 폴더 기준 상대경로 파일 서빙 (경로 탈출 차단) */
@@ -196,6 +234,12 @@ app.whenReady().then(() => {
   // 데이터 폴더 + DB 초기화 (멀티 PC 이동성 기반)
   initDataDir()
   openDb(dbPath())
+
+  // 예배별 기본 플레이리스트 시드 (최초 1회 — 이후 사용자가 지워도 재생성 안 함)
+  if (getSetting('seeded.playlists') !== '1') {
+    seedDefaultPlaylists()
+    setSetting('seeded.playlists', '1')
+  }
 
   registerMediaProtocol()
 
