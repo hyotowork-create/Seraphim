@@ -1,4 +1,5 @@
 import { useLive } from '../store/live'
+import { useDeck } from '../store/deck'
 
 interface BtnProps {
   label: string
@@ -30,12 +31,14 @@ function QuickButton({ label, keyHint, active, onClick }: BtnProps): JSX.Element
 export function QuickPanel(): JSX.Element {
   const state = useLive((s) => s.state)
   const patch = useLive((s) => s.patch)
+  const next = useDeck((s) => s.next)
+  const prev = useDeck((s) => s.prev)
 
   return (
     <div className="flex flex-col border border-line rounded-lg bg-panel2/40 p-2 gap-2">
       <div className="text-xs font-semibold text-slate-300">[4] 빠른 기능</div>
-      <QuickButton label="다음 슬라이드" keyHint="Space" onClick={() => {}} />
-      <QuickButton label="이전 슬라이드" keyHint="⌫" onClick={() => {}} />
+      <QuickButton label="다음 슬라이드" keyHint="Space" onClick={() => void next()} />
+      <QuickButton label="이전 슬라이드" keyHint="⌫" onClick={() => void prev()} />
       <QuickButton
         label="검정 화면"
         keyHint="B"
@@ -55,7 +58,7 @@ export function QuickPanel(): JSX.Element {
         onClick={() => patch({ paused: !state.paused })}
       />
       <p className="mt-auto text-[10px] text-slate-500 leading-relaxed">
-        다음/이전은 슬라이드 목록 연동 후 동작합니다 (M2/M3).
+        곡 선택 후 Space/⌫ 또는 슬라이드 클릭으로 절을 송출합니다.
       </p>
     </div>
   )

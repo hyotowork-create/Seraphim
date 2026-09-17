@@ -6,6 +6,9 @@ import { EditorPanel } from './EditorPanel'
 import { MediaPanel } from './MediaPanel'
 import { OutputBar } from './OutputBar'
 import { SettingsModal } from './SettingsModal'
+import { LibraryPanel } from './LibraryPanel'
+import { SlideListPanel } from './SlideListPanel'
+import { SongEditorModal } from './SongEditorModal'
 import { useShortcuts } from './useShortcuts'
 
 function Placeholder({ title, note }: { title: string; note: string }): JSX.Element {
@@ -46,16 +49,12 @@ export function ControlApp(): JSX.Element {
       </header>
 
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+      <SongEditorModal />
 
       {/* 본문: 좌 라이브러리 / 중 슬라이드 / 프리뷰+퀵 */}
-      <div className="flex-1 grid grid-cols-[220px_240px_1fr] gap-2 p-2 min-h-0">
-        {/* [1] 라이브러리 트리 + 플레이리스트 */}
-        <Placeholder
-          title="[1] 라이브러리"
-          note="전체·즐겨찾기·찬양·성경말씀·미디어·플레이리스트 (M2)"
-        />
-        {/* [2] 슬라이드 목록 */}
-        <Placeholder title="[2] 슬라이드 목록" note="선택 곡/말씀의 절별 썸네일 (M2/M3)" />
+      <div className="flex-1 grid grid-cols-[240px_260px_1fr] gap-2 p-2 min-h-0">
+        <LibraryPanel />
+        <SlideListPanel />
 
         {/* 중앙: 출력바 + [3] 프리뷰 + [4] 빠른 기능 */}
         <div className="flex flex-col gap-2 min-h-0">

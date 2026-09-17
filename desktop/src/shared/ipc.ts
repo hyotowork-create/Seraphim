@@ -16,8 +16,19 @@ export const IPC = {
   DATADIR_OPEN: 'datadir:open',
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',
-  DB_STATS: 'db:stats'
+  DB_STATS: 'db:stats',
+  // 곡/가사 (M2)
+  SONG_LIST: 'song:list',
+  SONG_GET: 'song:get',
+  SONG_SAVE: 'song:save',
+  SONG_DELETE: 'song:delete',
+  SONG_FAVORITE: 'song:favorite',
+  SONG_TOUCH: 'song:touch'
 } as const
+
+/** 찬양 카테고리 */
+export const SONG_CATEGORIES = ['새찬송가', '복음성가', '워십', '어린이', '특송'] as const
+export type SongCategory = (typeof SONG_CATEGORIES)[number]
 
 export type WindowRole = 'control' | 'output'
 
@@ -148,4 +159,53 @@ export interface PickedMedia {
   url: string
   relPath: string
   name: string
+}
+
+// ── 곡/가사 (M2) ──────────────────────────────────────
+
+export interface Verse {
+  id: number
+  label: string | null
+  orderIndex: number
+  text: string
+}
+
+/** 라이브러리 목록용 요약 */
+export interface SongListItem {
+  id: number
+  title: string
+  category: string
+  favorite: boolean
+  verseCount: number
+}
+
+/** 곡 상세 (편집/송출용) */
+export interface SongDetail {
+  id: number
+  title: string
+  category: string
+  favorite: boolean
+  subtitle: string | null
+  author: string | null
+  copyright: string | null
+  verses: Verse[]
+}
+
+/** 저장 입력 (id 없으면 신규) */
+export interface SongInput {
+  id?: number
+  title: string
+  category: string
+  favorite?: boolean
+  subtitle?: string | null
+  author?: string | null
+  copyright?: string | null
+  verses: { label?: string | null; text: string }[]
+}
+
+/** 라이브러리 필터 */
+export interface SongFilter {
+  scope: 'all' | 'favorite' | 'recent' | 'category'
+  category?: string
+  search?: string
 }

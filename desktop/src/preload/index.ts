@@ -7,7 +7,11 @@ import {
   type WindowRole,
   type PickedMedia,
   type DataDirInfo,
-  type DbStats
+  type DbStats,
+  type SongFilter,
+  type SongInput,
+  type SongListItem,
+  type SongDetail
 } from '../shared/ipc'
 
 function resolveRole(): WindowRole {
@@ -44,7 +48,17 @@ const api = {
   getSetting: (key: string): Promise<string | null> => ipcRenderer.invoke(IPC.SETTINGS_GET, key),
   setSetting: (key: string, value: string): Promise<boolean> =>
     ipcRenderer.invoke(IPC.SETTINGS_SET, key, value),
-  dbStats: (): Promise<DbStats> => ipcRenderer.invoke(IPC.DB_STATS)
+  dbStats: (): Promise<DbStats> => ipcRenderer.invoke(IPC.DB_STATS),
+
+  // 곡/가사 (M2)
+  listSongs: (filter: SongFilter): Promise<SongListItem[]> =>
+    ipcRenderer.invoke(IPC.SONG_LIST, filter),
+  getSong: (id: number): Promise<SongDetail | null> => ipcRenderer.invoke(IPC.SONG_GET, id),
+  saveSong: (input: SongInput): Promise<number> => ipcRenderer.invoke(IPC.SONG_SAVE, input),
+  deleteSong: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.SONG_DELETE, id),
+  setSongFavorite: (id: number, favorite: boolean): Promise<boolean> =>
+    ipcRenderer.invoke(IPC.SONG_FAVORITE, id, favorite),
+  touchSong: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.SONG_TOUCH, id)
 }
 
 export type SeraphimApi = typeof api

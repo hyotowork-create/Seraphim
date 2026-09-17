@@ -12,12 +12,22 @@ import { initDataDir, setDataDir, getDataDir, dbPath, dataDirInfo } from './data
 import { openDb, closeDb } from './db'
 import { getSetting, setSetting, insertMedia, dbStats } from './db/dao'
 import {
+  listSongs,
+  getSong,
+  saveSong,
+  deleteSong,
+  setFavorite,
+  touchSong
+} from './db/songs'
+import {
   IPC,
   DEFAULT_LIVE_STATE,
   type LiveState,
   type LivePatch,
   type DisplayInfo,
-  type PickedMedia
+  type PickedMedia,
+  type SongFilter,
+  type SongInput
 } from '../shared/ipc'
 
 // 커스텀 미디어 스킴을 privileged로 등록 (app ready 이전 필수)
@@ -130,6 +140,23 @@ function registerIpc(): void {
     return true
   })
   ipcMain.handle(IPC.DB_STATS, () => dbStats())
+
+  // 곡/가사 (M2)
+  ipcMain.handle(IPC.SONG_LIST, (_e, filter: SongFilter) => listSongs(filter))
+  ipcMain.handle(IPC.SONG_GET, (_e, id: number) => getSong(id))
+  ipcMain.handle(IPC.SONG_SAVE, (_e, input: SongInput) => saveSong(input))
+  ipcMain.handle(IPC.SONG_DELETE, (_e, id: number) => {
+    deleteSong(id)
+    return true
+  })
+  ipcMain.handle(IPC.SONG_FAVORITE, (_e, id: number, favorite: boolean) => {
+    setFavorite(id, favorite)
+    return true
+  })
+  ipcMain.handle(IPC.SONG_TOUCH, (_e, id: number) => {
+    touchSong(id)
+    return true
+  })
 }
 
 /** 커스텀 미디어 프로토콜: 데이터 폴더 기준 상대경로 파일 서빙 (경로 탈출 차단) */
