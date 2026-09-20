@@ -2,6 +2,13 @@ appId: com.seraphim.app
 productName: Seraphim
 copyright: Copyright © Seraphim
 
+# publish provider를 명시 (없으면 dmg 후 updateInfo 생성 중
+#  "Cannot read properties of null (reading 'channel')" 크래시)
+publish:
+  provider: github
+  owner: hyotowork-create
+  repo: Seraphim
+
 directories:
   output: release
   buildResources: resources
