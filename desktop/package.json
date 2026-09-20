@@ -4,6 +4,10 @@
   "description": "Seraphim — 예배 송출·자막·주보 통합 데스크톱 앱",
   "author": "Seraphim",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyotowork-create/Seraphim.git"
+  },
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
