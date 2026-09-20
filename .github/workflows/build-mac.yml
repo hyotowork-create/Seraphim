@@ -1,0 +1,58 @@
+name: Build macOS app (.dmg)
+
+# 수동 실행(Actions 탭 → Run workflow) 또는 v* 태그 푸시 시 빌드
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: build-mac-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14 # Apple Silicon
+            arch: arm64
+          - runner: macos-13 # Intel
+            arch: x64
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      # 의존성 설치 (postinstall이 better-sqlite3를 Electron ABI로 리빌드)
+      - name: Install deps
+        run: npm ci
+
+      # 렌더러/메인 번들
+      - name: Bundle
+        run: npm run build
+
+      # .dmg 빌드 (서명 없이 — 첫 실행은 우클릭→열기)
+      - name: Build dmg
+        run: npx electron-builder --mac dmg --${{ matrix.arch }} --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload dmg
+        uses: actions/upload-artifact@v4
+        with:
+          name: Seraphim-mac-${{ matrix.arch }}
+          path: desktop/release/*.dmg
+          if-no-files-found: error
+          retention-days: 30
