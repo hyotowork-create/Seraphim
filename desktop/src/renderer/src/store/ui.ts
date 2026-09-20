@@ -19,6 +19,10 @@ interface UiStore {
   scoreOpen: boolean
   openScore: () => void
   closeScore: () => void
+  /** 온라인 주보 발행 */
+  bulletinOpen: boolean
+  openBulletin: () => void
+  closeBulletin: () => void
 }
 
 export const useUi = create<UiStore>((set) => ({
@@ -35,5 +39,8 @@ export const useUi = create<UiStore>((set) => ({
   closeBibleEditor: () => set({ bibleEditorOpen: false }),
   scoreOpen: false,
   openScore: () => set({ scoreOpen: true }),
-  closeScore: () => set({ scoreOpen: false })
+  closeScore: () => set({ scoreOpen: false }),
+  bulletinOpen: false,
+  openBulletin: () => set({ bulletinOpen: true }),
+  closeBulletin: () => set({ bulletinOpen: false })
 }))

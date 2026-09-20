@@ -35,6 +35,10 @@ import {
 } from './db/playlists'
 import { listBible, getBible, saveBible, deleteBible } from './db/bible'
 import { extractLyricsGemini, setGeminiKey, getGeminiKey, hasGeminiKey } from './gemini'
+import { listBulletins, getBulletin, saveBulletin, deleteBulletin } from './db/bulletins'
+import { buildBulletinHtml, type BulletinData } from '../shared/bulletin'
+import QRCode from 'qrcode'
+import { writeFile } from 'fs/promises'
 import {
   IPC,
   DEFAULT_LIVE_STATE,
@@ -306,6 +310,31 @@ function registerIpc(): void {
   ipcMain.handle(IPC.BIBLE_DELETE, (_e, id: number) => {
     deleteBible(id)
     return true
+  })
+
+  // 온라인 주보 (M7)
+  ipcMain.handle(IPC.BULLETIN_LIST, () => listBulletins())
+  ipcMain.handle(IPC.BULLETIN_GET, (_e, id: number) => getBulletin(id))
+  ipcMain.handle(IPC.BULLETIN_SAVE, (_e, data: BulletinData, id?: number) => saveBulletin(data, id))
+  ipcMain.handle(IPC.BULLETIN_DELETE, (_e, id: number) => {
+    deleteBulletin(id)
+    return true
+  })
+  ipcMain.handle(IPC.BULLETIN_PUBLISH, async (_e, data: BulletinData) => {
+    const html = buildBulletinHtml(data)
+    const defaultName = `bulletin-${data.date || 'untitled'}.html`
+    const r = await dialog.showSaveDialog({
+      title: '주보 HTML 저장',
+      defaultPath: join(getDataDir(), 'exports', defaultName),
+      filters: [{ name: 'HTML', extensions: ['html'] }]
+    })
+    if (r.canceled || !r.filePath) return null
+    await writeFile(r.filePath, html, 'utf8')
+    return r.filePath
+  })
+  ipcMain.handle(IPC.BULLETIN_QR, async (_e, url: string) => {
+    const dataUrl = await QRCode.toDataURL(url, { width: 512, margin: 1 })
+    return dataUrl
   })
 }
 

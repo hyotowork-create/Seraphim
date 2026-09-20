@@ -19,8 +19,10 @@ import {
   type BibleDetail,
   type BibleInput,
   type ExtractMethod,
-  type ExtractedSong
+  type ExtractedSong,
+  type BulletinListItem
 } from '../shared/ipc'
+import type { BulletinData } from '../shared/bulletin'
 
 function resolveRole(): WindowRole {
   const arg = process.argv.find((a) => a.startsWith('--seraphim-role='))
@@ -106,7 +108,18 @@ const api = {
   extractScore: (relPath: string, method: ExtractMethod): Promise<ExtractedSong> =>
     ipcRenderer.invoke(IPC.SCORE_EXTRACT, relPath, method),
   hasGeminiKey: (): Promise<boolean> => ipcRenderer.invoke(IPC.GEMINI_HAS_KEY),
-  setGeminiKey: (key: string): Promise<boolean> => ipcRenderer.invoke(IPC.GEMINI_SET_KEY, key)
+  setGeminiKey: (key: string): Promise<boolean> => ipcRenderer.invoke(IPC.GEMINI_SET_KEY, key),
+
+  // 온라인 주보 (M7)
+  listBulletins: (): Promise<BulletinListItem[]> => ipcRenderer.invoke(IPC.BULLETIN_LIST),
+  getBulletin: (id: number): Promise<(BulletinData & { id: number }) | null> =>
+    ipcRenderer.invoke(IPC.BULLETIN_GET, id),
+  saveBulletin: (data: BulletinData, id?: number): Promise<number> =>
+    ipcRenderer.invoke(IPC.BULLETIN_SAVE, data, id),
+  deleteBulletin: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.BULLETIN_DELETE, id),
+  publishBulletin: (data: BulletinData): Promise<string | null> =>
+    ipcRenderer.invoke(IPC.BULLETIN_PUBLISH, data),
+  bulletinQr: (url: string): Promise<string> => ipcRenderer.invoke(IPC.BULLETIN_QR, url)
 }
 
 export type SeraphimApi = typeof api

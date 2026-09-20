@@ -19,6 +19,7 @@
   "dependencies": {
     "adm-zip": "^0.5.14",
     "better-sqlite3": "^11.3.0",
+    "qrcode": "^1.5.4",
     "zustand": "^4.5.5"
   },
   "devDependencies": {
@@ -26,6 +27,7 @@
     "@types/adm-zip": "^0.5.5",
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^20.16.5",
+    "@types/qrcode": "^1.5.5",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",

@@ -44,7 +44,14 @@ export const IPC = {
   // 악보 가사 추출 (M6)
   SCORE_EXTRACT: 'score:extract',
   GEMINI_SET_KEY: 'gemini:set-key',
-  GEMINI_HAS_KEY: 'gemini:has-key'
+  GEMINI_HAS_KEY: 'gemini:has-key',
+  // 온라인 주보 (M7)
+  BULLETIN_LIST: 'bulletin:list',
+  BULLETIN_GET: 'bulletin:get',
+  BULLETIN_SAVE: 'bulletin:save',
+  BULLETIN_DELETE: 'bulletin:delete',
+  BULLETIN_PUBLISH: 'bulletin:publish',
+  BULLETIN_QR: 'bulletin:qr'
 } as const
 
 /** 찬양 카테고리 */
@@ -112,6 +119,15 @@ export type ExtractMethod = 'gemini' | 'ocr'
 export interface ExtractedSong {
   title: string
   verses: { label: string; lines: string[] }[]
+}
+
+// ── 온라인 주보 (M7) ─────────────────────────────────
+
+export interface BulletinListItem {
+  id: number
+  serviceDate: string
+  churchName: string | null
+  serviceType: string | null
 }
 
 /** 출력 비율 (프로젝터 대응) */

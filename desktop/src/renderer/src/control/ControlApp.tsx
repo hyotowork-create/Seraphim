@@ -15,11 +15,14 @@ import { SongEditorModal } from './SongEditorModal'
 import { SongPickerModal } from './SongPickerModal'
 import { BibleEditorModal } from './BibleEditorModal'
 import { ScoreImportModal } from './ScoreImportModal'
+import { BulletinModal } from './BulletinModal'
+import { useUi } from '../store/ui'
 import { useShortcuts } from './useShortcuts'
 
 export function ControlApp(): JSX.Element {
   const init = useLive((s) => s.init)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const openBulletin = useUi((s) => s.openBulletin)
   useShortcuts()
 
   useEffect(() => {
@@ -36,12 +39,18 @@ export function ControlApp(): JSX.Element {
         <span className="font-bold tracking-wide text-accent">SERAPHIM</span>
         <span className="text-xs text-slate-400">예배 송출 · 자막 · 주보</span>
         <button
-          onClick={() => setSettingsOpen(true)}
+          onClick={openBulletin}
           className="ml-auto px-3 py-1 rounded border border-line bg-panel text-xs text-slate-200 hover:border-slate-500"
+        >
+          📰 주보 발행
+        </button>
+        <button
+          onClick={() => setSettingsOpen(true)}
+          className="px-3 py-1 rounded border border-line bg-panel text-xs text-slate-200 hover:border-slate-500"
         >
           ⚙️ 설정
         </button>
-        <span className="text-[11px] text-slate-500">v0.1 · M1</span>
+        <span className="text-[11px] text-slate-500">v0.1</span>
       </header>
 
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
@@ -49,6 +58,7 @@ export function ControlApp(): JSX.Element {
       <SongPickerModal />
       <BibleEditorModal />
       <ScoreImportModal />
+      <BulletinModal />
 
       {/* 본문: 좌 라이브러리 / 중 슬라이드 / 프리뷰+퀵 */}
       <div className="flex-1 grid grid-cols-[240px_260px_1fr] gap-2 p-2 min-h-0">
