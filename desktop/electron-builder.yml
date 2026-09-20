@@ -1,0 +1,40 @@
+appId: com.seraphim.app
+productName: Seraphim
+copyright: Copyright © Seraphim
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - out/**/*
+  - package.json
+
+# 네이티브 모듈(better-sqlite3 등)은 asar 밖으로 언팩 — M1에서 DB 도입 시 사용
+asarUnpack:
+  - "**/*.node"
+  - "**/node_modules/better-sqlite3/**"
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: Seraphim
+
+portable:
+  artifactName: Seraphim-${version}-portable.exe
+
+# macOS 후순위
+mac:
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  category: public.app-category.productivity
