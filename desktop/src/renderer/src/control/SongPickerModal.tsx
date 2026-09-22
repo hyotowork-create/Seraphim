@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { SongListItem } from '@shared/ipc'
 import { useUi } from '../store/ui'
 import { usePlaylist } from '../store/playlist'
+import { SyncInput } from '../components/SyncField'
 
 /** 플레이리스트에 곡 추가 — 전체 곡 목록에서 선택 */
 export function SongPickerModal(): JSX.Element | null {
@@ -44,10 +45,10 @@ export function SongPickerModal(): JSX.Element | null {
           </button>
         </div>
         <div className="p-3 border-b border-line">
-          <input
+          <SyncInput
             autoFocus
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onValue={setQ}
             placeholder="곡 검색…"
             className="w-full bg-black/40 border border-line rounded px-3 py-1.5 text-sm text-slate-100 outline-none focus:border-accent"
           />

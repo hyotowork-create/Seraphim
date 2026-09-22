@@ -5,6 +5,7 @@ import { useBible } from '../store/bible'
 import { useDeck } from '../store/deck'
 import { useUi } from '../store/ui'
 import { usePlaylist } from '../store/playlist'
+import { SyncInput } from '../components/SyncField'
 
 function isActive(f: SongFilter, scope: SongFilter['scope'], category?: string): boolean {
   if (scope === 'category') return f.scope === 'category' && f.category === category
@@ -188,11 +189,11 @@ export function LibraryPanel(): JSX.Element {
           {section === 'song' ? (
             <>
               <div className="p-2 border-b border-line">
-                <input
+                <SyncInput
                   value={q}
-                  onChange={(e) => {
-                    setQ(e.target.value)
-                    void setSearch(e.target.value)
+                  onValue={(v) => {
+                    setQ(v)
+                    void setSearch(v)
                   }}
                   placeholder="곡 검색…"
                   className="w-full bg-black/40 border border-line rounded px-2 py-1 text-xs text-slate-100 outline-none focus:border-accent"
@@ -239,9 +240,9 @@ export function LibraryPanel(): JSX.Element {
           ) : (
             <>
               <div className="p-2 border-b border-line">
-                <input
+                <SyncInput
                   value={bible.search}
-                  onChange={(e) => void bible.setSearch(e.target.value)}
+                  onValue={(v) => void bible.setSearch(v)}
                   placeholder="말씀 검색 (책/본문)…"
                   className="w-full bg-black/40 border border-line rounded px-2 py-1 text-xs text-slate-100 outline-none focus:border-accent"
                 />
@@ -290,10 +291,10 @@ export function LibraryPanel(): JSX.Element {
           </button>
         </div>
         {newName !== null && (
-          <input
+          <SyncInput
             autoFocus
             value={newName}
-            onChange={(e) => setNewName(e.target.value)}
+            onValue={setNewName}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && newName.trim()) {
                 void pl.create(newName.trim())

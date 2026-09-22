@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { buildBulletinHtml, type BulletinData } from '@shared/bulletin'
 import type { Playlist } from '@shared/ipc'
 import { useUi } from '../store/ui'
+import { SyncInput, SyncTextarea } from '../components/SyncField'
 
 const linesToArr = (s: string): string[] =>
   s
@@ -107,10 +108,10 @@ export function BulletinModal(): JSX.Element | null {
           <div className="overflow-auto p-5 space-y-3 border-r border-line">
             <div className="grid grid-cols-3 gap-2">
               <Labeled label="교회명">
-                <input value={church} onChange={(e) => setChurch(e.target.value)} className={inputCls} placeholder="○○교회" />
+                <SyncInput value={church} onValue={setChurch} className={inputCls} placeholder="○○교회" />
               </Labeled>
               <Labeled label="예배 종류">
-                <input value={serviceType} onChange={(e) => setServiceType(e.target.value)} className={inputCls} />
+                <SyncInput value={serviceType} onValue={setServiceType} className={inputCls} />
               </Labeled>
               <Labeled label="날짜">
                 <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
@@ -118,7 +119,7 @@ export function BulletinModal(): JSX.Element | null {
             </div>
 
             <Labeled label="예배 순서 (한 줄에 하나: 순서명, 담당자)">
-              <textarea value={orderText} onChange={(e) => setOrderText(e.target.value)} rows={5} className={inputCls} />
+              <SyncTextarea value={orderText} onValue={setOrderText} rows={5} className={inputCls} />
             </Labeled>
 
             <div>
@@ -144,29 +145,29 @@ export function BulletinModal(): JSX.Element | null {
                   불러오기
                 </button>
               </div>
-              <textarea value={songsText} onChange={(e) => setSongsText(e.target.value)} rows={3} className={inputCls} placeholder="곡 제목 (한 줄에 하나)" />
+              <SyncTextarea value={songsText} onValue={setSongsText} rows={3} className={inputCls} placeholder="곡 제목 (한 줄에 하나)" />
             </div>
 
             <div className="grid grid-cols-3 gap-2">
               <Labeled label="설교 제목">
-                <input value={sermonTitle} onChange={(e) => setSermonTitle(e.target.value)} className={inputCls} />
+                <SyncInput value={sermonTitle} onValue={setSermonTitle} className={inputCls} />
               </Labeled>
               <Labeled label="본문 (장·절)">
-                <input value={sermonPassage} onChange={(e) => setSermonPassage(e.target.value)} className={inputCls} placeholder="요 3:16" />
+                <SyncInput value={sermonPassage} onValue={setSermonPassage} className={inputCls} placeholder="요 3:16" />
               </Labeled>
               <Labeled label="설교자">
-                <input value={sermonPreacher} onChange={(e) => setSermonPreacher(e.target.value)} className={inputCls} />
+                <SyncInput value={sermonPreacher} onValue={setSermonPreacher} className={inputCls} />
               </Labeled>
             </div>
 
             <Labeled label="광고 (한 줄에 하나)">
-              <textarea value={annText} onChange={(e) => setAnnText(e.target.value)} rows={3} className={inputCls} />
+              <SyncTextarea value={annText} onValue={setAnnText} rows={3} className={inputCls} />
             </Labeled>
             <Labeled label="헌금 계좌">
-              <textarea value={offering} onChange={(e) => setOffering(e.target.value)} rows={2} className={inputCls} placeholder="○○은행 000-00-0000 (예금주)" />
+              <SyncTextarea value={offering} onValue={setOffering} rows={2} className={inputCls} placeholder="○○은행 000-00-0000 (예금주)" />
             </Labeled>
             <Labeled label="기도 제목 (한 줄에 하나, 선택)">
-              <textarea value={prayerText} onChange={(e) => setPrayerText(e.target.value)} rows={2} className={inputCls} />
+              <SyncTextarea value={prayerText} onValue={setPrayerText} rows={2} className={inputCls} />
             </Labeled>
 
             {/* QR */}

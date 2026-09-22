@@ -4,6 +4,7 @@ import { splitBibleVerses, formatReference } from '@shared/bible'
 import { useUi } from '../store/ui'
 import { useBible } from '../store/bible'
 import { useDeck } from '../store/deck'
+import { SyncInput, SyncTextarea } from '../components/SyncField'
 
 /** 성경 편집기 — 책·장·절 + 본문 → 절 단위 슬라이드 자동 생성 */
 export function BibleEditorModal(): JSX.Element | null {
@@ -82,9 +83,9 @@ export function BibleEditorModal(): JSX.Element | null {
         </div>
 
         <div className="flex items-center gap-2 px-5 py-3 border-b border-line flex-wrap">
-          <input
+          <SyncInput
             value={book}
-            onChange={(e) => setBook(e.target.value)}
+            onValue={setBook}
             placeholder="책 (예: 요한복음) *"
             className="w-40 bg-black/40 border border-line rounded px-3 py-1.5 text-sm text-white outline-none focus:border-accent"
           />
@@ -94,15 +95,15 @@ export function BibleEditorModal(): JSX.Element | null {
             placeholder="장"
             className="w-16 bg-black/40 border border-line rounded px-3 py-1.5 text-sm text-white outline-none focus:border-accent"
           />
-          <input
+          <SyncInput
             value={range}
-            onChange={(e) => setRange(e.target.value)}
+            onValue={setRange}
             placeholder="절 (예: 16-17)"
             className="w-28 bg-black/40 border border-line rounded px-3 py-1.5 text-sm text-white outline-none focus:border-accent"
           />
-          <input
+          <SyncInput
             value={translation}
-            onChange={(e) => setTranslation(e.target.value)}
+            onValue={setTranslation}
             placeholder="번역본 (선택)"
             className="w-32 bg-black/40 border border-line rounded px-3 py-1.5 text-sm text-slate-100 outline-none focus:border-accent"
           />
@@ -116,9 +117,9 @@ export function BibleEditorModal(): JSX.Element | null {
             <div className="text-[11px] text-slate-400 mb-1">
               본문 — <b>한 줄 = 한 절</b> 슬라이드 (절 번호로 시작하면 자동 인식)
             </div>
-            <textarea
+            <SyncTextarea
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onValue={setText}
               placeholder={'16 하나님이 세상을 이처럼 사랑하사 독생자를 주셨으니\n17 이는 그를 믿는 자마다 멸망하지 않고 영생을 얻게 하려 하심이라'}
               className="flex-1 resize-none rounded-md bg-black/40 border border-line p-3 text-sm text-white outline-none focus:border-accent leading-relaxed"
             />

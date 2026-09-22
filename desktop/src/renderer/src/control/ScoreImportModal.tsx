@@ -4,6 +4,7 @@ import { splitVerses } from '@shared/lyrics'
 import { useUi } from '../store/ui'
 import { useLibrary } from '../store/library'
 import { useDeck } from '../store/deck'
+import { SyncInput, SyncTextarea } from '../components/SyncField'
 
 function versesToText(x: ExtractedSong): string {
   return x.verses
@@ -146,9 +147,9 @@ export function ScoreImportModal(): JSX.Element | null {
           </div>
 
           <div className="flex flex-col min-h-0 gap-2">
-            <input
+            <SyncInput
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onValue={setTitle}
               placeholder="곡 제목 *"
               className="bg-black/40 border border-line rounded px-3 py-1.5 text-sm text-white outline-none focus:border-accent"
             />
@@ -166,9 +167,9 @@ export function ScoreImportModal(): JSX.Element | null {
             <div className="text-[11px] text-slate-400">
               추출 결과 (검수·수정) — 빈 줄로 절 구분 · <b>{verses.length}</b>개 절
             </div>
-            <textarea
+            <SyncTextarea
               value={lyrics}
-              onChange={(e) => setLyrics(e.target.value)}
+              onValue={setLyrics}
               placeholder="추출된 가사가 여기에 표시됩니다. 오탈자·절 구분을 직접 수정한 뒤 저장하세요."
               className="flex-1 resize-none rounded-md bg-black/40 border border-line p-3 text-sm text-white outline-none focus:border-accent leading-relaxed"
             />
