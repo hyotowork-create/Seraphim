@@ -4,6 +4,7 @@ import { splitVerses } from '@shared/lyrics'
 import { useUi } from '../store/ui'
 import { useLibrary } from '../store/library'
 import { useDeck } from '../store/deck'
+import { SyncInput, SyncTextarea } from '../components/SyncField'
 
 /** 곡 편집기 — 제목/카테고리 + 가사(빈 줄 기준 절 자동 분할, 실시간 미리보기) */
 export function SongEditorModal(): JSX.Element | null {
@@ -85,9 +86,9 @@ export function SongEditorModal(): JSX.Element | null {
 
         {/* 메타 */}
         <div className="flex items-center gap-2 px-5 py-3 border-b border-line flex-wrap">
-          <input
+          <SyncInput
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onValue={setTitle}
             placeholder="곡 제목 *"
             className="flex-1 min-w-[200px] bg-black/40 border border-line rounded px-3 py-1.5 text-sm text-white outline-none focus:border-accent"
           />
@@ -102,9 +103,9 @@ export function SongEditorModal(): JSX.Element | null {
               </option>
             ))}
           </select>
-          <input
+          <SyncInput
             value={author}
-            onChange={(e) => setAuthor(e.target.value)}
+            onValue={setAuthor}
             placeholder="작사/작곡 (선택)"
             className="w-40 bg-black/40 border border-line rounded px-3 py-1.5 text-sm text-slate-100 outline-none focus:border-accent"
           />
@@ -120,9 +121,9 @@ export function SongEditorModal(): JSX.Element | null {
             <div className="text-[11px] text-slate-400 mb-1">
               가사 — <b>빈 줄</b>로 절을 구분합니다 (예: 1절 ↵ 내용 ↵↵ 후렴 ↵ 내용)
             </div>
-            <textarea
+            <SyncTextarea
               value={lyrics}
-              onChange={(e) => setLyrics(e.target.value)}
+              onValue={setLyrics}
               placeholder={'1절\n주 하나님 지으신 모든 세계\n내 마음속에 그리어 볼 때\n\n후렴\n주님의 높고 위대하심을'}
               className="flex-1 resize-none rounded-md bg-black/40 border border-line p-3 text-sm text-white outline-none focus:border-accent leading-relaxed font-mono"
             />

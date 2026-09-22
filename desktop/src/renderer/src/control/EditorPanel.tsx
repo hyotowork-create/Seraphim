@@ -1,5 +1,6 @@
 import { useLive } from '../store/live'
 import { useDeck } from '../store/deck'
+import { SyncTextarea } from '../components/SyncField'
 import type { OverlayStyle } from '@shared/ipc'
 
 function Field({ label, children }: { label: string; children: React.ReactNode }): JSX.Element {
@@ -26,9 +27,9 @@ export function EditorPanel(): JSX.Element {
       <div className="text-xs font-semibold text-slate-300 mb-2">[5] 에디터 — 자막/가사</div>
       <div className="flex-1 grid grid-cols-[1fr_240px] gap-3 min-h-0">
         {/* 텍스트 입력 */}
-        <textarea
+        <SyncTextarea
           value={state.text}
-          onChange={(e) => patch({ text: e.target.value })}
+          onValue={(v) => patch({ text: v })}
           placeholder="여기에 자막/가사를 입력하면 프리뷰와 송출 화면에 바로 반영됩니다."
           className="resize-none rounded-md bg-black/40 border border-line p-3 text-sm text-white outline-none focus:border-accent leading-relaxed"
         />
