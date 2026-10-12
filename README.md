@@ -214,3 +214,7 @@ npm start       # http://localhost:8080  (이후로는 인터넷 없이 동작)
 ## 기술 스택
 
 Eleventy(11ty) · Nunjucks · GitHub Pages · Sveltia CMS(오프라인 번들 포함) — 모두 무료.
+
+## 라이선스
+
+Seraphim 코드는 [MIT](LICENSE)입니다. 설치 파일에 함께 들어 있는 FFmpeg·Electron·Tesseract 언어 데이터·개역한글 본문은 각자의 라이선스를 따릅니다([THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)).
