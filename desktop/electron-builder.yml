@@ -10,6 +10,8 @@ publish:
   repo: Seraphim
   releaseType: release
 
+afterPack: scripts/adhoc-sign.cjs
+
 directories:
   output: release
   buildResources: resources
@@ -46,3 +48,6 @@ mac:
     - target: dmg
       arch: [arm64, x64]
   category: public.app-category.productivity
+  # 인증서가 없으므로 electron-builder 서명은 건너뛰고(identity: null), afterPack에서 앱 전체를 ad-hoc으로 다시 서명.
+  # 링커 서명만 남은 앱은 서명이 깨진 것으로 보여 Apple Silicon에서 「손상되었기 때문에 열 수 없습니다」로 막힘(10/21 확인)
+  identity: null

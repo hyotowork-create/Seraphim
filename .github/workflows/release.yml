@@ -24,10 +24,8 @@ jobs:
         include:
           - os: windows-latest
             builder_args: --win --x64
-          - os: macos-14 # Apple Silicon
-            builder_args: --mac --arm64
-          - os: macos-13 # Intel
-            builder_args: --mac --x64
+          - os: macos-14 # Apple Silicon 서버에서 arm64·x64(인텔) dmg를 함께 만듦(electron-builder.yml mac.arch). macos-13 서버는 GitHub에서 없어져 뺌
+            builder_args: --mac
     runs-on: ${{ matrix.os }}
     defaults:
       run:
