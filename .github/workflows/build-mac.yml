@@ -44,16 +44,22 @@ jobs:
 
       # .dmg 빌드 (Secrets가 있으면 정식 서명·공증, 없으면 ad-hoc — electron-builder.yml mac 참고)
       - name: Build dmg
-        run: npx electron-builder --mac dmg --${{ matrix.arch }} --publish never
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = macOS ] && [ -n "$MAC_CERT_P12_BASE64" ]; then
+            # 맥 정식 서명·공증(저장소 Secrets가 있을 때만, 없으면 ad-hoc). 빈 값을 넘기면 electron-builder가 실패하므로 있을 때만 내보냄
+            export CSC_LINK="$MAC_CERT_P12_BASE64" CSC_KEY_PASSWORD="$MAC_CERT_PASSWORD"
+            [ -n "$MAC_APPLE_TEAM_ID" ] && export APPLE_ID="$MAC_APPLE_ID" APPLE_APP_SPECIFIC_PASSWORD="$MAC_APPLE_APP_SPECIFIC_PASSWORD" APPLE_TEAM_ID="$MAC_APPLE_TEAM_ID"
+          fi
+          npx electron-builder --mac dmg --${{ matrix.arch }} --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # 맥 정식 서명·공증(저장소 Secrets가 있을 때만, 없으면 ad-hoc). Windows에는 넘기지 않음
-          CSC_LINK: ${{ runner.os == 'macOS' && secrets.MAC_CERT_P12_BASE64 || '' }}
-          CSC_KEY_PASSWORD: ${{ runner.os == 'macOS' && secrets.MAC_CERT_PASSWORD || '' }}
-          APPLE_ID: ${{ runner.os == 'macOS' && secrets.APPLE_ID || '' }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ runner.os == 'macOS' && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
-          APPLE_TEAM_ID: ${{ runner.os == 'macOS' && secrets.APPLE_TEAM_ID || '' }}
+          MAC_CERT_P12_BASE64: ${{ secrets.MAC_CERT_P12_BASE64 }}
+          MAC_CERT_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+          MAC_APPLE_ID: ${{ secrets.APPLE_ID }}
+          MAC_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          MAC_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       - name: Upload dmg
         uses: actions/upload-artifact@v4
