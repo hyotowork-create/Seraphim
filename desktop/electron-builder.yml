@@ -11,6 +11,7 @@ publish:
   releaseType: release
 
 afterPack: scripts/adhoc-sign.cjs
+afterSign: scripts/mac-verify.cjs
 
 directories:
   output: release
@@ -48,6 +49,6 @@ mac:
     - target: dmg
       arch: [arm64, x64]
   category: public.app-category.productivity
-  # 인증서가 없으므로 electron-builder 서명은 건너뛰고(identity: null), afterPack에서 앱 전체를 ad-hoc으로 다시 서명.
-  # 링커 서명만 남은 앱은 서명이 깨진 것으로 보여 Apple Silicon에서 「손상되었기 때문에 열 수 없습니다」로 막힘(10/21 확인)
-  identity: null
+  # 서명: Developer ID 인증서(CSC_LINK)와 APPLE_ID·APPLE_APP_SPECIFIC_PASSWORD·APPLE_TEAM_ID가 있으면 정식 서명+공증(경고 없음).
+  # 없으면 afterPack에서 앱 전체를 ad-hoc 서명. 링커 서명만 남은 앱은 Apple Silicon에서 「손상된 앱」으로 막힘(10/21 확인)
+  hardenedRuntime: true

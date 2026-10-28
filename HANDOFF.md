@@ -127,7 +127,12 @@ DAO: `db/dao.ts`(settings/media/stats), `db/songs.ts`, `db/bible.ts`, `db/playli
 ## 7. 배포 / CI
 
 - `.github/workflows/build-mac.yml` — **수동 실행(Run workflow) 또는 `v*` 태그**로 맥 러너에서 .dmg 빌드.
-  - 매트릭스: macos-14(arm64) + macos-13(x64), 서명 없음(`CSC_IDENTITY_AUTO_DISCOVERY=false`), 결과 dmg를 Artifact로 업로드.
+  - 매트릭스: macos-14에서 arm64·x64(교차 빌드), 결과 dmg를 Artifact로 업로드.
+- **맥 배포 기준**(`desktop/scripts/mac-verify.cjs`가 빌드 중 점검, 못 맞추면 빌드 실패)
+  - 1단계(지금): 앱 전체 ad-hoc 서명이 유효 → 「손상된 앱」이 나오지 않음. 첫 실행은 시스템 설정 > 개인정보 보호 및 보안 > 「그래도 열기」.
+  - 2단계(Steno 같은 상용 앱 수준, 경고 없이 열림): Developer ID 서명 + Apple 공증 + 공증 표 부착. 저장소 Secrets 5개를 넣으면 다음 빌드부터 자동 적용(코드 수정 없음):
+    `MAC_CERT_P12_BASE64`(Developer ID Application 인증서 .p12를 base64로), `MAC_CERT_PASSWORD`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`(appleid.apple.com 앱 암호), `APPLE_TEAM_ID`.
+    필요한 것: Apple Developer Program 가입(연 129,000원 / US$99, 운영자 본인 또는 단체 명의).
   - main에 워크플로우가 있어야 "Run workflow" 버튼/`run_workflow` API가 동작함.
 - `electron-builder.yml` — win(nsis+portable) / mac(dmg arm64,x64), `publish: github`(‑‑publish never라 업로드 X, updateInfo 크래시 방지용), `asarUnpack`으로 better-sqlite3 언팩.
 - **Windows exe/mac dmg는 각 OS(또는 wine)에서만 빌드 가능** — 리눅스 CI에선 win 불가.
@@ -160,7 +165,7 @@ DAO: `db/dao.ts`(settings/media/stats), `db/songs.ts`, `db/bible.ts`, `db/playli
 ## 10. 알려진 이슈 / 검증 못 한 것
 
 - **Gemini 실제 추출**: UI/흐름만 검증, 실제 API 호출은 미검증(키 필요).
-- **서명/공증 없음**: mac 첫 실행 시 우클릭→열기 또는 `xattr -dr com.apple.quarantine /Applications/Seraphim.app`.
+- **맥 공증 없음(배포 기준 1단계)**: 첫 실행 시 「그래도 열기」 필요. 2단계는 위 7장 「맥 배포 기준」.
 - **동기화 폴더 동시편집**: 소프트 가드 문구만 있음, 락 미구현.
 - 로컬 OCR/PDF 미구현(위 TODO 1).
 

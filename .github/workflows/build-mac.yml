@@ -42,12 +42,18 @@ jobs:
       - name: Bundle
         run: npm run build
 
-      # .dmg 빌드 (서명 없이 — 첫 실행은 우클릭→열기)
+      # .dmg 빌드 (Secrets가 있으면 정식 서명·공증, 없으면 ad-hoc — electron-builder.yml mac 참고)
       - name: Build dmg
         run: npx electron-builder --mac dmg --${{ matrix.arch }} --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 맥 정식 서명·공증(저장소 Secrets가 있을 때만, 없으면 ad-hoc). Windows에는 넘기지 않음
+          CSC_LINK: ${{ runner.os == 'macOS' && secrets.MAC_CERT_P12_BASE64 || '' }}
+          CSC_KEY_PASSWORD: ${{ runner.os == 'macOS' && secrets.MAC_CERT_PASSWORD || '' }}
+          APPLE_ID: ${{ runner.os == 'macOS' && secrets.APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ runner.os == 'macOS' && secrets.APPLE_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ runner.os == 'macOS' && secrets.APPLE_TEAM_ID || '' }}
 
       - name: Upload dmg
         uses: actions/upload-artifact@v4
