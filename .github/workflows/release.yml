@@ -24,10 +24,8 @@ jobs:
         include:
           - os: windows-latest
             builder_args: --win --x64
-          - os: macos-14 # Apple Silicon
-            builder_args: --mac --arm64
-          - os: macos-13 # Intel
-            builder_args: --mac --x64
+          - os: macos-14 # Apple Silicon 서버에서 arm64·x64(인텔) dmg를 함께 만듦(electron-builder.yml mac.arch). macos-13 서버는 GitHub에서 없어져 뺌
+            builder_args: --mac
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -48,7 +46,19 @@ jobs:
         run: npm run build
 
       - name: Build & publish to Releases
-        run: npx electron-builder ${{ matrix.builder_args }} --publish always
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = macOS ] && [ -n "$MAC_CERT_P12_BASE64" ]; then
+            # 맥 정식 서명·공증(저장소 Secrets가 있을 때만, 없으면 ad-hoc). 빈 값을 넘기면 electron-builder가 실패하므로 있을 때만 내보냄
+            export CSC_LINK="$MAC_CERT_P12_BASE64" CSC_KEY_PASSWORD="$MAC_CERT_PASSWORD"
+            [ -n "$MAC_APPLE_TEAM_ID" ] && export APPLE_ID="$MAC_APPLE_ID" APPLE_APP_SPECIFIC_PASSWORD="$MAC_APPLE_APP_SPECIFIC_PASSWORD" APPLE_TEAM_ID="$MAC_APPLE_TEAM_ID"
+          fi
+          npx electron-builder ${{ matrix.builder_args }} --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          MAC_CERT_P12_BASE64: ${{ secrets.MAC_CERT_P12_BASE64 }}
+          MAC_CERT_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+          MAC_APPLE_ID: ${{ secrets.APPLE_ID }}
+          MAC_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          MAC_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}

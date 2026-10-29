@@ -10,6 +10,9 @@ publish:
   repo: Seraphim
   releaseType: release
 
+afterPack: scripts/adhoc-sign.cjs
+afterSign: scripts/mac-verify.cjs
+
 directories:
   output: release
   buildResources: resources
@@ -46,3 +49,6 @@ mac:
     - target: dmg
       arch: [arm64, x64]
   category: public.app-category.productivity
+  # 서명: Developer ID 인증서(CSC_LINK)와 APPLE_ID·APPLE_APP_SPECIFIC_PASSWORD·APPLE_TEAM_ID가 있으면 정식 서명+공증(경고 없음).
+  # 없으면 afterPack에서 앱 전체를 ad-hoc 서명. 링커 서명만 남은 앱은 Apple Silicon에서 「손상된 앱」으로 막힘(10/21 확인)
+  hardenedRuntime: true
