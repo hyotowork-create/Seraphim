@@ -133,6 +133,7 @@ DAO: `db/dao.ts`(settings/media/stats), `db/songs.ts`, `db/bible.ts`, `db/playli
   - 2단계(Steno 같은 상용 앱 수준, 경고 없이 열림): Developer ID 서명 + Apple 공증 + 공증 표 부착. 저장소 Secrets 5개를 넣으면 다음 빌드부터 자동 적용(코드 수정 없음):
     `MAC_CERT_P12_BASE64`(Developer ID Application 인증서 .p12를 base64로), `MAC_CERT_PASSWORD`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`(appleid.apple.com 앱 암호), `APPLE_TEAM_ID`.
     필요한 것: Apple Developer Program 가입(연 129,000원 / US$99, 운영자 본인 또는 단체 명의).
+    - 운영자 결정(2026-10-29): 개발자 계정·인증서 발급 계획 없음 → 1단계로 배포.
   - main에 워크플로우가 있어야 "Run workflow" 버튼/`run_workflow` API가 동작함.
 - `electron-builder.yml` — win(nsis+portable) / mac(dmg arm64,x64), `publish: github`(‑‑publish never라 업로드 X, updateInfo 크래시 방지용), `asarUnpack`으로 better-sqlite3 언팩.
 - **Windows exe/mac dmg는 각 OS(또는 wine)에서만 빌드 가능** — 리눅스 CI에선 win 불가.
