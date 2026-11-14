@@ -6,6 +6,10 @@ interface Props {
   state: LiveState
   /** 프리뷰에서 카메라 실제 스트림 대신 표시만 */
   cameraPlaceholder?: boolean
+  /** 방송 하단 자막 띠 */
+  band?: boolean
+  /** 카메라 요청 해상도 */
+  cameraIdeal?: { width: number; height: number }
 }
 
 const RATIO: Record<string, number | null> = { '16:9': 16 / 9, '4:3': 4 / 3, fill: null }
@@ -14,7 +18,7 @@ const RATIO: Record<string, number | null> = { '16:9': 16 / 9, '4:3': 4 / 3, fil
  * 출력 무대 — 지정 비율(16:9/4:3)로 레터박스 처리한 중앙 박스 안에 SlideView 렌더.
  * 'fill'은 화면 전체를 채운다. 스케일은 박스 높이/1080 기준.
  */
-export function Stage({ state, cameraPlaceholder }: Props): JSX.Element {
+export function Stage({ state, cameraPlaceholder, band, cameraIdeal }: Props): JSX.Element {
   const ref = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ w: 0, h: 0 })
 
@@ -40,7 +44,7 @@ export function Stage({ state, cameraPlaceholder }: Props): JSX.Element {
   return (
     <div ref={ref} className="w-full h-full bg-black flex items-center justify-center overflow-hidden">
       <div className="relative" style={{ width: boxW || '100%', height: boxH || '100%' }}>
-        {scale > 0 && <SlideView state={state} scale={scale} cameraPlaceholder={cameraPlaceholder} />}
+        {scale > 0 && <SlideView state={state} scale={scale} cameraPlaceholder={cameraPlaceholder} band={band} cameraIdeal={cameraIdeal} />}
       </div>
     </div>
   )

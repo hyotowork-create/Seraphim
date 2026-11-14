@@ -71,7 +71,8 @@ export function getPlaylistItems(playlistId: number): PlaylistItem[] {
       refId: r.ref_id,
       orderIndex: r.order_index,
       title,
-      subtitle
+      subtitle,
+      note: r.item_type === 'song' || r.item_type === 'bible' ? r.note : null
     }
   })
 }
@@ -79,7 +80,8 @@ export function getPlaylistItems(playlistId: number): PlaylistItem[] {
 export function addPlaylistItem(
   playlistId: number,
   itemType: PlaylistItemType,
-  refId: number | null
+  refId: number | null,
+  note: string | null = null
 ): number {
   const db = getDb()
   const row = db
@@ -87,9 +89,9 @@ export function addPlaylistItem(
     .get(playlistId) as { next: number }
   const info = db
     .prepare(
-      'INSERT INTO playlist_items (playlist_id, item_type, ref_id, order_index) VALUES (?, ?, ?, ?)'
+      'INSERT INTO playlist_items (playlist_id, item_type, ref_id, order_index, note) VALUES (?, ?, ?, ?, ?)'
     )
-    .run(playlistId, itemType, refId, row.next)
+    .run(playlistId, itemType, refId, row.next, note)
   return Number(info.lastInsertRowid)
 }
 

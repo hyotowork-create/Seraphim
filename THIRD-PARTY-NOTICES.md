@@ -12,7 +12,7 @@ Seraphim 자체 코드는 MIT 라이선스입니다(`LICENSE`). 설치 파일에
 
 - macOS용 빌드 설정(소스 그대로, 이 옵션으로 `./configure && make`):
   ```
-  --arch=arm64 --cc=clang --disable-everything --disable-autodetect --disable-doc --disable-ffplay --disable-ffprobe --disable-debug
+  --arch=arm64 --cc="clang -arch arm64" (인텔판: x86_64) --enable-cross-compile --target-os=darwin --disable-everything --disable-autodetect --disable-doc --disable-ffplay --disable-ffprobe --disable-debug
   --enable-pthreads --enable-videotoolbox --enable-audiotoolbox --enable-securetransport --enable-network
   --enable-avfilter --enable-swscale --enable-swresample
   --enable-demuxer=matroska,mov,flv --enable-muxer=flv,mp4,mov,tee,matroska,null

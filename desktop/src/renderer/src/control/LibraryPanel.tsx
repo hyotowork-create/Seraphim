@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { SONG_CATEGORIES, type SongFilter } from '@shared/ipc'
+import { BUNDLED_BIBLE_CODE, SONG_CATEGORIES, type SongFilter } from '@shared/ipc'
+import { parseVerseSelection } from '@shared/orderSheet'
 import { useLibrary } from '../store/library'
 import { useBible } from '../store/bible'
 import { useDeck } from '../store/deck'
@@ -24,13 +25,45 @@ export function LibraryPanel(): JSX.Element {
   const openBibleEditor = useUi((s) => s.openBibleEditor)
   const openPicker = useUi((s) => s.openPicker)
   const openScore = useUi((s) => s.openScore)
+  const openOrder = useUi((s) => s.openOrder)
+  const openPptx = useUi((s) => s.openPptx)
   const pl = usePlaylist()
   const [q, setQ] = useState('')
   const [newName, setNewName] = useState<string | null>(null)
+  const [quickRef, setQuickRef] = useState('')
+  const [quickMsg, setQuickMsg] = useState('')
+
+  /** 구절 빠른 추가: 입력 → 본문 조회 → 말씀 저장 → 슬라이드 목록에 로드 */
+  const quickAdd = async (): Promise<void> => {
+    const ref = quickRef.trim()
+    if (!ref) return
+    setQuickMsg('')
+    try {
+      const code = (await window.seraphim.getSetting('bible.translation')) || BUNDLED_BIBLE_CODE
+      const r = await window.seraphim.lookupBible(ref, code)
+      const id = await window.seraphim.saveBible({
+        book: r.book,
+        chapter: r.chapter,
+        verseRange: r.verseRange,
+        translation: r.translationName,
+        text: r.text
+      })
+      await bible.reload()
+      await loadBible(id)
+      setQuickRef('')
+      setQuickMsg(`${r.reference} (${r.translationName}) ${r.verses.length}절 추가`)
+    } catch (e) {
+      const m = e instanceof Error ? e.message : String(e)
+      setQuickMsg(m.replace(/^Error invoking remote method '[^']*':\s*(?:Error:\s*)?/, ''))
+    }
+  }
 
   useEffect(() => {
     void reload()
     void pl.loadPlaylists()
+    const onChanged = (): void => void reload()
+    window.addEventListener('seraphim:songs-changed', onChanged)
+    return () => window.removeEventListener('seraphim:songs-changed', onChanged)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -133,7 +166,7 @@ export function LibraryPanel(): JSX.Element {
                   }}
                   onClick={() => {
                     if (it.refId == null) return
-                    if (it.itemType === 'song') void load(it.refId)
+                    if (it.itemType === 'song') void load(it.refId, parseVerseSelection(it.note))
                     else if (it.itemType === 'bible') void loadBible(it.refId)
                   }}
                   className="group flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer hover:bg-panel2"
@@ -142,7 +175,12 @@ export function LibraryPanel(): JSX.Element {
                   <span className="text-[11px] text-slate-500 w-4 text-right">{idx + 1}</span>
                   <div className="min-w-0 flex-1">
                     <div className="text-[13px] text-slate-100 truncate">{it.title}</div>
-                    {it.subtitle && <div className="text-[10px] text-slate-500">{it.subtitle}</div>}
+                    {(it.subtitle || it.note) && (
+                      <div className="text-[10px] text-slate-500 truncate">
+                        {it.subtitle}
+                        {it.note && <span className="text-accent"> · {it.note}</span>}
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={(e) => {
@@ -227,7 +265,10 @@ export function LibraryPanel(): JSX.Element {
                         ★
                       </button>
                       <div className="min-w-0 flex-1">
-                        <div className="text-[13px] text-slate-100 truncate">{s.title}</div>
+                        <div className="text-[13px] text-slate-100 truncate">
+                          {s.hymnNo != null && <span className="text-accent mr-1">{s.hymnNo}장</span>}
+                          {s.title}
+                        </div>
                         <div className="text-[10px] text-slate-500">
                           {s.category} · {s.verseCount}절
                         </div>
@@ -239,7 +280,17 @@ export function LibraryPanel(): JSX.Element {
             </>
           ) : (
             <>
-              <div className="p-2 border-b border-line">
+              <div className="p-2 border-b border-line space-y-1">
+                <SyncInput
+                  value={quickRef}
+                  onValue={setQuickRef}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') void quickAdd()
+                  }}
+                  placeholder="구절 입력 후 Enter → 본문 불러와 추가 (예: 요 3:16)"
+                  className="w-full bg-black/40 border border-accent/60 rounded px-2 py-1 text-xs text-white outline-none focus:border-accent"
+                />
+                {quickMsg && <div className="text-[10px] text-slate-400 truncate" title={quickMsg}>{quickMsg}</div>}
                 <SyncInput
                   value={bible.search}
                   onValue={(v) => void bible.setSearch(v)}
@@ -283,12 +334,32 @@ export function LibraryPanel(): JSX.Element {
       <div className="border-t border-line p-2 max-h-[32%] overflow-auto">
         <div className="flex items-center justify-between mb-1">
           <span className="text-[10px] text-slate-500">플레이리스트 (예배별)</span>
-          <button
-            onClick={() => setNewName('')}
-            className="text-[11px] px-1.5 rounded bg-panel2 border border-line text-slate-300 hover:border-slate-500"
-          >
-            ＋
-          </button>
+          <div className="flex gap-1">
+            <button
+              onClick={openOrder}
+              className="text-[11px] px-1.5 rounded bg-accent/20 border border-accent/60 text-white hover:bg-accent/30"
+              title="예배 순서(말씀 장절·곡 제목)를 줄로 적으면 플레이리스트를 자동으로 만듭니다"
+            >
+              순서로 만들기
+            </button>
+            <button
+              onClick={() => {
+                const cur = pl.playlists.find((p) => p.id === pl.activeId)
+                if (cur) openPptx({ name: cur.name, playlistId: cur.id })
+              }}
+              disabled={pl.activeId == null}
+              className="text-[11px] px-1.5 rounded bg-panel2 border border-line text-slate-300 hover:border-slate-500 disabled:opacity-40"
+              title="열려 있는 플레이리스트를 송출 화면과 같은 모양의 PPTX 파일로 저장"
+            >
+              PPTX
+            </button>
+            <button
+              onClick={() => setNewName('')}
+              className="text-[11px] px-1.5 rounded bg-panel2 border border-line text-slate-300 hover:border-slate-500"
+            >
+              ＋
+            </button>
+          </div>
         </div>
         {newName !== null && (
           <SyncInput

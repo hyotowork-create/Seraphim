@@ -176,7 +176,7 @@ export function BulletinModal(): JSX.Element | null {
                 공개 URL → QR (주보를 호스팅한 주소; 예: GitHub Pages/Netlify)
               </div>
               <div className="flex items-center gap-2">
-                <input value={publicUrl} onChange={(e) => setPublicUrl(e.target.value)} className={inputCls} placeholder="https://..." />
+                <SyncInput value={publicUrl} onValue={setPublicUrl} className={inputCls} placeholder="https://..." />
                 <button onClick={() => void makeQr()} className="text-xs px-3 py-1 rounded bg-panel2 border border-line text-slate-200 hover:border-slate-500 shrink-0">
                   QR 생성
                 </button>

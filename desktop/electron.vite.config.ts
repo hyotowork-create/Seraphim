@@ -10,7 +10,7 @@ export default defineConfig({
     },
     build: {
       rollupOptions: {
-        input: { index: resolve('src/main/index.ts') }
+        input: { index: resolve('src/main/index.ts'), ocrProcess: resolve('src/main/ocrProcess.ts') }
       }
     }
   },

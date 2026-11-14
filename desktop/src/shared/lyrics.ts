@@ -51,3 +51,23 @@ export function splitVerses(raw: string): SplitVerse[] {
   }
   return out
 }
+
+/**
+ * 긴 절을 n줄씩 절로 나눈 가사 텍스트를 만든다(편집기 도구).
+ *  - 번호 절(1절…)은 라벨을 버리고 자동 번호로 다시 매김(나뉜 조각이 각각 절이 됨)
+ *  - 후렴/브릿지 등 이름 절은 첫 조각에 라벨을 유지, 이어지는 조각은 '후렴2'처럼 번호를 붙임
+ */
+export function splitLongVerses(raw: string, n: number): string {
+  const size = Math.max(1, Math.min(12, Math.round(n)))
+  const blocks: string[] = []
+  for (const v of splitVerses(raw)) {
+    const lines = v.text.split('\n').filter((l) => l.trim())
+    const named = /^(\d+\s*절)$/.test(v.label) ? null : v.label.replace(/\d+$/, '')
+    for (let i = 0, k = 0; i < lines.length; i += size, k++) {
+      const chunk = lines.slice(i, i + size).join('\n')
+      if (named) blocks.push(`${named}${k > 0 ? k + 1 : ''}\n${chunk}`)
+      else blocks.push(chunk)
+    }
+  }
+  return blocks.join('\n\n')
+}

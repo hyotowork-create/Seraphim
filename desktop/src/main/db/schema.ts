@@ -92,5 +92,46 @@ export const MIGRATIONS: Migration[] = [
     sql: /* sql */ `
       ALTER TABLE songs ADD COLUMN bg_media_id INTEGER REFERENCES media(id);
     `
+  },
+  {
+    // 곡 ↔ 원본 악보 이미지(여러 페이지) 연결 — 재검수/재추출용
+    version: 3,
+    sql: /* sql */ `
+      CREATE TABLE song_scores (
+        id          INTEGER PRIMARY KEY,
+        song_id     INTEGER NOT NULL REFERENCES songs(id) ON DELETE CASCADE,
+        media_id    INTEGER NOT NULL REFERENCES media(id),
+        order_index INTEGER NOT NULL
+      );
+      CREATE INDEX idx_song_scores ON song_scores(song_id, order_index);
+    `
+  },
+  {
+    // 찬송가 장 번호 — "478장" 검색·중복 판별용
+    version: 4,
+    sql: /* sql */ `
+      ALTER TABLE songs ADD COLUMN hymn_no INTEGER;
+      CREATE INDEX idx_songs_hymn_no ON songs(hymn_no);
+    `
+  },
+  {
+    // 성경 본문 DB — 구절 입력으로 본문 불러오기. 번역본별 66권 × 장 × 절
+    version: 5,
+    sql: /* sql */ `
+      CREATE TABLE bible_text (
+        translation TEXT    NOT NULL,   -- 'KRV'(개역한글, 내장) / 'NKRV'(개역개정, 가져오기) …
+        book        INTEGER NOT NULL,   -- 1~66
+        chapter     INTEGER NOT NULL,
+        verse       INTEGER NOT NULL,
+        text        TEXT    NOT NULL,
+        PRIMARY KEY (translation, book, chapter, verse)
+      ) WITHOUT ROWID;
+      CREATE TABLE bible_translations (
+        code       TEXT PRIMARY KEY,
+        name       TEXT NOT NULL,
+        bundled    INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
+      );
+    `
   }
 ]

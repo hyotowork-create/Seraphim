@@ -45,6 +45,18 @@ jobs:
       - name: Bundle
         run: npm run build
 
+      # YouTube 라이브 송출용 ffmpeg(git에 없음, vendor/ffmpeg/README.md). 없으면 송출 기능이 「ffmpeg가 없습니다」로 멈춤
+      - name: Prepare ffmpeg
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = macOS ]; then
+            brew install nasm   # 인텔(x86_64) ffmpeg 어셈블러
+            zsh scripts/build-ffmpeg-mac.sh arm64
+            zsh scripts/build-ffmpeg-mac.sh x64
+          else
+            node scripts/fetch-ffmpeg.mjs win32-x64
+          fi
+
       - name: Build & publish to Releases
         shell: bash
         run: |

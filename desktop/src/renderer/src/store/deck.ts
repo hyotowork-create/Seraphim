@@ -25,6 +25,19 @@ export interface Loaded {
   bgMediaId: number | null
   bgUrl: string | null
   verses: DeckVerse[]
+  /** 플레이리스트 메모로 지정된 절 번호(없으면 전체) */
+  verseSelection?: number[] | null
+}
+
+/** "1-3절" 같은 선택이 있으면 해당 번호 절만 남김. 후렴·브릿지 등 번호 없는 절은 유지. 결과가 비면 전체 */
+function applyVerseSelection(verses: DeckVerse[], sel: Set<number> | null): DeckVerse[] {
+  if (!sel || sel.size === 0) return verses
+  const kept = verses.filter((v) => {
+    const m = (v.label ?? '').match(/^(\d{1,2})\s*절/)
+    return m ? sel.has(Number(m[1])) : true
+  })
+  const hasNumbered = kept.some((v) => /^\d{1,2}\s*절/.test(v.label ?? ''))
+  return hasNumbered ? kept : verses
 }
 
 function buildPages(verses: DeckVerse[], maxLines: number): Page[] {
@@ -52,7 +65,7 @@ interface DeckStore {
   maxLines: number
   initSettings: () => Promise<void>
   setMaxLines: (n: number) => Promise<void>
-  load: (id: number) => Promise<void> // 곡 로드 (기존 호환)
+  load: (id: number, verseSelection?: Set<number> | null) => Promise<void> // 곡 로드 (선택 절만 가능)
   loadBible: (id: number) => Promise<void>
   reloadCurrent: () => Promise<void>
   clear: () => void
@@ -84,16 +97,18 @@ export const useDeck = create<DeckStore>((set, get) => ({
     if (cur) set({ pages: buildPages(cur.verses, maxLines), activeIndex: -1 })
   },
 
-  load: async (id) => {
+  load: async (id, verseSelection = null) => {
     const s = await window.seraphim.getSong(id)
     if (!s) return
+    const all = s.verses.map((v) => ({ id: v.id, label: v.label, text: v.text }))
     const loaded: Loaded = {
       kind: 'song',
       id: s.id,
       title: s.title,
       bgMediaId: s.bgMediaId,
       bgUrl: s.bgUrl,
-      verses: s.verses.map((v) => ({ id: v.id, label: v.label, text: v.text }))
+      verses: applyVerseSelection(all, verseSelection),
+      verseSelection: verseSelection ? [...verseSelection] : null
     }
     set({ loaded, pages: buildPages(loaded.verses, get().maxLines), activeIndex: -1 })
     void window.seraphim.touchSong(id)
@@ -121,7 +136,7 @@ export const useDeck = create<DeckStore>((set, get) => ({
   reloadCurrent: async () => {
     const cur = get().loaded
     if (!cur) return
-    if (cur.kind === 'song') await get().load(cur.id)
+    if (cur.kind === 'song') await get().load(cur.id, cur.verseSelection ? new Set(cur.verseSelection) : null)
     else await get().loadBible(cur.id)
   },
 

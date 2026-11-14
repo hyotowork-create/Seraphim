@@ -16,6 +16,10 @@ import { SongPickerModal } from './SongPickerModal'
 import { BibleEditorModal } from './BibleEditorModal'
 import { ScoreImportModal } from './ScoreImportModal'
 import { BulletinModal } from './BulletinModal'
+import { OrderSheetModal } from './OrderSheetModal'
+import { PptxExportModal } from './PptxExportModal'
+import { BroadcastModal, BroadcastHeaderButton, RecordHeaderButton } from './BroadcastModal'
+import { CameraSwitcher, CameraSetupDialog } from './CameraSwitcher'
 import { useUi } from '../store/ui'
 import { useShortcuts } from './useShortcuts'
 
@@ -38,9 +42,13 @@ export function ControlApp(): JSX.Element {
       <header className="flex items-center gap-3 px-4 h-11 border-b border-line bg-panel2 shrink-0">
         <span className="font-bold tracking-wide text-accent">SERAPHIM</span>
         <span className="text-xs text-slate-400">예배 송출 · 자막 · 주보</span>
+        <div className="ml-auto flex items-center gap-2">
+          <BroadcastHeaderButton />
+          <RecordHeaderButton />
+        </div>
         <button
           onClick={openBulletin}
-          className="ml-auto px-3 py-1 rounded border border-line bg-panel text-xs text-slate-200 hover:border-slate-500"
+          className="px-3 py-1 rounded border border-line bg-panel text-xs text-slate-200 hover:border-slate-500"
         >
           📰 주보 발행
         </button>
@@ -50,7 +58,7 @@ export function ControlApp(): JSX.Element {
         >
           ⚙️ 설정
         </button>
-        <span className="text-[11px] text-slate-500">v0.1</span>
+        <span className="text-[11px] text-slate-500">v0.2</span>
       </header>
 
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
@@ -59,6 +67,10 @@ export function ControlApp(): JSX.Element {
       <BibleEditorModal />
       <ScoreImportModal />
       <BulletinModal />
+      <OrderSheetModal />
+      <PptxExportModal />
+      <BroadcastModal />
+      <CameraSetupDialog />
 
       {/* 본문: 좌 라이브러리 / 중 슬라이드 / 프리뷰+퀵 */}
       <div className="flex-1 grid grid-cols-[240px_260px_1fr] gap-2 p-2 min-h-0">
@@ -72,6 +84,8 @@ export function ControlApp(): JSX.Element {
             <PreviewPanel />
             <QuickPanel />
           </div>
+          {/* 카메라 1·2·3 전환 */}
+          <CameraSwitcher />
         </div>
       </div>
 

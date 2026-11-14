@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { BibleInput } from '@shared/ipc'
+import { BUNDLED_BIBLE_CODE, type BibleInput, type BibleTranslationInfo } from '@shared/ipc'
 import { splitBibleVerses, formatReference } from '@shared/bible'
 import { useUi } from '../store/ui'
 import { useBible } from '../store/bible'
@@ -20,9 +20,25 @@ export function BibleEditorModal(): JSX.Element | null {
   const [translation, setTranslation] = useState('개역개정')
   const [text, setText] = useState('')
   const [saving, setSaving] = useState(false)
+  // 구절 입력 → 본문 불러오기
+  const [ref, setRef] = useState('')
+  const [translations, setTranslations] = useState<BibleTranslationInfo[]>([])
+  const [code, setCode] = useState(BUNDLED_BIBLE_CODE)
+  const [lookupError, setLookupError] = useState('')
+  const [looking, setLooking] = useState(false)
 
   useEffect(() => {
     if (!open) return
+    setRef('')
+    setLookupError('')
+    void window.seraphim.getSetting('bible.translation').then((c) => {
+      if (c) setCode(c)
+    })
+    void window.seraphim.listBibleTranslations().then((list) => {
+      setTranslations(list)
+      // 저장된 선호 번역본이 설치되어 있지 않으면 첫 번역본으로
+      setCode((cur) => (list.some((t) => t.code === cur) ? cur : (list[0]?.code ?? cur)))
+    })
     if (editId == null) {
       setBook('')
       setChapter('')
@@ -42,6 +58,26 @@ export function BibleEditorModal(): JSX.Element | null {
   }, [open, editId])
 
   if (!open) return null
+
+  const lookup = async (): Promise<void> => {
+    if (!ref.trim()) return
+    setLooking(true)
+    setLookupError('')
+    try {
+      const r = await window.seraphim.lookupBible(ref, code)
+      setBook(r.book)
+      setChapter(String(r.chapter))
+      setRange(r.verseRange)
+      setTranslation(r.translationName)
+      setText(r.text)
+      void window.seraphim.setSetting('bible.translation', code)
+    } catch (e) {
+      const m = e instanceof Error ? e.message : String(e)
+      setLookupError(m.replace(/^Error invoking remote method '[^']*':\s*(?:Error:\s*)?/, ''))
+    } finally {
+      setLooking(false)
+    }
+  }
 
   const verses = splitBibleVerses(text)
   const canSave = book.trim().length > 0 && text.trim().length > 0
@@ -82,6 +118,42 @@ export function BibleEditorModal(): JSX.Element | null {
           </button>
         </div>
 
+        {/* 구절 입력 → 본문 불러오기 */}
+        <div className="flex items-center gap-2 px-5 py-2 border-b border-line bg-panel2/40 flex-wrap">
+          <span className="text-xs text-slate-400 shrink-0">구절 입력</span>
+          <SyncInput
+            autoFocus={editId == null}
+            value={ref}
+            onValue={setRef}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') void lookup()
+            }}
+            placeholder="예: 요 3:16, 요한복음 3장 16-18절, 시 23편"
+            className="flex-1 min-w-[220px] bg-black/40 border border-line rounded px-3 py-1.5 text-sm text-white outline-none focus:border-accent"
+          />
+          <select
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            className="bg-black/40 border border-line rounded px-2 py-1.5 text-sm text-slate-100"
+            title="번역본 (설정 → 성경 본문에서 추가)"
+          >
+            {translations.length === 0 && <option value={code}>번역본 없음</option>}
+            {translations.map((t) => (
+              <option key={t.code} value={t.code}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => void lookup()}
+            disabled={!ref.trim() || looking || translations.length === 0}
+            className="px-3 py-1.5 rounded bg-accent/30 border border-accent text-sm text-white hover:bg-accent/40 disabled:opacity-40"
+          >
+            {looking ? '불러오는 중…' : '본문 불러오기'}
+          </button>
+          {lookupError && <span className="w-full text-[11px] text-red-400">{lookupError}</span>}
+        </div>
+
         <div className="flex items-center gap-2 px-5 py-3 border-b border-line flex-wrap">
           <SyncInput
             value={book}
@@ -89,9 +161,10 @@ export function BibleEditorModal(): JSX.Element | null {
             placeholder="책 (예: 요한복음) *"
             className="w-40 bg-black/40 border border-line rounded px-3 py-1.5 text-sm text-white outline-none focus:border-accent"
           />
-          <input
+          <SyncInput
             value={chapter}
-            onChange={(e) => setChapter(e.target.value.replace(/[^0-9]/g, ''))}
+            onValue={(v) => setChapter(v.replace(/[^0-9]/g, ''))}
+            inputMode="numeric"
             placeholder="장"
             className="w-16 bg-black/40 border border-line rounded px-3 py-1.5 text-sm text-white outline-none focus:border-accent"
           />

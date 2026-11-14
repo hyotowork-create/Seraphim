@@ -4,3 +4,7 @@ dist
 release
 *.log
 .DS_Store
+
+# ffmpeg 바이너리 (scripts/fetch-ffmpeg.mjs 로 받음)
+vendor/ffmpeg/*/ffmpeg
+vendor/ffmpeg/*/ffmpeg.exe

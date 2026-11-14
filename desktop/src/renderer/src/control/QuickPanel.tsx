@@ -34,6 +34,17 @@ export function QuickPanel(): JSX.Element {
   const next = useDeck((s) => s.next)
   const prev = useDeck((s) => s.prev)
 
+  const pickLogo = async (): Promise<void> => {
+    const r = await window.seraphim.pickLogo()
+    if (!r) return
+    await window.seraphim.setSetting('logo.mediaId', String(r.id))
+    await patch({ logoUrl: r.url })
+  }
+  const clearLogo = async (): Promise<void> => {
+    await window.seraphim.setSetting('logo.mediaId', '')
+    await patch({ logoUrl: null })
+  }
+
   return (
     <div className="flex flex-col border border-line rounded-lg bg-panel2/40 p-2 gap-2">
       <div className="text-xs font-semibold text-slate-300">[4] 빠른 기능</div>
@@ -51,6 +62,27 @@ export function QuickPanel(): JSX.Element {
         active={state.showLogo}
         onClick={() => patch({ showLogo: !state.showLogo })}
       />
+      <div className="flex items-center gap-1 -mt-1 px-1 text-[10px] text-slate-500">
+        <span className="truncate flex-1" title={state.logoUrl ?? '기본 글자 로고(SERAPHIM)'}>
+          {state.logoUrl ? '로고 이미지 지정됨' : '글자 로고(SERAPHIM)'}
+        </span>
+        <button
+          onClick={() => void pickLogo()}
+          className="px-1.5 py-0.5 rounded border border-line bg-panel2 text-slate-300 hover:border-slate-500"
+          title="교회 로고 이미지를 지정 (PNG 투명 배경 권장)"
+        >
+          이미지…
+        </button>
+        {state.logoUrl && (
+          <button
+            onClick={() => void clearLogo()}
+            className="px-1.5 py-0.5 rounded border border-line bg-panel2 text-slate-400 hover:text-red-300"
+            title="글자 로고로 되돌리기"
+          >
+            지우기
+          </button>
+        )}
+      </div>
       <QuickButton
         label="일시정지"
         keyHint="P"

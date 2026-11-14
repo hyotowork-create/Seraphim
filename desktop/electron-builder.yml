@@ -21,12 +21,42 @@ files:
   - out/**/*
   - package.json
 
+# 내장 성경 본문(개역한글, 저작권 만료) → Contents/Resources/bible/
+# 로컬 OCR 언어 데이터(tessdata_fast kor/eng) → Contents/Resources/tessdata/
+extraResources:
+  - from: data/bible
+    to: bible
+    filter: ['*.gz', '*.md']
+  - from: data/tessdata
+    to: tessdata
+    filter: ['*.traineddata']
+
 # 네이티브 모듈(better-sqlite3 등)은 asar 밖으로 언팩 — M1에서 DB 도입 시 사용
+# tesseract.js는 worker_threads + wasm을 파일 경로로 읽으므로 asar 밖에 있어야 함
 asarUnpack:
   - "**/*.node"
   - "**/node_modules/better-sqlite3/**"
+  - "**/node_modules/tesseract.js/**"
+  - "**/node_modules/tesseract.js-core/**"
+  - "**/node_modules/regenerator-runtime/**"
+  - "**/node_modules/bmp-js/**"
+  - "**/node_modules/idb-keyval/**"
+  - "**/node_modules/is-electron/**"
+  - "**/node_modules/is-url/**"
+  - "**/node_modules/node-fetch/**"
+  - "**/node_modules/wasm-feature-detect/**"
+  - "**/node_modules/zlibjs/**"
+  - "**/node_modules/opencollective-postinstall/**"
+  - "**/node_modules/whatwg-url/**"
+  - "**/node_modules/tr46/**"
+  - "**/node_modules/webidl-conversions/**"
 
 win:
+  # YouTube 라이브 송출용 ffmpeg (scripts/fetch-ffmpeg.mjs) → Resources/ffmpeg/ffmpeg.exe
+  extraResources:
+    - from: vendor/ffmpeg/win32-x64
+      to: ffmpeg
+      filter: ['ffmpeg.exe']
   target:
     - target: nsis
       arch: [x64]
@@ -52,3 +82,13 @@ mac:
   # 서명: Developer ID 인증서(CSC_LINK)와 APPLE_ID·APPLE_APP_SPECIFIC_PASSWORD·APPLE_TEAM_ID가 있으면 정식 서명+공증(경고 없음).
   # 없으면 afterPack에서 앱 전체를 ad-hoc 서명. 링커 서명만 남은 앱은 Apple Silicon에서 「손상된 앱」으로 막힘(10/21 확인)
   hardenedRuntime: true
+  # YouTube 라이브 송출용 ffmpeg (scripts/build-ffmpeg-mac.sh, LGPL) → Resources/ffmpeg/ffmpeg
+  extraResources:
+    - from: vendor/ffmpeg/darwin-${arch}
+      to: ffmpeg
+      filter: ['ffmpeg']
+  extendInfo:
+    NSCameraUsageDescription: 송출·방송 화면에 카메라(아이폰 연속성 카메라 포함)를 보여 주기 위해 카메라를 사용합니다.
+    NSMicrophoneUsageDescription: YouTube 라이브 방송에 믹서·마이크 소리를 싣기 위해 마이크 입력을 사용합니다.
+    # 아이폰 연속성 카메라를 카메라 목록에 보이게 함 (macOS 13+)
+    NSCameraUseContinuityCameraDeviceType: true

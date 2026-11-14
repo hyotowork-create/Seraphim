@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
 import { useLive } from '../store/live'
 import type { BackgroundKind } from '@shared/ipc'
+import { CameraZoomControls } from './CameraZoomControls'
+import { CameraSourceSelect } from './CameraSwitcher'
+import { resolveCameraLayers } from '@shared/stream'
 
 const TABS: { key: BackgroundKind; label: string }[] = [
   { key: 'color', label: '단색' },
@@ -12,33 +14,11 @@ const TABS: { key: BackgroundKind; label: string }[] = [
 /** [6] 미디어 — 배경 소스: 단색 / 이미지 / 라이브 카메라 */
 export function MediaPanel(): JSX.Element {
   const bg = useLive((s) => s.state.background)
+  const cameras = useLive((s) => s.state.cameras)
+  const activeCamera = useLive((s) => s.state.activeCamera)
+  // 이 배경이 보여 주는 카메라 (줌 조절 대상)
+  const camIndex = resolveCameraLayers(cameras, activeCamera, bg.cameraSource ?? 'program').visible
   const patch = useLive((s) => s.patch)
-  const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
-  const [camLoading, setCamLoading] = useState(false)
-
-  const loadCameras = async (): Promise<void> => {
-    setCamLoading(true)
-    try {
-      // 라벨을 얻으려면 1회 권한 획득 필요
-      const s = await navigator.mediaDevices.getUserMedia({ video: true })
-      s.getTracks().forEach((t) => t.stop())
-    } catch {
-      /* 권한 거부/장치 없음 — enumerate는 계속 시도 */
-    }
-    try {
-      const devs = await navigator.mediaDevices.enumerateDevices()
-      setCameras(devs.filter((d) => d.kind === 'videoinput'))
-    } finally {
-      setCamLoading(false)
-    }
-  }
-
-  // 카메라 탭 진입 시 장치 목록 로드
-  useEffect(() => {
-    if (bg.kind === 'camera' && cameras.length === 0) void loadCameras()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bg.kind])
-
   const pickImage = async (): Promise<void> => {
     const r = await window.seraphim.pickBackgroundImage()
     if (r)
@@ -49,11 +29,6 @@ export function MediaPanel(): JSX.Element {
     const r = await window.seraphim.pickBackgroundVideo()
     if (r)
       await patch({ background: { kind: 'video', videoUrl: r.url, videoName: r.name, mediaId: r.id } })
-  }
-
-  const chooseCamera = (id: string): void => {
-    const label = cameras.find((c) => c.deviceId === id)?.label || '카메라'
-    void patch({ background: { kind: 'camera', cameraDeviceId: id, cameraLabel: label } })
   }
 
   return (
@@ -124,29 +99,12 @@ export function MediaPanel(): JSX.Element {
 
         {bg.kind === 'camera' && (
           <div className="space-y-2">
-            <select
-              value={bg.cameraDeviceId ?? ''}
-              onChange={(e) => chooseCamera(e.target.value)}
-              className="w-full bg-black/40 border border-line rounded px-2 py-1 text-slate-200 outline-none"
-            >
-              <option value="" disabled>
-                {camLoading ? '카메라 검색 중…' : '카메라 선택'}
-              </option>
-              {cameras.map((c, i) => (
-                <option key={c.deviceId} value={c.deviceId}>
-                  {c.label || `카메라 ${i + 1}`}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={() => void loadCameras()}
-              className="w-full px-2 py-1 rounded bg-panel2 border border-line text-slate-200 hover:border-slate-500"
-            >
-              장치 새로고침
-            </button>
-            <p className="text-[10px] text-slate-500 leading-relaxed">
-              카메라 영상이 배경으로 실시간 송출되고, 그 위에 가사가 얹힙니다.
-            </p>
+            <CameraSourceSelect
+              value={bg.cameraSource ?? 'program'}
+              onChange={(v) => void patch({ background: { kind: 'camera', cameraSource: v === 'none' ? 'program' : v } })}
+            />
+            {camIndex != null && <CameraZoomControls index={camIndex} compact />}
+            <p className="text-[10px] text-slate-500 leading-relaxed">카메라 연결·전환은 프리뷰 아래 카메라 칸에서 합니다 (숫자키 1·2·3).</p>
           </div>
         )}
 

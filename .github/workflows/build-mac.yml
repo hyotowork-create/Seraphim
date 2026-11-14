@@ -42,6 +42,12 @@ jobs:
       - name: Bundle
         run: npm run build
 
+      # YouTube 라이브 송출용 ffmpeg(git에 없음, vendor/ffmpeg/README.md)
+      - name: Prepare ffmpeg
+        run: |
+          [ "${{ matrix.arch }}" = x64 ] && brew install nasm   # 인텔(x86_64) ffmpeg 어셈블러
+          zsh scripts/build-ffmpeg-mac.sh ${{ matrix.arch }}
+
       # .dmg 빌드 (Secrets가 있으면 정식 서명·공증, 없으면 ad-hoc — electron-builder.yml mac 참고)
       - name: Build dmg
         shell: bash
