@@ -1,4 +1,4 @@
-name: Build macOS app (.dmg)
+name: Build test apps (macOS .dmg + Windows .exe)
 
 # 수동 실행(Actions 탭 → Run workflow) 또는 v* 태그 푸시 시 빌드
 on:
@@ -72,5 +72,31 @@ jobs:
         with:
           name: Seraphim-mac-${{ matrix.arch }}
           path: desktop/release/*.dmg
+          if-no-files-found: error
+          retention-days: 30
+
+  # Windows 시험 빌드(릴리스에 올리지 않음). 릴리스 전 설치 파일·ffmpeg 포함 여부 확인용
+  build-win:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: node scripts/fetch-ffmpeg.mjs win32-x64
+      - run: npx electron-builder --win --x64 --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Seraphim-win-x64
+          path: desktop/release/*.exe
           if-no-files-found: error
           retention-days: 30
