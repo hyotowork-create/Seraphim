@@ -5,6 +5,8 @@
 cd desktop && for f in tests/*.mts; do npx --yes tsx "$f"; done
 ```
 
+`tests/remote-test.mts`는 실제 로컬 서버(127.0.0.1:47200~)를 잠깐 띄워 인증·명령·SSE를 본다.
+
 ## E2E (패키징 앱 + Chrome DevTools Protocol)
 사용자 데이터를 건드리지 않도록 임시 userData와 DB 사본으로 격리해 실행한다.
 ```bash

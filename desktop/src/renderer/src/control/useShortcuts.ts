@@ -75,6 +75,14 @@ export function useShortcuts(): void {
       }
     }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    // 휴대폰 리모컨·HTTP 명령의 다음/이전 — Space/⌫과 같은 처리
+    const offRemote = window.seraphim.onRemoteCommand((c) => {
+      if (c === 'next') void useDeck.getState().next()
+      else if (c === 'prev') void useDeck.getState().prev()
+    })
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      offRemote()
+    }
   }, [])
 }

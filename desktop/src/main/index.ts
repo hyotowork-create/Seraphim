@@ -9,7 +9,8 @@ import {
   toggleOutputFullscreen,
   openStreamWindow,
   closeStreamWindow,
-  setControlCloseGuard
+  setControlCloseGuard,
+  getControlWindow
 } from './windows'
 import { initDataDir, setDataDir, getDataDir, dbPath, dataDirInfo } from './datadir'
 import { openDb, closeDb } from './db'
@@ -97,6 +98,8 @@ import {
   BUNDLED_BIBLE_NAME,
   BIBLE_TRANSLATION_NAMES
 } from '../shared/ipc'
+import { initRemote, pushRemoteState, remoteStatus, setRemoteEnabled } from './remote'
+import type { RemoteCommand } from '../shared/remote'
 
 // 커스텀 미디어 스킴을 privileged로 등록 (app ready 이전 필수)
 // 미디어 파일을 거대한 dataURL 없이 seraphim-media://local/<상대경로> 로 서빙
@@ -168,6 +171,14 @@ function broadcastLiveState(): void {
   for (const win of BrowserWindow.getAllWindows()) {
     if (!win.isDestroyed()) win.webContents.send(IPC.LIVE_STATE, liveState)
   }
+  pushRemoteState(liveState)
+}
+
+/** 휴대폰·HTTP 명령 — 다음/이전은 운영자 창의 단축키와 같은 경로(useDeck), 검정·로고는 여기서 바로 */
+function runRemoteCommand(c: RemoteCommand): void {
+  if (c === 'black') applyPatch({ blackout: !liveState.blackout })
+  else if (c === 'logo') applyPatch({ showLogo: !liveState.showLogo })
+  else getControlWindow()?.webContents.send(IPC.REMOTE_CMD, c)
 }
 
 let saveCamerasTimer: ReturnType<typeof setTimeout> | null = null
@@ -315,6 +326,11 @@ function registerIpc(): void {
     return dataDirInfo()
   })
 
+  ipcMain.handle(IPC.REMOTE_STATUS, () => remoteStatus())
+  ipcMain.handle(IPC.REMOTE_SET_ENABLED, async (_e, on: boolean) => {
+    setSetting('remote.enabled', on ? '1' : '0')
+    return setRemoteEnabled(on)
+  })
   ipcMain.handle(IPC.SETTINGS_GET, (_e, key: string) => getSetting(key))
   ipcMain.handle(IPC.SETTINGS_SET, (_e, key: string, value: string) => {
     setSetting(key, value)
@@ -735,6 +751,8 @@ app.whenReady().then(() => {
   })
 
   registerIpc()
+  initRemote(() => liveState, runRemoteCommand)
+  if (getSetting('remote.enabled') === '1') void setRemoteEnabled(true)
   // 방송·녹화 중에 운영자 창을 닫으려 하면 확인 (실수로 끊기지 않게)
   setControlCloseGuard(() => {
     if (!isStreaming()) return false
@@ -760,6 +778,7 @@ app.whenReady().then(() => {
 })
 
 app.on('before-quit', () => {
+  void setRemoteEnabled(false)
   killStream()
   closeDb()
 })

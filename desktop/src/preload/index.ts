@@ -35,6 +35,7 @@ import {
   type BulletinListItem
 } from '../shared/ipc'
 import type { BulletinData } from '../shared/bulletin'
+import type { RemoteCommand, RemoteStatus } from '../shared/remote'
 import type { DiskInfo, StreamConfig, StreamKind, StreamPrepareResult, StreamProbe, StreamStatus } from '../shared/stream'
 
 function resolveRole(): WindowRole {
@@ -190,7 +191,15 @@ const api = {
   deleteBulletin: (id: number): Promise<boolean> => ipcRenderer.invoke(IPC.BULLETIN_DELETE, id),
   publishBulletin: (data: BulletinData): Promise<string | null> =>
     ipcRenderer.invoke(IPC.BULLETIN_PUBLISH, data),
-  bulletinQr: (url: string): Promise<string> => ipcRenderer.invoke(IPC.BULLETIN_QR, url)
+  bulletinQr: (url: string): Promise<string> => ipcRenderer.invoke(IPC.BULLETIN_QR, url),
+
+  remoteStatus: (): Promise<RemoteStatus> => ipcRenderer.invoke(IPC.REMOTE_STATUS),
+  setRemoteEnabled: (on: boolean): Promise<RemoteStatus> => ipcRenderer.invoke(IPC.REMOTE_SET_ENABLED, on),
+  onRemoteCommand: (cb: (c: RemoteCommand) => void): (() => void) => {
+    const l = (_e: unknown, c: RemoteCommand): void => cb(c)
+    ipcRenderer.on(IPC.REMOTE_CMD, l)
+    return () => ipcRenderer.removeListener(IPC.REMOTE_CMD, l)
+  }
 }
 
 export type SeraphimApi = typeof api

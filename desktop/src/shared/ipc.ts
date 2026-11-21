@@ -87,7 +87,11 @@ export const IPC = {
   BULLETIN_SAVE: 'bulletin:save',
   BULLETIN_DELETE: 'bulletin:delete',
   BULLETIN_PUBLISH: 'bulletin:publish',
-  BULLETIN_QR: 'bulletin:qr'
+  BULLETIN_QR: 'bulletin:qr',
+  // OBS 자막 주소 · 휴대폰 리모컨 (로컬 웹서버)
+  REMOTE_STATUS: 'remote:status',
+  REMOTE_SET_ENABLED: 'remote:set-enabled',
+  REMOTE_CMD: 'remote:cmd'
 } as const
 
 /** 찬양 카테고리 */

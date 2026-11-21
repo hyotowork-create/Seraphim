@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { DEFAULT_GEMINI_MODEL, DEFAULT_GEMINI_PRECISE_MODEL, GEMINI_MODEL_CHOICES, SONG_CATEGORIES, BUNDLED_BIBLE_CODE, BIBLE_TRANSLATION_NAMES, type BibleTranslationInfo, type DupGroup, type ImportReport, type DataDirInfo, type DbStats, type ExtractMethod } from '@shared/ipc'
+import type { RemoteStatus } from '@shared/remote'
 import { SyncInput } from '../components/SyncField'
 
 /** 악보 가사 추출 설정 — Gemini API 키(무료 티어) + 방식 */
@@ -440,6 +441,84 @@ function BibleTextSection(): JSX.Element {
   )
 }
 
+/** OBS 자막 주소 · 휴대폰 리모컨 · 스트림덱 명령 — 앱 안 로컬 웹서버 (기본 꺼짐) */
+function RemoteSection(): JSX.Element {
+  const [st, setSt] = useState<RemoteStatus | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [qr, setQr] = useState('')
+  const [copied, setCopied] = useState('')
+
+  useEffect(() => {
+    void window.seraphim.remoteStatus().then(setSt)
+  }, [])
+  const base = st?.port ? `http://127.0.0.1:${st.port}` : ''
+  const lan = st?.port && st.lanHosts[0] ? `http://${st.lanHosts[0]}:${st.port}` : ''
+  const remoteUrl = lan ? `${lan}/remote?pin=${st?.pin}` : ''
+  useEffect(() => {
+    if (remoteUrl) void window.seraphim.bulletinQr(remoteUrl).then(setQr)
+    else setQr('')
+  }, [remoteUrl])
+
+  const toggle = async (on: boolean): Promise<void> => {
+    setBusy(true)
+    try {
+      setSt(await window.seraphim.setRemoteEnabled(on))
+    } finally {
+      setBusy(false)
+    }
+  }
+  const copy = (text: string): void => {
+    void navigator.clipboard.writeText(text)
+    setCopied(text)
+  }
+  const UrlRow = ({ label, url }: { label: string; url: string }): JSX.Element => (
+    <div className="flex items-center gap-2 text-sm">
+      <span className="text-slate-400 w-20 shrink-0">{label}</span>
+      <code className="text-slate-100 break-all select-all">{url}</code>
+      <button onClick={() => copy(url)} className="ml-auto shrink-0 px-2 py-0.5 rounded bg-panel2 border border-line text-[11px] text-slate-200 hover:border-slate-500">
+        {copied === url ? '복사됨' : '복사'}
+      </button>
+    </div>
+  )
+
+  return (
+    <section>
+      <h3 className="text-sm font-semibold text-accent mb-2">OBS 자막 주소 · 휴대폰 리모컨</h3>
+      <div className="rounded-lg bg-panel2/60 border border-line p-3 space-y-2">
+        <label className="flex items-center gap-2 text-sm text-slate-100">
+          <input type="checkbox" checked={!!st?.enabled} disabled={busy || !st} onChange={(e) => void toggle(e.target.checked)} />
+          켜기 {st?.port ? <span className="text-[11px] text-slate-400">(포트 {st.port} · PIN {st.pin})</span> : null}
+        </label>
+        {st?.error && <div className="text-[11px] text-red-300">{st.error}</div>}
+        {base && (
+          <>
+            <UrlRow label="OBS 자막" url={`${base}/overlay`} />
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              OBS → 소스 추가 → 브라우저 → 위 주소 붙여 넣기, 너비 1920 · 높이 1080. 배경이 투명해 카메라 위에 자막 띠만 얹힙니다(검정·로고·일시정지 때 숨김).
+            </p>
+            {remoteUrl ? (
+              <div className="flex gap-3 items-start">
+                {qr && <img src={qr} alt="휴대폰 리모컨 QR" className="w-28 h-28 rounded bg-white p-1" />}
+                <div className="space-y-1 min-w-0 flex-1">
+                  <UrlRow label="리모컨" url={remoteUrl} />
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    같은 와이파이의 휴대폰 카메라로 QR을 찍으면 이전·다음·검정·로고 단추가 열립니다. PIN은 앱을 켤 때마다 바뀝니다. 처음 켤 때 방화벽이 묻으면 「허용」을 누르세요.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-[11px] text-slate-400">와이파이 주소를 찾지 못했습니다 — 네트워크에 연결하면 휴대폰 리모컨 주소가 나타납니다(설정을 다시 여세요).</div>
+            )}
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              스트림덱·Companion(HTTP 요청): <code>{base}/cmd/next</code> · <code>/cmd/prev</code> · <code>/cmd/black</code> · <code>/cmd/logo</code> — 이 PC 안에서는 PIN 없이, 다른 기기에서는 주소 끝에 <code>?pin={st?.pin}</code>.
+            </p>
+          </>
+        )}
+      </div>
+    </section>
+  )
+}
+
 interface Props {
   onClose: () => void
 }
@@ -542,6 +621,8 @@ export function SettingsModal({ onClose }: Props): JSX.Element {
           </section>
 
           {/* 악보 가사 추출 */}
+          <RemoteSection />
+
           <GeminiSection />
 
           <ImportSection />
