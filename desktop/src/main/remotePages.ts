@@ -40,7 +40,7 @@ button:active{filter:brightness(1.4)}
 #next{background:#6d28d9}
 button.on{outline:3px solid #fbbf24}
 </style></head><body>
-<div id="conn">연결 중…</div>
+<div style="display:flex;justify-content:space-between"><span id="conn">연결 중…</span><a id="pr" style="color:#c4b5fd;font-size:13px">프롬프터 화면 →</a></div>
 <div id="now" class="dim">—</div>
 <div class="grid">
 <button id="prev">◀ 이전</button><button id="next">다음 ▶</button>
@@ -48,6 +48,7 @@ button.on{outline:3px solid #fbbf24}
 </div>
 <script>
 var q=location.search, now=document.getElementById('now'), conn=document.getElementById('conn');
+document.getElementById('pr').href='/prompter'+q;
 ['prev','next','black','logo'].forEach(function(c){
   document.getElementById(c).onclick=function(){
     if(navigator.vibrate) navigator.vibrate(15);
@@ -63,5 +64,41 @@ es.onmessage=function(e){
   now.classList.toggle('dim',v.blackout||v.showLogo||!v.text);
   document.getElementById('black').classList.toggle('on',v.blackout);
   document.getElementById('logo').classList.toggle('on',v.showLogo);
+};
+</script></body></html>`
+
+/** 설교자 프롬프터(읽기 전용): 지금 슬라이드 크게 · 다음 슬라이드 작게 · 현재 시각 — 강대상의 휴대폰·태블릿용 */
+export const PROMPTER_HTML = `<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seraphim 프롬프터</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{display:flex;flex-direction:column;gap:2vh;padding:3vh 4vw;background:#000;color:#fff;
+font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif}
+#top{display:flex;justify-content:space-between;align-items:center;font-size:clamp(14px,3vh,28px);color:#94a3b8}
+#clock{font-size:clamp(24px,7vh,64px);font-weight:700;color:#fbbf24;font-variant-numeric:tabular-nums}
+#now{flex:3;display:flex;align-items:center;justify-content:center;text-align:center;white-space:pre-line;
+font-size:clamp(24px,7vh,72px);line-height:1.35;font-weight:700;overflow:hidden}
+#next{flex:1;border-top:1px solid #334155;padding-top:1.5vh;color:#94a3b8;white-space:pre-line;text-align:center;
+font-size:clamp(16px,3.6vh,36px);line-height:1.35;overflow:hidden}
+#next:before{content:'다음';display:block;font-size:.55em;color:#64748b;margin-bottom:.4vh}
+.dim{color:#475569}
+</style></head><body>
+<div id="top"><span id="state">연결 중…</span><span id="clock"></span></div>
+<div id="now" class="dim">—</div>
+<div id="next"></div>
+<script>
+var now=document.getElementById('now'), next=document.getElementById('next'), st=document.getElementById('state'), clock=document.getElementById('clock');
+function tick(){var d=new Date();clock.textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
+tick(); setInterval(tick,1000);
+var es=new EventSource('/events'+location.search);
+es.onerror=function(){st.textContent='연결 끊김 — 다시 잇는 중…'};
+es.onmessage=function(e){
+  var v=JSON.parse(e.data);
+  st.textContent=v.blackout?'검정 화면':v.showLogo?'로고 화면':'송출 중';
+  now.textContent=v.text||'(글자 없음)';
+  now.classList.toggle('dim',v.blackout||v.showLogo||!v.text);
+  next.textContent=v.nextText||'—';
 };
 </script></body></html>`

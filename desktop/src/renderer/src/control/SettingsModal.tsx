@@ -502,7 +502,7 @@ function RemoteSection(): JSX.Element {
                 <div className="space-y-1 min-w-0 flex-1">
                   <UrlRow label="리모컨" url={remoteUrl} />
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    같은 와이파이의 휴대폰 카메라로 QR을 찍으면 이전·다음·검정·로고 단추가 열립니다. PIN은 앱을 켤 때마다 바뀝니다. 처음 켤 때 방화벽이 묻으면 「허용」을 누르세요.
+                    같은 와이파이의 휴대폰 카메라로 QR을 찍으면 이전·다음·검정·로고 단추가 열리고, 위쪽 「프롬프터 화면」은 설교자용(지금·다음 슬라이드·시계)입니다. PIN은 앱을 켤 때마다 바뀝니다. 처음 켤 때 방화벽이 묻으면 「허용」을 누르세요.
                   </p>
                 </div>
               </div>

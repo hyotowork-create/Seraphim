@@ -146,7 +146,7 @@ export const useDeck = create<DeckStore>((set, get) => ({
     const { pages } = get()
     if (pageIndex < 0 || pageIndex >= pages.length) return
     set({ activeIndex: pageIndex })
-    await window.seraphim.setLive({ text: pages[pageIndex].text })
+    await window.seraphim.setLive({ text: pages[pageIndex].text, nextText: pages[pageIndex + 1]?.text ?? '' })
   },
 
   goToVerse: async (verseIndex) => {

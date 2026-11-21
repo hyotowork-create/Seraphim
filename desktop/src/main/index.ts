@@ -198,6 +198,7 @@ function applyPatch(patch: LivePatch): LiveState {
   const cam = applyCameraPatch(liveState.cameras, liveState.activeCamera, { camera, cameraSlot, activeCamera })
   liveState = {
     ...liveState,
+    ...(patch.text !== undefined ? { nextText: '' } : {}),
     ...rest,
     overlay: { ...liveState.overlay, ...(patch.overlay ?? {}) },
     background: { ...liveState.background, ...(patch.background ?? {}) },

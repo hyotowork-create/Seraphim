@@ -1,4 +1,4 @@
-// 로컬 웹서버: OBS 자막(/overlay) · 휴대폰 리모컨(/remote) · 상태(/events, SSE) · 명령(/cmd/<next|prev|black|logo>)
+// 로컬 웹서버: OBS 자막(/overlay) · 휴대폰 리모컨(/remote) · 프롬프터(/prompter) · 상태(/events, SSE) · 명령(/cmd/<next|prev|black|logo>)
 // 새 의존성 없이 Node http. 설정에서 켤 때만 열고(기본 꺼짐), 같은 와이파이에서는 PIN이 있어야 보고 조작한다.
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'http'
 import { networkInterfaces } from 'os'
@@ -15,7 +15,7 @@ import {
   type RemoteCommand,
   type RemoteStatus
 } from '../shared/remote'
-import { OVERLAY_HTML, REMOTE_HTML } from './remotePages'
+import { OVERLAY_HTML, PROMPTER_HTML, REMOTE_HTML } from './remotePages'
 
 const pin = newPin()
 const limiter = new FailLimiter()
@@ -78,6 +78,9 @@ function handle(req: IncomingMessage, res: ServerResponse): void {
 
   if (req.method === 'GET' && path === '/overlay') {
     return canView(a, pin) ? send(res, 200, OVERLAY_HTML, html) : send(res, 401, 'PIN이 필요합니다.')
+  }
+  if (req.method === 'GET' && path === '/prompter') {
+    return canView(a, pin) ? send(res, 200, PROMPTER_HTML, html) : send(res, 401, 'PIN이 필요합니다. 세라핌 설정 화면의 QR로 들어오세요.')
   }
   if (req.method === 'GET' && path === '/remote') {
     return canControl(a, pin) ? send(res, 200, REMOTE_HTML, html) : send(res, 401, 'PIN이 맞지 않습니다. 세라핌 설정 화면의 QR로 다시 들어오세요.')

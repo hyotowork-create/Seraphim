@@ -27,6 +27,8 @@ export function newPin(rand: () => number = Math.random): string {
 /** 자막·리모컨 화면에 보내는 것만 (상태가 바뀌어도 이것이 같으면 다시 보내지 않음) */
 export interface RemoteView {
   text: string
+  /** 프롬프터의 다음 슬라이드 */
+  nextText: string
   /** OBS 자막을 숨길지 — 검정·로고·일시정지 때 */
   hidden: boolean
   blackout: boolean
@@ -37,6 +39,7 @@ export interface RemoteView {
 export function remoteView(s: LiveState): RemoteView {
   return {
     text: s.text,
+    nextText: s.nextText,
     hidden: s.blackout || s.showLogo || s.paused || !s.text.trim(),
     blackout: s.blackout,
     showLogo: s.showLogo,

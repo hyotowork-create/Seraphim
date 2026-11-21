@@ -220,6 +220,8 @@ export type OutputAspect = '16:9' | '4:3' | 'fill'
 export interface LiveState {
   /** 현재 슬라이드 텍스트 (여러 줄 가능) */
   text: string
+  /** 다음 슬라이드 텍스트 — 휴대폰 프롬프터용 (슬라이드 목록으로 넘길 때만, 그 밖에 text가 바뀌면 main이 비움) */
+  nextText: string
   /** 검정 화면 (B) */
   blackout: boolean
   /** 로고 화면 (L) */
@@ -275,6 +277,7 @@ export const DEFAULT_BACKGROUND: Background = {
 
 export const DEFAULT_LIVE_STATE: LiveState = {
   text: '',
+  nextText: '',
   blackout: false,
   showLogo: false,
   logoUrl: null,
