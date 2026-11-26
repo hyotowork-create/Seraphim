@@ -721,6 +721,15 @@ function registerMediaProtocol(): void {
   })
 }
 
+// 이미 켜져 있으면 새로 띄우지 않고 원래 창을 앞으로 (두 개가 같은 DB를 고치고 OBS·휴대폰은 한쪽만 따라가던 문제, 11/26)
+if (!app.requestSingleInstanceLock()) app.exit(0)
+app.on('second-instance', () => {
+  const w = getControlWindow()
+  if (!w) return
+  if (w.isMinimized()) w.restore()
+  w.focus()
+})
+
 app.whenReady().then(() => {
   // 데이터 폴더 + DB 초기화 (멀티 PC 이동성 기반)
   initDataDir()
