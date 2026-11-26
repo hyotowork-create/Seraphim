@@ -9,7 +9,7 @@ export interface RemoteStatus {
   enabled: boolean
   /** 실제로 연 포트 (꺼져 있으면 null) */
   port: number | null
-  /** 앱을 켤 때마다 새로 만드는 4자리 */
+  /** 앱을 켤 때마다 새로 만드는 6자리 */
   pin: string
   /** 같은 와이파이에서 여는 주소들 (IPv4) */
   lanHosts: string[]
@@ -21,7 +21,7 @@ export function isRemoteCommand(s: string): s is RemoteCommand {
 }
 
 export function newPin(rand: () => number = Math.random): string {
-  return String(Math.floor(rand() * 10000)).padStart(4, '0')
+  return String(Math.floor(rand() * 1_000_000)).padStart(6, '0')
 }
 
 /** 자막·리모컨 화면에 보내는 것만 (상태가 바뀌어도 이것이 같으면 다시 보내지 않음) */

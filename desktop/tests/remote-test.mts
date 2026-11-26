@@ -15,7 +15,7 @@ check(canView({ ...local, fromBrowser: true }, '1234'), '이 PC의 OBS: PIN 없�
 check(canControl(local, '1234'), '이 PC의 Companion·스트림덱(브라우저 아님): PIN 없이 조작')
 check(!canControl({ ...local, fromBrowser: true }, '1234'), '이 PC의 웹페이지가 보낸 명령은 PIN 필요(남의 사이트가 화면을 넘기지 못하게)')
 check(!canControl({ ...local, host: 'evil.example:47200' }, '1234') && !canView({ ...local, host: 'evil.example' }, '1234'), 'Host가 루프백 이름이 아니면 거절(DNS 리바인딩)')
-check(/^\d{4}$/.test(newPin()) && newPin(() => 0) === '0000' && newPin(() => 0.99999) === '9999', 'PIN 4자리')
+check(/^\d{6}$/.test(newPin()) && newPin(() => 0) === '000000' && newPin(() => 0.9999999) === '999999', 'PIN 6자리')
 check(isRemoteCommand('next') && isRemoteCommand('logo') && !isRemoteCommand('shutdown'), '명령 목록: next prev black logo만')
 const lim = new FailLimiter(5, 60_000)
 for (let i = 0; i < 4; i++) lim.fail('a', 0)
@@ -82,7 +82,7 @@ state = { ...state, blackout: true }; pushRemoteState(state); await wait()
 check(events.length === 4 && JSON.parse(events[3]).hidden === true, 'SSE: 검정 → 숨김')
 
 // PIN 무작위 대입은 5번 뒤 429 (127.0.0.1로 시험하므로 다른 시험 뒤에)
-for (let i = 0; i < 5; i++) await call('GET', '/cmd/next?pin=xxxx')
+for (let i = 0; i < 5; i++) await call('GET', '/cmd/next?pin=xxxxxx')
 check((await call('POST', `/cmd/next?pin=${pin}`)).status === 429, 'PIN 5번 틀리면 1분 동안 맞는 PIN도 거절')
 
 sse.destroy()
