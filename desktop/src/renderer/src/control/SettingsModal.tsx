@@ -448,8 +448,12 @@ function RemoteSection(): JSX.Element {
   const [qr, setQr] = useState('')
   const [copied, setCopied] = useState('')
 
+  // 와이파이가 바뀌면 주소도 바뀜(11/26 실기기 시험) → 설정 화면이 열려 있는 동안 3초마다 다시 읽음. QR은 주소가 바뀔 때만 새로 만듦
   useEffect(() => {
-    void window.seraphim.remoteStatus().then(setSt)
+    const load = (): void => void window.seraphim.remoteStatus().then(setSt)
+    load()
+    const t = setInterval(load, 3000)
+    return () => clearInterval(t)
   }, [])
   const base = st?.port ? `http://127.0.0.1:${st.port}` : ''
   const lan = st?.port && st.lanHosts[0] ? `http://${st.lanHosts[0]}:${st.port}` : ''
@@ -502,12 +506,12 @@ function RemoteSection(): JSX.Element {
                 <div className="space-y-1 min-w-0 flex-1">
                   <UrlRow label="리모컨" url={remoteUrl} />
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    같은 와이파이의 휴대폰 카메라로 QR을 찍으면 이전·다음·검정·로고 단추가 열리고, 위쪽 「프롬프터 화면」은 설교자용(지금·다음 슬라이드·시계)입니다. PIN은 앱을 켤 때마다 바뀝니다. 처음 켤 때 방화벽이 묻으면 「허용」을 누르세요.
+                    같은 와이파이의 휴대폰 카메라로 QR을 찍으면 이전·다음·검정·로고 단추가 열리고, 위쪽 「프롬프터 화면」은 설교자용(지금·다음 슬라이드·시계)입니다. PIN은 앱을 켤 때마다 바뀝니다. 처음 켤 때 방화벽이 묻으면 「허용」을 누르세요. 아이폰에 「비공개 릴레이」 경고가 뜨면 휴대폰이 같은 와이파이에 있는지 먼저 확인하세요.
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="text-[11px] text-slate-400">와이파이 주소를 찾지 못했습니다 — 네트워크에 연결하면 휴대폰 리모컨 주소가 나타납니다(설정을 다시 여세요).</div>
+              <div className="text-[11px] text-slate-400">와이파이 주소를 찾지 못했습니다 — 네트워크에 연결하면 휴대폰 리모컨 주소가 저절로 나타납니다.</div>
             )}
             <p className="text-[11px] text-slate-500 leading-relaxed">
               스트림덱·Companion(HTTP 요청): <code>{base}/cmd/next</code> · <code>/cmd/prev</code> · <code>/cmd/black</code> · <code>/cmd/logo</code> — 이 PC 안에서는 PIN 없이, 다른 기기에서는 주소 끝에 <code>?pin={st?.pin}</code>.
